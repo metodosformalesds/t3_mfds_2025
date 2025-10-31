@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import "../assets/styles/postulate.css";
 import "../assets/styles/como_funciona.css";
 
 function Home() {
@@ -26,6 +27,15 @@ function Home() {
           </ul>
         </div>
 
+        <section class="cta-section">
+            <div class="cta-content">
+                <h2 class="cta-title">¿Eres un profesional de servicios? Únete a Easy Home</h2>
+                <p class="cta-description">
+                    Conectamos directamente a expertos locales como tú con clientes que necesitan servicios de carpintería, fontanería, limpieza para sus hogares y mucho más. Consigue más trabajo y haz crecer tu negocio.
+                </p>
+                <a href="#" class="cta-button">Postulate aquí</a>
+            </div>
+        </section>
         <h2 class="process-title">¿Cómo funciona Easy Home?</h2>
         <div class="process-steps">
 
