@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import "../assets/styles/postulate.css";
+import "../assets/styles/como_funciona.css";
 
 function Home() {
   const [count, setCount] = useState(0)
@@ -35,6 +36,35 @@ function Home() {
                 <a href="#" class="cta-button">Postulate aquí</a>
             </div>
         </section>
+        <h2 class="process-title">¿Cómo funciona Easy Home?</h2>
+        <div class="process-steps">
+
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <h3 class="step-heading">Busca el servicio</h3>
+            <p class="step-description">
+              Encuentra el profesional que necesites usando nuestra búsqueda o categorías.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <h3 class="step-heading">Compara y elige</h3>
+            <p class="step-description">
+              Revisa perfiles, precios y reseñas de otros clientes.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <h3 class="step-heading">Contrata</h3>
+            <p class="step-description">
+              Agenda tu servicio y recibe trabajo de calidad garantizada.
+            </p>
+          </div>
+
+        </div>
+
 
       </div>
     </div>
