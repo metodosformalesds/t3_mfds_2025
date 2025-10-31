@@ -1,0 +1,69 @@
+/* --- ESTILOS DEL CONTENEDOR GENERAL --- */
+.easy-home-process {
+  text-align: center; /* Centra el título y los elementos flexbox */
+  padding: 40px 20px;
+  max-width: 1000px;
+  margin: 0 auto; /* Centrar el contenido */
+  font-family: 'Nunito Sans', sans-serif; /* Usando la fuente que elegiste */
+}
+
+.process-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 50px;
+  color: black;
+}
+
+/* --- ESTILOS DEL CONTENEDOR DE PASOS (FLEXBOX) --- */
+.process-steps {
+  display: flex;
+  justify-content: space-between; /* Distribuye las tarjetas uniformemente */
+  gap: 30px; /* Espacio entre las tarjetas */
+}
+
+/* --- ESTILOS DE CADA TARJETA DE PASO --- */
+.step-card {
+  flex: 1; /* Hace que todas las tarjetas ocupen el mismo ancho */
+  text-align: center;
+}
+
+/* --- ESTILOS DEL CÍRCULO CON NÚMERO --- */
+.step-number {
+  width: 60px;
+  height: 60px;
+  line-height: 60px; /* Centra verticalmente el texto */
+  margin: 0 auto 20px auto; /* Centrar y añadir margen inferior */
+  
+  /* Círculo */
+  border-radius: 50%;
+  
+  /* Colores */
+  background-color: #0b2f4a; /* Color azul oscuro similar al del header */
+  color: white;
+  
+  /* Tipografía del número */
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* --- ESTILOS DEL TEXTO DENTRO DE LA TARJETA --- */
+.step-heading {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: black; /* Color azul oscuro */
+}
+
+.step-description {
+  font-size: 15px;
+  color: black;
+  line-height: 1.6;
+}
+
+/* --- RESPONSIVE: Apilar pasos en pantallas pequeñas --- */
+@media (max-width: 768px) {
+  .process-steps {
+    flex-direction: column; /* Apila los pasos verticalmente */
+    gap: 40px;
+  }
+}
