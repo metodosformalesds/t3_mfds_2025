@@ -73,7 +73,7 @@ class Proveedor_Servicio(Base):
 
     # Relaciones
     usuario = relationship("Usuario", back_populates="proveedor_servicio")
-    foto_trabajo = relationship("Foto_Trabajo", back_populates="proveedor_servicio", cascade="all, delete")
+    foto_trabajo = relationship("Foto_Trabajo_Anterior", back_populates="proveedor_servicio", cascade="all, delete")
     publicacion_servicio = relationship("Publicacion_Servicio", back_populates="proveedor_servicio", cascade="all, delete")
     servicio_contratado = relationship("Servicio_Contratado", back_populates="proveedor_servicio", cascade="all, delete")
     reseña_servicio = relationship("Reseña_Servicio", back_populates="proveedor_servicio", cascade="all, delete")
