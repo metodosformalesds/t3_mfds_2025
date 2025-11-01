@@ -1,69 +1,103 @@
-/* --- ESTILOS DEL CONTENEDOR GENERAL --- */
-.easy-home-process {
-  text-align: center; /* Centra el título y los elementos flexbox */
-  padding: 40px 20px;
-  max-width: 1000px;
-  margin: 0 auto; /* Centrar el contenido */
-  font-family: 'Nunito Sans', sans-serif; /* Usando la fuente que elegiste */
+/* ============================================
+   CÓMO FUNCIONA - Sección de Proceso
+   ============================================ */
+
+/* --- Contenedor de la sección --- */
+.how-it-works-section {
+  text-align: center;
+  padding: 60px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
+/* --- Título principal --- */
 .process-title {
-  font-size: 32px;
+  font-family: var(--font-titles);
+  font-size: var(--font-size-h2);
   font-weight: 700;
   margin-bottom: 50px;
-  color: black;
+  color: var(--color-primary);
 }
 
-/* --- ESTILOS DEL CONTENEDOR DE PASOS (FLEXBOX) --- */
+/* --- Contenedor de los pasos (Flexbox) --- */
 .process-steps {
   display: flex;
-  justify-content: space-between; /* Distribuye las tarjetas uniformemente */
-  gap: 30px; /* Espacio entre las tarjetas */
+  justify-content: space-between;
+  gap: 30px;
+  align-items: flex-start;
 }
 
-/* --- ESTILOS DE CADA TARJETA DE PASO --- */
+/* --- Tarjeta de cada paso --- */
 .step-card {
-  flex: 1; /* Hace que todas las tarjetas ocupen el mismo ancho */
+  flex: 1;
   text-align: center;
+  padding: 20px;
+  transition: transform 0.3s ease;
 }
 
-/* --- ESTILOS DEL CÍRCULO CON NÚMERO --- */
+.step-card:hover {
+  transform: translateY(-5px);
+}
+
+/* --- Círculo con número --- */
 .step-number {
-  width: 60px;
-  height: 60px;
-  line-height: 60px; /* Centra verticalmente el texto */
-  margin: 0 auto 20px auto; /* Centrar y añadir margen inferior */
+  width: 70px;
+  height: 70px;
+  line-height: 70px;
+  margin: 0 auto 20px auto;
   
   /* Círculo */
   border-radius: 50%;
   
   /* Colores */
-  background-color: #0b2f4a; /* Color azul oscuro similar al del header */
-  color: white;
+  background-color: var(--color-primary);
+  color: var(--color-white);
   
-  /* Tipografía del número */
-  font-size: 24px;
+  /* Tipografía */
+  font-family: var(--font-titles);
+  font-size: 28px;
   font-weight: 700;
+  
+  /* Sombra */
+  box-shadow: 0 4px 10px rgba(22, 57, 79, 0.2);
 }
 
-/* --- ESTILOS DEL TEXTO DENTRO DE LA TARJETA --- */
+/* --- Título del paso --- */
 .step-heading {
-  font-size: 18px;
+  font-family: var(--font-titles);
+  font-size: var(--font-size-h4);
   font-weight: 700;
   margin-bottom: 15px;
-  color: black; /* Color azul oscuro */
+  color: var(--color-primary);
 }
 
+/* --- Descripción del paso --- */
 .step-description {
-  font-size: 15px;
-  color: black;
+  font-family: var(--font-text);
+  font-size: var(--font-size-base);
+  color: #555;
   line-height: 1.6;
 }
 
-/* --- RESPONSIVE: Apilar pasos en pantallas pequeñas --- */
+/* --- Responsive: Pantallas pequeñas --- */
 @media (max-width: 768px) {
+  .how-it-works-section {
+    padding: 40px 20px;
+  }
+
   .process-steps {
-    flex-direction: column; /* Apila los pasos verticalmente */
+    flex-direction: column;
     gap: 40px;
+  }
+
+  .process-title {
+    font-size: var(--font-size-h3);
+  }
+
+  .step-number {
+    width: 60px;
+    height: 60px;
+    line-height: 60px;
+    font-size: 24px;
   }
 }
