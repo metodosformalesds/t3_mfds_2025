@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, Index
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from .base import Base
@@ -31,8 +31,14 @@ class Servicio_Contratado(Base):
     fecha_confirmacion_finalizacion = Column(TIMESTAMP, nullable=True)
 
     # Relaciones
-    cliente = relationship("Usuario", back_populates="servicio_contratado")
+    usuario = relationship("Usuario", back_populates="servicio_contratado")
     proveedor_servicio = relationship("Proveedor_Servicio", back_populates="servicio_contratado")
     publicacion_servicio = relationship("Publicacion_Servicio", back_populates="servicio_contratado")
     reseña_servicio = relationship("Reseña_Servicio", back_populates="servicio_contratado", cascade="all, delete")
     alerta_sistema = relationship("Alerta_Sistema", back_populates="servicio_contratado", cascade="all, delete")
+
+    __table_args__ = (
+        Index("idx_servicio_cliente", "id_cliente"),
+        Index("idx_servicio_proveedor", "id_proveedor"),
+        Index("idx_servicio_estado", "estado_servicio"),
+    )
