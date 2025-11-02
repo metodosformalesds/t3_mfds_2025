@@ -2,6 +2,8 @@ import { Routes, Route } from 'react-router-dom';
 import Home from '../../pages/Home';
 import ProtectedRoute from './ProtectedRoute';
 import Callback from '../../pages/auth/Callback';
+import Subscriptions from '../../pages/premium/Subscriptions';
+import Advertise from '../../pages/services/Advertise';
 
 // Páginas de autenticación (placeholder)
 const Login = () => <div>Login Page</div>;
@@ -32,6 +34,8 @@ const AppRoutes = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/callback" element={<Callback />} /> 
       <Route path="/unauthorized" element={<Unauthorized />} />
+      <Route path="/subscriptions" element={<Subscriptions />} />
+      <Route path="/advertise" element={<Advertise />} />
 
       {/* Rutas de Cliente (prioridad 1 - incluye Google) */}
       <Route 
