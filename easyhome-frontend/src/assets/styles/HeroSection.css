@@ -76,21 +76,17 @@
   width: 100%;
   max-width: 500px;
   height: 400px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  border: 2px dashed rgba(255, 255, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  backdrop-filter: blur(10px);
 }
 
-.hero-image-placeholder::after {
-  content: 'Imagen del Hero';
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 1.2rem;
-  font-family: 'Nunito Sans', sans-serif;
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 20px;
 }
 
 /* Animación de ondas - múltiples capas */
