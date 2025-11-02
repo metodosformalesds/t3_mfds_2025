@@ -37,9 +37,6 @@ const AppRoutes = () => {
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/subscriptions" element={<Subscriptions />} />
       <Route path="/advertise" element={<Advertise />} />
-      
-      {/* Ruta temporal para desarrollo - REMOVER EN PRODUCCIÓN */}
-      <Route path="/dev/admin-categories" element={<AdminCategories />} />
 
       {/* Rutas de Cliente (prioridad 1 - incluye Google) */}
       <Route 
