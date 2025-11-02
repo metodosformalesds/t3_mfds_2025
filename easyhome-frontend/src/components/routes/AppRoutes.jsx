@@ -23,6 +23,7 @@ import AdminDashboard from '../../pages/admin/AdminDashboard';
 import AdminCategories from '../../pages/admin/AdminCategories';
 import AdminUsuarios from '../../pages/admin/AdminUsuarios';
 import AdminReportes from '../../pages/admin/AdminReportes';
+import AdminSolicitudes from '../../pages/admin/AdminSolicitudes';
 
 const AppRoutes = () => {
   return (
@@ -127,6 +128,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['Admin']}>
             <AdminCategories />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/solicitudes" 
+        element={
+          <ProtectedRoute allowedRoles={['Admin']}>
+            <AdminSolicitudes />
           </ProtectedRoute>
         } 
       />
