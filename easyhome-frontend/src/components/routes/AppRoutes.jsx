@@ -4,6 +4,7 @@ import ProtectedRoute from './ProtectedRoute';
 import Callback from '../../pages/auth/Callback';
 import Subscriptions from '../../pages/Subscriptions';
 import Advertise from '../../pages/Advertise';
+import AdminCategories from '../../pages/admin/AdminCategories';
 
 // Páginas de autenticación (placeholder)
 const Login = () => <div>Login Page</div>;
@@ -36,6 +37,9 @@ const AppRoutes = () => {
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/subscriptions" element={<Subscriptions />} />
       <Route path="/advertise" element={<Advertise />} />
+      
+      {/* Ruta temporal para desarrollo - REMOVER EN PRODUCCIÓN */}
+      <Route path="/dev/admin-categories" element={<AdminCategories />} />
 
       {/* Rutas de Cliente (prioridad 1 - incluye Google) */}
       <Route 
@@ -111,6 +115,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['Admin']}>
             <AdminReportes />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/categories" 
+        element={
+          <ProtectedRoute allowedRoles={['Admin']}>
+            <AdminCategories />
           </ProtectedRoute>
         } 
       />
