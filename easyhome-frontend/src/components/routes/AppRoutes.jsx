@@ -5,6 +5,7 @@ import Callback from '../../pages/auth/Callback';
 import Subscriptions from '../../pages/Subscriptions';
 import Advertise from '../../pages/Advertise';
 import AdminCategories from '../../pages/admin/AdminCategories';
+import AdminDashboard from '../../pages/admin/AdminDashboard';
 
 // Páginas de autenticación (placeholder)
 const Login = () => <div>Login Page</div>;
@@ -22,7 +23,6 @@ const TrabajadorServicios = () => <div>Servicios Ofrecidos</div>;
 const TrabajadorPerfil = () => <div>Perfil Trabajador</div>;
 
 // Páginas de Admin
-const AdminDashboard = () => <div>Dashboard Admin</div>;
 const AdminUsuarios = () => <div>Gestión de Usuarios</div>;
 const AdminReportes = () => <div>Reportes</div>;
 
