@@ -36,21 +36,33 @@ function Categories() {
   return (
     <section className="categories-section">
       <div className="categories-container">
-        <h2 className="categories-title">Categorías de Servicios</h2>
-        <p className="categories-subtitle">Encuentra el servicio que necesitas</p>
+        <h2 className="categories-title">Categorías</h2>
         
-        <div className="categories-grid">
-          {categories.map((category) => (
-            <div key={category.id_categoria} className="category-card">
-              {category.icono_url && (
-                <div className="category-icon">
-                  <img src={category.icono_url} alt={category.nombre_categoria} />
-                </div>
-              )}
-              <h3 className="category-name">{category.nombre_categoria}</h3>
-              {category.descripcion && (
-                <p className="category-description">{category.descripcion}</p>
-              )}
+        <div className="categories-list">
+          {categories.map((category, index) => (
+            <div 
+              key={category.id_categoria} 
+              className={`category-item ${index % 2 === 0 ? 'category-left-icon' : 'category-right-icon'}`}
+            >
+              <div className="category-icon-wrapper">
+                {category.icono_url ? (
+                  <div className="category-icon">
+                    <img src={category.icono_url} alt={category.nombre_categoria} />
+                  </div>
+                ) : (
+                  <div className="category-icon category-icon-placeholder">
+                    <span>🔧</span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="category-content">
+                <h3 className="category-name">{category.nombre_categoria}</h3>
+                {category.descripcion && (
+                  <p className="category-description">{category.descripcion}</p>
+                )}
+                <a href="#" className="category-link">Ver catálogo ›</a>
+              </div>
             </div>
           ))}
         </div>
