@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import HeroSection from '../components/features/HeroSection'
 import '../assets/styles/BeneficiosEH_HomePage.css'
 import "../assets/styles/postulate.css"
 import "../assets/styles/como_funciona.css"
@@ -8,6 +9,8 @@ function Home() {
 
   return (
     <>
+      <HeroSection />
+      
       <div className="home-container">
         {/* Sección: Cómo Funciona */}
         <section className="how-it-works-section">
