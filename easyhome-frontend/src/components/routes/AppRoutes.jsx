@@ -5,6 +5,7 @@ import Callback from '../../pages/auth/Callback';
 import Subscriptions from '../../pages/Subscriptions';
 import Advertise from '../../pages/Advertise';
 import AdminCategories from '../../pages/admin/AdminCategories';
+import AdminDashboard from '../../pages/admin/AdminDashboard';
 
 // Páginas de autenticación (placeholder)
 const Login = () => <div>Login Page</div>;
@@ -22,7 +23,6 @@ const TrabajadorServicios = () => <div>Servicios Ofrecidos</div>;
 const TrabajadorPerfil = () => <div>Perfil Trabajador</div>;
 
 // Páginas de Admin
-const AdminDashboard = () => <div>Dashboard Admin</div>;
 const AdminUsuarios = () => <div>Gestión de Usuarios</div>;
 const AdminReportes = () => <div>Reportes</div>;
 
@@ -37,9 +37,6 @@ const AppRoutes = () => {
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/subscriptions" element={<Subscriptions />} />
       <Route path="/advertise" element={<Advertise />} />
-      
-      {/* Ruta temporal para desarrollo - REMOVER EN PRODUCCIÓN */}
-      <Route path="/dev/admin-categories" element={<AdminCategories />} />
 
       {/* Rutas de Cliente (prioridad 1 - incluye Google) */}
       <Route 

@@ -1,18 +1,26 @@
 import { Navigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from 'react-oidc-context';
+import { hasAnyRole } from '../../utils/authUtils';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const { isAuthenticated, getUserRole } = useAuth();
+  const auth = useAuth();
   
-  if (!isAuthenticated) {
+  // Si está cargando, mostrar loading
+  if (auth.isLoading) {
+    return <div style={{ textAlign: 'center', padding: '40px' }}>Cargando...</div>;
+  }
+  
+  // Si no está autenticado, redirigir al login
+  if (!auth.isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
   
-  const userRole = getUserRole();
-  
-  if (allowedRoles && !allowedRoles.includes(userRole)) {
-    return <Navigate to="/unauthorized" replace />;
+  // Si se especificaron roles permitidos, verificar
+  if (allowedRoles && allowedRoles.length > 0) {
+    if (!hasAnyRole(auth.user, allowedRoles)) {
+      return <Navigate to="/unauthorized" replace />;
+    }
   }
   
   return children;
