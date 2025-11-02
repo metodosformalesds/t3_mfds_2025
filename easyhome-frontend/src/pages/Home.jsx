@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import HeroSection from '../components/features/HeroSection'
 import Categories from '../components/features/Categories'
+import { Button } from '../components/ui'
 import '../assets/styles/BeneficiosEH_HomePage.css'
 import "../assets/styles/postulate.css"
 import "../assets/styles/como_funciona.css"
@@ -118,9 +119,14 @@ function Home() {
               necesitan servicios de carpintería, fontanería, limpieza para sus 
               hogares y mucho más. Consigue más trabajo y haz crecer tu negocio.
             </p>
-            <a href="#" className="cta-button">
+            <Button 
+              variant="primary" 
+              size="medium"
+              onClick={() => window.location.href = '#'}
+              className="cta-button"
+            >
               Postúlate aquí
-            </a>
+            </Button>
           </div>
         </section>
       </div>
