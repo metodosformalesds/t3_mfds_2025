@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
+from sqlalchemy.orm import joinedload
 from typing import List, Optional
 from datetime import datetime
 from app.core.database import get_db
@@ -127,31 +128,64 @@ def listar_solicitudes_admin(db: Session = Depends(get_db)):
     """
     Muestra todas las solicitudes de proveedores (pendientes, aprobadas, rechazadas).
     Solo debe ser consumido por un usuario Administrador.
+    AHORA INCLUYE LAS FOTOS DE EVIDENCIA.
     """
     try:
-        # Query para traer todas las solicitudes y la información del usuario asociado
-        solicitudes = db.query(Proveedor_Servicio, Usuario.correo_electronico, Usuario.nombre, Usuario.numero_telefono)\
-            .join(Usuario, Proveedor_Servicio.id_proveedor == Usuario.id_usuario)\
+        # 🔹 1. Query modificado:
+        # Usamos options(joinedload(...)) para cargar eficientemente:
+        #   - La relación con 'Usuario' (para obtener email, nombre, teléfono)
+        #   - La relación con 'foto_trabajo' (para obtener las URLs de las fotos)
+        
+        solicitudes = db.query(Proveedor_Servicio)\
+            .options(
+                joinedload(Proveedor_Servicio.usuario),
+                joinedload(Proveedor_Servicio.foto_trabajo)
+            )\
             .order_by(Proveedor_Servicio.fecha_solicitud.desc())\
             .all()
 
         resultado = []
-        for s, email, nombre, telefono in solicitudes:
+        
+        # 🔹 2. Loop modificado:
+        # 's' ahora es el objeto Proveedor_Servicio completo
+        for s in solicitudes:
+            
+            # 🔹 3. Procesar la lista de fotos
+            # Creamos una lista solo con las URLs de las fotos de evidencia
+            fotos_evidencia = []
+            if s.foto_trabajo: # Verificar que la relación no esté vacía
+                for foto in s.foto_trabajo:
+                    fotos_evidencia.append({
+                        "id_foto": foto.id_foto_trabajo_anterior, # Suponiendo que la PK se llama así
+                        "url_imagen": foto.url_imagen,
+                        "descripcion": foto.descripcion
+                    })
+
+            # 🔹 4. Construir el resultado
             resultado.append({
                 "id_proveedor": s.id_proveedor,
                 "nombre_completo": s.nombre_completo,
-                "email_usuario": email,
-                "nombre_usuario": nombre,
-                "telefono_usuario": telefono, # Se añade el teléfono del usuario base
+                
+                # Accedemos a los datos del usuario a través de la relación 's.usuario'
+                "email_usuario": s.usuario.correo_electronico if s.usuario else None,
+                "nombre_usuario": s.usuario.nombre if s.usuario else None,
+                "telefono_usuario": s.usuario.numero_telefono if s.usuario else None,
+                
                 "direccion": s.direccion,
                 "curp": s.curp,
                 "años_experiencia": s.años_experiencia,
                 "estado_solicitud": s.estado_solicitud,
                 "fecha_solicitud": s.fecha_solicitud,
                 "fecha_aprobacion": s.fecha_aprobacion,
-                "especializaciones": s.especializaciones
+                "especializaciones": s.especializaciones,
+                
+                # --- CAMPO AÑADIDO ---
+                "fotos_evidencia": fotos_evidencia 
+                # ---------------------
             })
+            
         return resultado
+        
     except Exception as e:
         logger.error(f"Error al listar solicitudes de admin: {e}")
         raise HTTPException(status_code=500, detail="Error al obtener las solicitudes.")
@@ -201,7 +235,6 @@ def actualizar_estado_solicitud(
             usuario.tipo_usuario = "proveedor"
             
             # -----------------------------------------------------------------
-            # AQUI ESTÁ LA LÓGICA DE CAMBIO DE GRUPO QUE PEDISTE
             # Se llama a tu servicio de cognito para mover al usuario
             # -----------------------------------------------------------------
             cognito_service.add_user_to_group(
