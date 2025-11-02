@@ -1,6 +1,7 @@
 import '../../assets/styles/Header.css'
 import { useAuth } from "react-oidc-context";
 import { Link } from 'react-router-dom';
+import { isAdmin } from '../../utils/authUtils';
 
 function Header() {
   const auth = useAuth();
@@ -35,6 +36,11 @@ function Header() {
           
           {auth.isAuthenticated ? (
             <>
+              {isAdmin(auth.user) && (
+                <li>
+                  <Link to="/admin/dashboard">Dashboard</Link>
+                </li>
+              )}
               <li>
                 <a href="#">
                   👤 Perfil
