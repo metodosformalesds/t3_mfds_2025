@@ -5,8 +5,11 @@ from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from app.core.database import get_db
 from app.models.user import Usuario
+from app.services.cognito_service import cognito_service
+import logging
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 class CognitoUserSync(BaseModel):
@@ -23,12 +26,28 @@ def sync_cognito_user(user_data: CognitoUserSync, db: Session = Depends(get_db))
     Sincroniza un usuario de Cognito con la base de datos local.
     Si el usuario ya existe, actualiza su última sesión.
     Si no existe, lo crea.
+    
+    IMPORTANTE: Si el usuario no tiene grupos en Cognito, se le asigna automáticamente al grupo "Clientes"
     """
     # Buscar usuario por email o google_id (usaremos google_id para guardar el cognito_sub)
     existing_user = db.query(Usuario).filter(
         (Usuario.correo_electronico == user_data.email) |
         (Usuario.google_id == user_data.cognito_sub)
     ).first()
+
+    # Asegurar que el usuario tenga al menos el grupo "Clientes"
+    # Usamos el email como username (Cognito puede usar email o sub según configuración)
+    groups_assigned = cognito_service.ensure_user_has_default_group(
+        username=user_data.email,
+        current_groups=user_data.cognito_groups
+    )
+    
+    if groups_assigned and not user_data.cognito_groups:
+        # Si se asignó el grupo por defecto, actualizar los grupos en la respuesta
+        user_data.cognito_groups = [cognito_service.client and 
+                                     cognito_service.get_user_groups(user_data.email) or 
+                                     ["Clientes"]]
+        logger.info(f"Usuario {user_data.email} asignado al grupo por defecto")
 
     if existing_user:
         # Actualizar última sesión
@@ -39,7 +58,8 @@ def sync_cognito_user(user_data: CognitoUserSync, db: Session = Depends(get_db))
         return {
             "message": "Usuario actualizado",
             "user_id": existing_user.id_usuario,
-            "is_new": False
+            "is_new": False,
+            "groups": user_data.cognito_groups
         }
     
     # Determinar tipo de usuario basado en los grupos de Cognito
@@ -72,7 +92,8 @@ def sync_cognito_user(user_data: CognitoUserSync, db: Session = Depends(get_db))
     return {
         "message": "Usuario creado exitosamente",
         "user_id": new_user.id_usuario,
-        "is_new": True
+        "is_new": True,
+        "groups": user_data.cognito_groups
     }
 
 
