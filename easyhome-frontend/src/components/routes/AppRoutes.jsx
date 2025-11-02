@@ -2,8 +2,8 @@ import { Routes, Route } from 'react-router-dom';
 import Home from '../../pages/Home';
 import ProtectedRoute from './ProtectedRoute';
 import Callback from '../../pages/auth/Callback';
-import Subscriptions from '../../pages/premium/Subscriptions';
-import Advertise from '../../pages/services/Advertise';
+import Subscriptions from '../../pages/Subscriptions';
+import Advertise from '../../pages/Advertise';
 
 // Páginas de autenticación (placeholder)
 const Login = () => <div>Login Page</div>;
