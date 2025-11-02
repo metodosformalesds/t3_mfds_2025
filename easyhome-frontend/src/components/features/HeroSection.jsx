@@ -1,4 +1,5 @@
 import '../../assets/styles/HeroSection.css';
+import heroImage from '../../assets/images/Recurso 1.png';
 
 function HeroSection() {
   return (
@@ -10,9 +11,8 @@ function HeroSection() {
           <button className="hero-button">Comenzar ahora</button>
         </div>
         <div className="hero-image-container">
-          {/* Espacio reservado para la imagen */}
           <div className="hero-image-placeholder">
-            {/* La imagen se agregará aquí */}
+            <img src={heroImage} alt="Profesionales de hogar" className="hero-image" />
           </div>
         </div>
       </div>
