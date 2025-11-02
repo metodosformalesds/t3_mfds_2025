@@ -6,6 +6,7 @@ import Auth from '../../pages/auth/Auth';
 import Unauthorized from '../../pages/auth/Unauthorized';
 import Subscriptions from '../../pages/Subscriptions';
 import Advertise from '../../pages/Advertise';
+import Postulate from '../../pages/Postulate';
 
 // Páginas de Cliente
 import ClienteDashboard from '../../pages/cliente/Dashboard';
@@ -33,6 +34,16 @@ const AppRoutes = () => {
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/subscriptions" element={<Subscriptions />} />
       <Route path="/advertise" element={<Advertise />} />
+      
+      {/* Ruta de postulación - Solo para clientes autenticados */}
+      <Route 
+        path="/postulate" 
+        element={
+          <ProtectedRoute allowedRoles={['Clientes']}>
+            <Postulate />
+          </ProtectedRoute>
+        } 
+      />
 
       {/* Rutas de Cliente (prioridad 1 - incluye Google) */}
       <Route 
