@@ -2,7 +2,6 @@
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
-from sqlalchemy.orm import joinedload
 from typing import List, Optional
 from datetime import datetime
 from app.core.database import get_db
@@ -11,6 +10,7 @@ from app.models.user import Proveedor_Servicio, Usuario
 # Si 'foto_trabajo.py' está en 'app/models/', esta importación es correcta.
 from app.models.foto_trabajo import Foto_Trabajo_Anterior 
 from app.services.cognito_service import cognito_service  # Importas tu servicio de Cognito
+from app.services.s3_service import s3_service  # Importar servicio S3
 import uuid
 import logging # Es buena práctica añadir logging
 
@@ -88,19 +88,48 @@ async def crear_solicitud_proveedor(
         db.commit()
         db.refresh(solicitud)
 
-        # 🔹 5. Guardar fotos (Simulación de subida a S3)
+        # 🔹 5. Guardar fotos en S3
         urls_fotos_guardadas = []
         for file in fotos:
-            nombre_archivo = f"evidencia/{uuid.uuid4()}_{file.filename}"
-            url_simulada_s3 = f"https://s3.amazonaws.com/easyhome-service-images/{nombre_archivo}"
-            
-            nueva_foto = Foto_Trabajo_Anterior(
-                id_proveedor=solicitud.id_proveedor,
-                url_imagen=url_simulada_s3,
-                descripcion="Evidencia de trabajo (postulación)"
-            )
-            db.add(nueva_foto)
-            urls_fotos_guardadas.append(url_simulada_s3)
+            try:
+                # Generar nombre único para el archivo
+                file_extension = file.filename.split('.')[-1] if '.' in file.filename else 'jpg'
+                # Usar work-images/ como está configurado en el bucket
+                s3_key = f"work-images/{uuid.uuid4()}.{file_extension}"
+                
+                # Determinar content type basado en la extensión
+                content_types = {
+                    'jpg': 'image/jpeg',
+                    'jpeg': 'image/jpeg',
+                    'png': 'image/png',
+                    'gif': 'image/gif',
+                    'webp': 'image/webp'
+                }
+                content_type = content_types.get(file_extension.lower(), 'image/jpeg')
+                
+                # Subir archivo a S3 (retorna la S3 key, no URL pública)
+                s3_object_key = s3_service.upload_file(
+                    file_obj=file.file,
+                    object_name=s3_key,
+                    content_type=content_type
+                )
+                
+                # Guardar la S3 key en la base de datos (no URL pública)
+                # La key será usada para generar URLs pre-firmadas cuando se necesite
+                nueva_foto = Foto_Trabajo_Anterior(
+                    id_proveedor=solicitud.id_proveedor,
+                    url_imagen=s3_object_key,  # Guardar S3 key
+                    descripcion="Evidencia de trabajo (postulación)"
+                )
+                db.add(nueva_foto)
+                urls_fotos_guardadas.append(s3_object_key)
+                
+                logger.info(f"Foto subida a S3: {s3_object_key}")
+                
+            except Exception as e:
+                logger.error(f"Error al subir foto {file.filename}: {e}")
+                # Continuar con las demás fotos aunque una falle
+                continue
         
         db.commit()
         logger.info(f"Nueva solicitud creada para {user_email}, ID: {solicitud.id_proveedor}")
@@ -128,64 +157,31 @@ def listar_solicitudes_admin(db: Session = Depends(get_db)):
     """
     Muestra todas las solicitudes de proveedores (pendientes, aprobadas, rechazadas).
     Solo debe ser consumido por un usuario Administrador.
-    AHORA INCLUYE LAS FOTOS DE EVIDENCIA.
     """
     try:
-        # 🔹 1. Query modificado:
-        # Usamos options(joinedload(...)) para cargar eficientemente:
-        #   - La relación con 'Usuario' (para obtener email, nombre, teléfono)
-        #   - La relación con 'foto_trabajo' (para obtener las URLs de las fotos)
-        
-        solicitudes = db.query(Proveedor_Servicio)\
-            .options(
-                joinedload(Proveedor_Servicio.usuario),
-                joinedload(Proveedor_Servicio.foto_trabajo)
-            )\
+        # Query para traer todas las solicitudes y la información del usuario asociado
+        solicitudes = db.query(Proveedor_Servicio, Usuario.correo_electronico, Usuario.nombre, Usuario.numero_telefono)\
+            .join(Usuario, Proveedor_Servicio.id_proveedor == Usuario.id_usuario)\
             .order_by(Proveedor_Servicio.fecha_solicitud.desc())\
             .all()
 
         resultado = []
-        
-        # 🔹 2. Loop modificado:
-        # 's' ahora es el objeto Proveedor_Servicio completo
-        for s in solicitudes:
-            
-            # 🔹 3. Procesar la lista de fotos
-            # Creamos una lista solo con las URLs de las fotos de evidencia
-            fotos_evidencia = []
-            if s.foto_trabajo: # Verificar que la relación no esté vacía
-                for foto in s.foto_trabajo:
-                    fotos_evidencia.append({
-                        "id_foto": foto.id_foto_trabajo_anterior, # Suponiendo que la PK se llama así
-                        "url_imagen": foto.url_imagen,
-                        "descripcion": foto.descripcion
-                    })
-
-            # 🔹 4. Construir el resultado
+        for s, email, nombre, telefono in solicitudes:
             resultado.append({
                 "id_proveedor": s.id_proveedor,
                 "nombre_completo": s.nombre_completo,
-                
-                # Accedemos a los datos del usuario a través de la relación 's.usuario'
-                "email_usuario": s.usuario.correo_electronico if s.usuario else None,
-                "nombre_usuario": s.usuario.nombre if s.usuario else None,
-                "telefono_usuario": s.usuario.numero_telefono if s.usuario else None,
-                
+                "email_usuario": email,
+                "nombre_usuario": nombre,
+                "telefono_usuario": telefono, # Se añade el teléfono del usuario base
                 "direccion": s.direccion,
                 "curp": s.curp,
                 "años_experiencia": s.años_experiencia,
                 "estado_solicitud": s.estado_solicitud,
                 "fecha_solicitud": s.fecha_solicitud,
                 "fecha_aprobacion": s.fecha_aprobacion,
-                "especializaciones": s.especializaciones,
-                
-                # --- CAMPO AÑADIDO ---
-                "fotos_evidencia": fotos_evidencia 
-                # ---------------------
+                "especializaciones": s.especializaciones
             })
-            
         return resultado
-        
     except Exception as e:
         logger.error(f"Error al listar solicitudes de admin: {e}")
         raise HTTPException(status_code=500, detail="Error al obtener las solicitudes.")
@@ -209,7 +205,9 @@ def actualizar_estado_solicitud(
     2. Cambia el 'tipo_usuario' a 'proveedor' en la tabla 'usuario'.
     3. Mueve al usuario al grupo 'Trabajadores' en Cognito.
     Si se RECHAZA:
-    1. Solo cambia el estado en la BD.
+    1. Elimina la solicitud de la BD.
+    2. Elimina las fotos asociadas de la BD y S3.
+    3. Permite que el usuario pueda crear una nueva solicitud.
     """
     solicitud = db.query(Proveedor_Servicio).filter(Proveedor_Servicio.id_proveedor == id_proveedor).first()
     if not solicitud:
@@ -218,15 +216,13 @@ def actualizar_estado_solicitud(
     if estado not in ["aprobado", "rechazado"]:
         raise HTTPException(status_code=400, detail="Estado inválido. Use 'aprobado' o 'rechazado'.")
 
-    # 🔹 1. Actualizar el estado en BD
-    solicitud.estado_solicitud = estado
-    
     usuario = db.query(Usuario).filter(Usuario.id_usuario == solicitud.id_proveedor).first()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario asociado a la solicitud no encontrado.")
 
-    # 🔹 2. Lógica de APROBACIÓN
+    # 🔹 Lógica de APROBACIÓN
     if estado == "aprobado":
+        solicitud.estado_solicitud = estado
         solicitud.fecha_aprobacion = datetime.utcnow()
         solicitud.tiempo_activo_desde = datetime.utcnow() # Inicia tiempo como proveedor
         
@@ -235,6 +231,7 @@ def actualizar_estado_solicitud(
             usuario.tipo_usuario = "proveedor"
             
             # -----------------------------------------------------------------
+            # AQUI ESTÁ LA LÓGICA DE CAMBIO DE GRUPO QUE PEDISTE
             # Se llama a tu servicio de cognito para mover al usuario
             # -----------------------------------------------------------------
             cognito_service.add_user_to_group(
@@ -248,15 +245,106 @@ def actualizar_estado_solicitud(
             db.rollback()
             logger.error(f"Error en Cognito al aprobar {id_proveedor}: {e}")
             raise HTTPException(status_code=500, detail=f"Error al actualizar grupo en Cognito: {e}")
+        
+        db.commit()
+        
+        return {
+            "message": "Solicitud aprobada correctamente.", 
+            "id_proveedor": id_proveedor,
+            "nuevo_estado": estado
+        }
             
-    else: # Lógica de RECHAZO
-        solicitud.fecha_aprobacion = None
-        logger.info(f"Solicitud {id_proveedor} RECHAZADA.")
-    
-    db.commit()
+    else: # 🔹 Lógica de RECHAZO - ELIMINAR SOLICITUD
+        try:
+            # 1. Obtener y eliminar fotos de S3 y BD
+            fotos = db.query(Foto_Trabajo_Anterior).filter(
+                Foto_Trabajo_Anterior.id_proveedor == id_proveedor
+            ).all()
+            
+            for foto in fotos:
+                try:
+                    # url_imagen ahora contiene la S3 key directamente (ej: work-images/uuid.jpg)
+                    s3_key = foto.url_imagen
+                    s3_service.delete_file(s3_key)
+                    logger.info(f"Foto eliminada de S3: {s3_key}")
+                except Exception as e:
+                    logger.warning(f"Error al eliminar foto de S3: {e}")
+                    # Continuar aunque falle la eliminación de S3
+                
+                # Eliminar de BD
+                db.delete(foto)
+            
+            # 2. Eliminar la solicitud de la BD
+            db.delete(solicitud)
+            db.commit()
+            
+            logger.info(f"Solicitud {id_proveedor} RECHAZADA y ELIMINADA. Usuario {usuario.correo_electronico} puede crear nueva solicitud.")
+            
+            return {
+                "message": "Solicitud rechazada y eliminada correctamente. El usuario puede crear una nueva solicitud.", 
+                "id_proveedor": id_proveedor,
+                "nuevo_estado": "eliminado"
+            }
+            
+        except Exception as e:
+            db.rollback()
+            logger.error(f"Error al eliminar solicitud {id_proveedor}: {e}")
+            raise HTTPException(status_code=500, detail=f"Error al eliminar la solicitud: {e}")
 
-    return {
-        "message": f"Solicitud {estado} correctamente.", 
-        "id_proveedor": id_proveedor,
-        "nuevo_estado": estado
-    }
+
+# =========================================================
+# 4️⃣ OBTENER FOTOS DE UN PROVEEDOR CON URLs PRE-FIRMADAS
+# =========================================================
+
+@router.get("/{id_proveedor}/fotos")
+def obtener_fotos_proveedor(
+    id_proveedor: int,
+    expiration: int = 3600,  # 1 hora por defecto
+    db: Session = Depends(get_db)
+):
+    """
+    Obtiene las fotos de un proveedor con URLs pre-firmadas para acceso temporal.
+    
+    Args:
+        id_proveedor: ID del proveedor
+        expiration: Tiempo de expiración de las URLs en segundos (default: 3600 = 1 hora)
+    
+    Returns:
+        Lista de fotos con URLs pre-firmadas temporales
+    """
+    try:
+        # Buscar fotos del proveedor
+        fotos = db.query(Foto_Trabajo_Anterior).filter(
+            Foto_Trabajo_Anterior.id_proveedor == id_proveedor
+        ).all()
+        
+        if not fotos:
+            return []
+        
+        # Generar URLs pre-firmadas para cada foto
+        fotos_con_urls = []
+        for foto in fotos:
+            try:
+                # Generar URL pre-firmada temporal
+                presigned_url = s3_service.get_presigned_url(
+                    object_name=foto.url_imagen,  # S3 key
+                    expiration=expiration
+                )
+                
+                fotos_con_urls.append({
+                    "id_foto": foto.id_foto,
+                    "url_temporal": presigned_url,
+                    "s3_key": foto.url_imagen,
+                    "descripcion": foto.descripcion,
+                    "fecha_subida": foto.fecha_subida,
+                    "expira_en": f"{expiration} segundos"
+                })
+            except Exception as e:
+                logger.error(f"Error generando URL pre-firmada para foto {foto.id_foto}: {e}")
+                continue
+        
+        return fotos_con_urls
+        
+    except Exception as e:
+        logger.error(f"Error al obtener fotos del proveedor {id_proveedor}: {e}")
+        raise HTTPException(status_code=500, detail="Error al obtener las fotos.")
