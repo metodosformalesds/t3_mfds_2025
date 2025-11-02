@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import '../../assets/styles/Categories.css';
+import categoryService from '../../services/categoryService';
 
 function Categories() {
   const [categories, setCategories] = useState([]);
@@ -9,14 +10,10 @@ function Categories() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/v1/categories/');
-        if (!response.ok) {
-          throw new Error('Error al cargar las categorías');
-        }
-        const data = await response.json();
+        const data = await categoryService.getAll();
         setCategories(data);
       } catch (err) {
-        setError(err.message);
+        setError(err.detail || err.message || 'Error al cargar las categorías');
       } finally {
         setLoading(false);
       }
