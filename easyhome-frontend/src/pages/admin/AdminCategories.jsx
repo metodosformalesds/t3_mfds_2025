@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import '../../assets/styles/AdminCategories.css';
+import categoryService from '../../services/categoryService';
 
 function AdminCategories() {
   const [categories, setCategories] = useState([]);
@@ -25,12 +26,11 @@ function AdminCategories() {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:8000/api/v1/categories/');
-      if (!response.ok) throw new Error('Error al cargar las categorías');
-      const data = await response.json();
+      const data = await categoryService.getAll();
       setCategories(data);
+      setError(null);
     } catch (err) {
-      setError(err.message);
+      setError(err.detail || err.message || 'Error al cargar las categorías');
     } finally {
       setLoading(false);
     }
@@ -50,23 +50,10 @@ function AdminCategories() {
     setFormSuccess(false);
 
     try {
-      const url = editingCategory 
-        ? `http://localhost:8000/api/v1/categories/${editingCategory.id_categoria}`
-        : 'http://localhost:8000/api/v1/categories/';
-      
-      const method = editingCategory ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Error al guardar la categoría');
+      if (editingCategory) {
+        await categoryService.update(editingCategory.id_categoria, formData);
+      } else {
+        await categoryService.create(formData);
       }
 
       setFormSuccess(true);
@@ -88,7 +75,7 @@ function AdminCategories() {
       }, 2000);
 
     } catch (err) {
-      setFormError(err.message);
+      setFormError(err.detail || err.message || 'Error al guardar la categoría');
     }
   };
 
@@ -98,18 +85,11 @@ function AdminCategories() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/categories/${categoryId}`, {
-        method: 'DELETE'
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al eliminar la categoría');
-      }
-
+      await categoryService.delete(categoryId);
       // Recargar categorías
       await fetchCategories();
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      alert(`Error: ${err.detail || err.message || 'Error al eliminar la categoría'}`);
     }
   };
 

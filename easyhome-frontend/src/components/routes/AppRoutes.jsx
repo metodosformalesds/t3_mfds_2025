@@ -2,37 +2,33 @@ import { Routes, Route } from 'react-router-dom';
 import Home from '../../pages/Home';
 import ProtectedRoute from './ProtectedRoute';
 import Callback from '../../pages/auth/Callback';
+import Auth from '../../pages/auth/Auth';
+import Unauthorized from '../../pages/auth/Unauthorized';
 import Subscriptions from '../../pages/Subscriptions';
 import Advertise from '../../pages/Advertise';
-import AdminCategories from '../../pages/admin/AdminCategories';
-import AdminDashboard from '../../pages/admin/AdminDashboard';
 
-// Páginas de autenticación (placeholder)
-const Login = () => <div>Login Page</div>;
-const Register = () => <div>Register Page</div>;
-const Unauthorized = () => <div>No autorizado</div>;
-
-// Páginas de Cliente (incluyendo usuarios de Google)
-const ClienteDashboard = () => <div>Dashboard Cliente</div>;
-const ClienteServicios = () => <div>Servicios Contratados</div>;
-const ClientePerfil = () => <div>Perfil Cliente</div>;
+// Páginas de Cliente
+import ClienteDashboard from '../../pages/cliente/Dashboard';
+import ClienteServicios from '../../pages/cliente/Servicios';
+import ClientePerfil from '../../pages/cliente/Perfil';
 
 // Páginas de Trabajador
-const TrabajadorDashboard = () => <div>Dashboard Trabajador</div>;
-const TrabajadorServicios = () => <div>Servicios Ofrecidos</div>;
-const TrabajadorPerfil = () => <div>Perfil Trabajador</div>;
+import TrabajadorDashboard from '../../pages/trabajador/Dashboard';
+import TrabajadorServicios from '../../pages/trabajador/Servicios';
+import TrabajadorPerfil from '../../pages/trabajador/Perfil';
 
 // Páginas de Admin
-const AdminUsuarios = () => <div>Gestión de Usuarios</div>;
-const AdminReportes = () => <div>Reportes</div>;
+import AdminDashboard from '../../pages/admin/AdminDashboard';
+import AdminCategories from '../../pages/admin/AdminCategories';
+import AdminUsuarios from '../../pages/admin/AdminUsuarios';
+import AdminReportes from '../../pages/admin/AdminReportes';
 
 const AppRoutes = () => {
   return (
     <Routes>
       {/* Rutas públicas */}
       <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route path="/auth" element={<Auth />} />
       <Route path="/callback" element={<Callback />} /> 
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/subscriptions" element={<Subscriptions />} />
