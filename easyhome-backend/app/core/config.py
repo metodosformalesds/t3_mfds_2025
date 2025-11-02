@@ -45,6 +45,10 @@ class Settings(BaseSettings):
     COGNITO_USER_POOL_ID: str | None = None
     COGNITO_DEFAULT_GROUP: str = "Clientes"
     
+    # AWS S3 Configuration
+    S3_BUCKET_NAME: str
+    S3_REGION: str
+    
     class Config:
         env_file = os.path.join(BASE_DIR, ".env")
         case_sensitive = True
