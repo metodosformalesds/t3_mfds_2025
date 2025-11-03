@@ -332,7 +332,7 @@ function AdminSolicitudes() {
               {/* Galería de Fotos */}
               <div className="detail-section">
                 <div className="section-header-with-action">
-                  <h3>📸 Evidencia Fotográfica</h3>
+                  <h3><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-camera"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2" /><path d="M9 13a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg> Evidencia Fotográfica</h3>
                   {fotosProveedor.length > 0 && (
                     <button 
                       className="btn-reload-fotos"
@@ -340,7 +340,7 @@ function AdminSolicitudes() {
                       disabled={cargandoFotos}
                       title="Regenerar URLs de fotos (si expiraron)"
                     >
-                      🔄 Recargar Fotos
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-refresh"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg> Recargar Fotos
                     </button>
                   )}
                 </div>
@@ -354,7 +354,7 @@ function AdminSolicitudes() {
 
                 {errorFotos && (
                   <div className="error-fotos">
-                    <p>⚠️ {errorFotos}</p>
+                    <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-alert-triangle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9v4" /><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" /><path d="M12 16h.01" /></svg> {errorFotos}</p>
                     <button onClick={recargarFotos} className="btn-retry">
                       Reintentar
                     </button>
@@ -363,7 +363,7 @@ function AdminSolicitudes() {
 
                 {!cargandoFotos && !errorFotos && fotosProveedor.length === 0 && (
                   <div className="no-fotos">
-                    <p>😔 No hay fotos disponibles para esta solicitud</p>
+                    <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-mood-sad"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9 10l.01 0" /><path d="M15 10l.01 0" /><path d="M9.5 15.25a3.5 3.5 0 0 1 5 0" /></svg> No hay fotos disponibles para esta solicitud</p>
                   </div>
                 )}
 
@@ -371,10 +371,10 @@ function AdminSolicitudes() {
                   <div className="fotos-galeria">
                     <div className="fotos-header">
                       <p className="fotos-info">
-                        📷 {fotosProveedor.length} foto{fotosProveedor.length !== 1 ? 's' : ''} de trabajo
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-camera"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2" /><path d="M9 13a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg> {fotosProveedor.length} foto{fotosProveedor.length !== 1 ? 's' : ''} de trabajo
                       </p>
                       <p className="fotos-expiracion-header">
-                        ⏰ URLs válidas por {fotosProveedor[0]?.expira_en || '1 hora'}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-clock-hour-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 12l3 -2" /><path d="M12 7v5" /></svg> URLs válidas por {fotosProveedor[0]?.expira_en || '1 hora'}
                       </p>
                     </div>
                     <div className="fotos-grid">
@@ -396,11 +396,11 @@ function AdminSolicitudes() {
                               rel="noopener noreferrer"
                               className="foto-ver-completa"
                             >
-                              🔍 Ver completa
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-search"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></svg> Ver completa
                             </a>
                           </div>
                           <div className="foto-error-overlay">
-                            <p>❌ URL expirada</p>
+                            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg> URL expirada</p>
                             <button 
                               onClick={(e) => {
                                 e.preventDefault();
@@ -408,7 +408,7 @@ function AdminSolicitudes() {
                               }}
                               className="btn-regenerar-mini"
                             >
-                              🔄 Regenerar
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-refresh"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg> Regenerar
                             </button>
                           </div>
                         </div>
@@ -416,7 +416,7 @@ function AdminSolicitudes() {
                     </div>
                     <div className="fotos-footer">
                       <p className="fotos-aviso">
-                        💡 Si las imágenes no cargan, las URLs pueden haber expirado. 
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-bulb"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12h1m8 -9v1m8 8h1m-15.4 -6.4l.7 .7m12.1 -.7l-.7 .7" /><path d="M9 16a5 5 0 1 1 6 0a3.5 3.5 0 0 0 -1 3a2 2 0 0 1 -4 0a3.5 3.5 0 0 0 -1 -3" /><path d="M9.7 17l4.6 0" /></svg> Si las imágenes no cargan, las URLs pueden haber expirado. 
                         Click en "Recargar Fotos" para generar nuevas URLs temporales.
                       </p>
                     </div>
