@@ -84,6 +84,7 @@
   height: 18px;
 }
 
+/* botones */
 .plan-button {
   background-color: #ffffff;
   color: #000000;
@@ -222,11 +223,9 @@
   color: #000000;
 }
 
-
 .compare-features-list li {
   justify-content: center;
 }
-
 
 .compare-plan-column h3 {
   font-size: 2rem;

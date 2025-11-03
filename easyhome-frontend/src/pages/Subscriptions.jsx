@@ -92,7 +92,7 @@ function Subscriptions() {
   return (
     <div className="subscriptions-page">
 
-      {/* Seccion planes de suscripcion */}
+      {/* Seccion planes de suscripción */}
       <br />
       <h1>Encuentra el Plan Perfecto para Ti</h1>
       <p>Selecciona uno y obtén sus beneficios</p>
