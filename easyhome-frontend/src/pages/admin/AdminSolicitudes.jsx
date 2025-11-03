@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSolicitudes } from '../../hooks/useSolicitudes';
+import solicitudService from '../../services/solicitudService';
 import '../../assets/styles/AdminSolicitudes.css';
 
 function AdminSolicitudes() {
@@ -7,11 +8,53 @@ function AdminSolicitudes() {
   const [filtro, setFiltro] = useState('todas'); // todas, pendiente, aprobado, rechazado
   const [solicitudSeleccionada, setSolicitudSeleccionada] = useState(null);
   const [procesando, setProcesando] = useState(false);
+  const [fotosProveedor, setFotosProveedor] = useState([]);
+  const [cargandoFotos, setCargandoFotos] = useState(false);
+  const [mostrarGaleria, setMostrarGaleria] = useState(false);
+  const [errorFotos, setErrorFotos] = useState(null);
 
   const solicitudesFiltradas = solicitudes.filter(sol => {
     if (filtro === 'todas') return true;
     return sol.estado_solicitud === filtro;
   });
+
+  const cargarFotosProveedor = async (idProveedor, mostrarMensaje = false) => {
+    setCargandoFotos(true);
+    setErrorFotos(null);
+    try {
+      const fotos = await solicitudService.obtenerFotosProveedor(idProveedor);
+      setFotosProveedor(fotos);
+      setMostrarGaleria(true);
+      if (mostrarMensaje) {
+        alert('✅ URLs de fotos regeneradas correctamente');
+      }
+    } catch (err) {
+      console.error('Error cargando fotos:', err);
+      setErrorFotos('Error al cargar las fotos del proveedor');
+      setFotosProveedor([]);
+    } finally {
+      setCargandoFotos(false);
+    }
+  };
+
+  const recargarFotos = () => {
+    if (solicitudSeleccionada) {
+      cargarFotosProveedor(solicitudSeleccionada.id_proveedor, true);
+    }
+  };
+
+  const handleVerDetalles = async (solicitud) => {
+    setSolicitudSeleccionada(solicitud);
+    // Cargar fotos automáticamente al ver detalles
+    await cargarFotosProveedor(solicitud.id_proveedor);
+  };
+
+  const cerrarModal = () => {
+    setSolicitudSeleccionada(null);
+    setFotosProveedor([]);
+    setMostrarGaleria(false);
+    setErrorFotos(null);
+  };
 
   const handleAprobar = async (idProveedor) => {
     if (!confirm('¿Estás seguro de que deseas aprobar esta solicitud? El usuario será movido al grupo de Trabajadores.')) {
@@ -24,14 +67,14 @@ function AdminSolicitudes() {
     
     if (result.success) {
       alert(result.message);
-      setSolicitudSeleccionada(null);
+      cerrarModal();
     } else {
       alert('Error: ' + result.message);
     }
   };
 
   const handleRechazar = async (idProveedor) => {
-    if (!confirm('¿Estás seguro de que deseas rechazar esta solicitud?')) {
+    if (!confirm('⚠️ ¿Estás seguro de que deseas rechazar esta solicitud?\n\nEsto eliminará:\n- La solicitud completa\n- Todas las fotos del proveedor\n\nEl usuario podrá crear una nueva solicitud.')) {
       return;
     }
     
@@ -41,7 +84,7 @@ function AdminSolicitudes() {
     
     if (result.success) {
       alert(result.message);
-      setSolicitudSeleccionada(null);
+      cerrarModal();
     } else {
       alert('Error: ' + result.message);
     }
@@ -183,7 +226,7 @@ function AdminSolicitudes() {
               <div className="solicitud-actions">
                 <button
                   className="btn-details"
-                  onClick={() => setSolicitudSeleccionada(solicitud)}
+                  onClick={() => handleVerDetalles(solicitud)}
                 >
                   Ver detalles
                 </button>
@@ -214,11 +257,11 @@ function AdminSolicitudes() {
 
       {/* Modal de detalles */}
       {solicitudSeleccionada && (
-        <div className="modal-overlay" onClick={() => setSolicitudSeleccionada(null)}>
+        <div className="modal-overlay" onClick={cerrarModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Detalles de la Solicitud</h2>
-              <button className="modal-close" onClick={() => setSolicitudSeleccionada(null)}>
+              <button className="modal-close" onClick={cerrarModal}>
                 ✕
               </button>
             </div>
@@ -285,6 +328,101 @@ function AdminSolicitudes() {
                   )}
                 </div>
               </div>
+
+              {/* Galería de Fotos */}
+              <div className="detail-section">
+                <div className="section-header-with-action">
+                  <h3>📸 Evidencia Fotográfica</h3>
+                  {fotosProveedor.length > 0 && (
+                    <button 
+                      className="btn-reload-fotos"
+                      onClick={recargarFotos}
+                      disabled={cargandoFotos}
+                      title="Regenerar URLs de fotos (si expiraron)"
+                    >
+                      🔄 Recargar Fotos
+                    </button>
+                  )}
+                </div>
+                
+                {cargandoFotos && (
+                  <div className="loading-fotos">
+                    <div className="spinner-small"></div>
+                    <p>Cargando fotos...</p>
+                  </div>
+                )}
+
+                {errorFotos && (
+                  <div className="error-fotos">
+                    <p>⚠️ {errorFotos}</p>
+                    <button onClick={recargarFotos} className="btn-retry">
+                      Reintentar
+                    </button>
+                  </div>
+                )}
+
+                {!cargandoFotos && !errorFotos && fotosProveedor.length === 0 && (
+                  <div className="no-fotos">
+                    <p>😔 No hay fotos disponibles para esta solicitud</p>
+                  </div>
+                )}
+
+                {!cargandoFotos && !errorFotos && fotosProveedor.length > 0 && (
+                  <div className="fotos-galeria">
+                    <div className="fotos-header">
+                      <p className="fotos-info">
+                        📷 {fotosProveedor.length} foto{fotosProveedor.length !== 1 ? 's' : ''} de trabajo
+                      </p>
+                      <p className="fotos-expiracion-header">
+                        ⏰ URLs válidas por {fotosProveedor[0]?.expira_en || '1 hora'}
+                      </p>
+                    </div>
+                    <div className="fotos-grid">
+                      {fotosProveedor.map((foto, index) => (
+                        <div key={foto.id_foto} className="foto-item">
+                          <img 
+                            src={foto.url_temporal} 
+                            alt={`Evidencia ${index + 1}`}
+                            loading="lazy"
+                            onError={(e) => {
+                              e.target.parentElement.classList.add('foto-error');
+                            }}
+                          />
+                          <div className="foto-overlay">
+                            <span className="foto-numero">#{index + 1}</span>
+                            <a 
+                              href={foto.url_temporal} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="foto-ver-completa"
+                            >
+                              🔍 Ver completa
+                            </a>
+                          </div>
+                          <div className="foto-error-overlay">
+                            <p>❌ URL expirada</p>
+                            <button 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                recargarFotos();
+                              }}
+                              className="btn-regenerar-mini"
+                            >
+                              🔄 Regenerar
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="fotos-footer">
+                      <p className="fotos-aviso">
+                        💡 Si las imágenes no cargan, las URLs pueden haber expirado. 
+                        Click en "Recargar Fotos" para generar nuevas URLs temporales.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="modal-footer">
@@ -302,11 +440,11 @@ function AdminSolicitudes() {
                     onClick={() => handleRechazar(solicitudSeleccionada.id_proveedor)}
                     disabled={procesando}
                   >
-                    {procesando ? 'Procesando...' : '✗ Rechazar Solicitud'}
+                    {procesando ? 'Procesando...' : '✗ Rechazar y Eliminar'}
                   </button>
                 </>
               )}
-              <button className="btn-secondary" onClick={() => setSolicitudSeleccionada(null)}>
+              <button className="btn-secondary" onClick={cerrarModal}>
                 Cerrar
               </button>
             </div>

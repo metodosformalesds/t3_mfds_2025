@@ -29,10 +29,12 @@ const solicitudService = {
   /**
    * Obtener fotos de trabajo de un proveedor
    * @param {number} idProveedor - ID del proveedor
+   * @param {number} expiration - Tiempo de expiración de las URLs en segundos (default: 3600)
    */
-  obtenerFotosProveedor: async (idProveedor) => {
-    // Este endpoint aún no existe en el backend, pero lo dejamos preparado
-    const response = await apiClient.get(`/api/v1/solicitudes/${idProveedor}/fotos`);
+  obtenerFotosProveedor: async (idProveedor, expiration = 3600) => {
+    const response = await apiClient.get(`/api/v1/solicitudes/${idProveedor}/fotos`, {
+      params: { expiration }
+    });
     return response.data;
   }
 };
