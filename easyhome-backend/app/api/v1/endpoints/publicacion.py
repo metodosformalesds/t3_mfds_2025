@@ -1,0 +1,234 @@
+# app/api/v1/endpoints/publicacion.py
+
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status, Query
+from sqlalchemy.orm import Session, joinedload
+from typing import List, Optional
+from datetime import datetime
+import uuid
+import logging
+
+# --- Importaciones de tu proyecto ---
+from app.core.database import get_db
+from app.models.user import Usuario, Proveedor_Servicio
+# Ajusta esta importación si tus modelos están en archivos separados
+from app.models.publicacion_servicio import Publicacion_Servicio, Categoria_Servicio, Imagen_Publicacion
+# from app.models.etiqueta import Etiqueta 
+
+# --- Importaciones de Servicios ---
+from app.services.s3_service import s3_service # Usamos el mismo servicio S3
+# Asumo que tienes una forma de obtener el usuario actual (ajusta si es necesario)
+from app.services.cognito_service import get_current_user 
+
+logger = logging.getLogger(__name__)
+router = APIRouter(prefix="/publicaciones", tags=["Publicaciones de Servicios"])
+
+
+# =========================================================
+# 1️⃣ CREAR PUBLICACIÓN DE SERVICIO (Proveedor)
+# (Coincide con el formulario "Publica tu servicio")
+# =========================================================
+@router.post("/", status_code=status.HTTP_201_CREATED)
+async def crear_publicacion(
+    # --- Datos del Formulario ---
+    titulo: str = Form(...),
+    id_categoria: int = Form(..., description="El ID de la categoría seleccionada"),
+    descripcion: str = Form(...),
+    rango_precio_min: float = Form(...),
+    rango_precio_max: float = Form(...),
+    fotos: List[UploadFile] = File(..., description="Máximo 10 fotos"),
+    
+    # --- Datos de autenticación y BD ---
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user) 
+):
+    """
+    Permite a un PROVEEDOR autenticado crear una nueva publicación de servicio.
+    Sube las fotos de referencia a S3 y guarda la S3 Key.
+    """
+    
+    # 🔹 1. Verificar que el usuario sea un Proveedor
+    if not current_user.tipo_usuario == "proveedor" or not current_user.proveedor_servicio:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo los proveedores de servicio pueden crear publicaciones."
+        )
+    
+    # 🔹 2. Verificar límite de fotos (Máximo 10)
+    if len(fotos) > 10:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Se permite un máximo de 10 fotos por publicación."
+        )
+
+    # 🔹 3. Verificar que la categoría exista
+    categoria = db.query(Categoria_Servicio).filter(Categoria_Servicio.id_categoria == id_categoria).first()
+    if not categoria:
+        raise HTTPException(status_code=404, detail="La categoría seleccionada no existe.")
+
+    try:
+        # 🔹 4. Crear la publicación en la BD
+        nueva_publicacion = Publicacion_Servicio(
+            id_proveedor=current_user.id_usuario, # ID del proveedor autenticado
+            id_categoria=id_categoria,
+            titulo=titulo,
+            descripcion=descripcion,
+            rango_precio_min=rango_precio_min,
+            rango_precio_max=rango_precio_max,
+            estado="activo", # Estado por defecto
+            fecha_publicacion=datetime.utcnow()
+        )
+        
+        db.add(nueva_publicacion)
+        db.commit()
+        db.refresh(nueva_publicacion) # Para obtener el 'id_publicacion' generado
+
+        # 🔹 5. Subir fotos a S3 (MISMA LÓGICA DE SOLICITUD.PY)
+        urls_fotos_guardadas = []
+        for index, file in enumerate(fotos):
+            try:
+                # Generar S3 key (ruta en S3)
+                file_extension = file.filename.split('.')[-1] if '.' in file.filename else 'jpg'
+                # Carpeta 'publicaciones/' -> 'id_publicacion' -> 'uuid.jpg'
+                s3_key = f"publicaciones/{nueva_publicacion.id_publicacion}/{uuid.uuid4()}.{file_extension}"
+                content_type = file.content_type
+                
+                # Subir a S3
+                s3_service.upload_file(
+                    file_obj=file.file,
+                    object_name=s3_key,
+                    content_type=content_type
+                )
+                
+                # Guardar S3 KEY en la tabla Imagen_Publicacion
+                nueva_foto = Imagen_Publicacion(
+                    id_publicacion=nueva_publicacion.id_publicacion,
+                    url_imagen=s3_key, # <-- Guardamos la S3 key, NO la URL
+                    orden=index + 1
+                )
+                db.add(nueva_foto)
+                urls_fotos_guardadas.append(s3_key)
+                
+            except Exception as e:
+                logger.error(f"Error al subir foto {file.filename} para pub {nueva_publicacion.id_publicacion}: {e}")
+                continue 
+        
+        db.commit()
+        
+        return {
+            "message": "Publicación creada exitosamente",
+            "id_publicacion": nueva_publicacion.id_publicacion,
+            "titulo": nueva_publicacion.titulo,
+            "fotos_guardadas_keys": urls_fotos_guardadas
+        }
+
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error al crear publicación para proveedor {current_user.id_usuario}: {e}")
+        raise HTTPException(status_code=500, detail=f"Error interno al crear la publicación: {e}")
+
+
+# =========================================================
+# 2️⃣ MOSTRAR TODAS LAS PUBLICACIONES (Feed / Tarjetas)
+# (Esta es la "Feed Page" para Clientes CON FILTROS)
+# =========================================================
+@router.get("/", response_model=None) 
+def listar_publicaciones(
+    db: Session = Depends(get_db),
+    # --- PARÁMETROS DE FILTRO (Query Params) ---
+    # RF-15: Filtrar por categoría de servicio
+    categorias: Optional[List[int]] = Query(None, description="Lista de IDs de categorías para filtrar"),
+    
+    # RF-15: Filtrar por proveedores suscritos
+    suscriptores: Optional[bool] = Query(False, description="Filtrar solo proveedores con suscripción premium"),
+    
+    # RF-15: Ordenar por...
+    ordenar_por: Optional[str] = Query(None, description="Ordenar por: 'mejor_calificados' o 'mas_recientes'")
+):
+    """
+    Lista todas las publicaciones de servicios ACTIVAS para el feed principal (Clientes).
+    Permite filtrar y ordenar según los criterios del RF-15 y la imagen de filtros.
+    Genera URLs pre-firmadas para las imágenes.
+    """
+    try:
+        # 🔹 1. Query base
+        query = db.query(Publicacion_Servicio)\
+            .filter(Publicacion_Servicio.estado == 'activo')
+        
+        # 🔹 2. Aplicar Filtro: Categorías
+        if categorias:
+            query = query.filter(Publicacion_Servicio.id_categoria.in_(categorias))
+
+        # 🔹 3. Aplicar Filtro: Suscriptores
+        # (RF-16 pide ordenarlos primero por defecto)
+        # Necesitamos unir con Proveedor_Servicio para filtrar u ordenar
+        needs_join = suscriptores or ordenar_por == 'mejor_calificados'
+        
+        if needs_join:
+            query = query.join(Publicacion_Servicio.proveedor_servicio)
+            
+        if suscriptores:
+            # Asumimos que "suscriptor" significa que tienen un plan (id_plan_suscripcion no es NULO)
+            query = query.filter(Proveedor_Servicio.id_plan_suscripcion != None) 
+
+        # 🔹 4. Aplicar Ordenamiento
+        if ordenar_por == 'mejor_calificados':
+            # RF-15: Ordenar por mejores calificados
+            query = query.order_by(Proveedor_Servicio.calificacion_promedio.desc(), Publicacion_Servicio.fecha_publicacion.desc()) 
+        
+        elif ordenar_por == 'mas_recientes':
+            # RF-15: Ordenar por más recientes
+            query = query.order_by(Publicacion_Servicio.fecha_publicacion.desc()) 
+        
+        else:
+            # RF-16: Orden por defecto (Premium primero)
+            # Si no se unió antes, la unimos ahora
+            if not needs_join:
+                query = query.join(Publicacion_Servicio.proveedor_servicio)
+            
+            # Ordenar por plan (DESC pone los NULL al final) y luego por fecha
+            query = query.order_by(Proveedor_Servicio.id_plan_suscripcion.desc(), Publicacion_Servicio.fecha_publicacion.desc())
+
+        # 🔹 5. Cargar relaciones y ejecutar
+        publicaciones = query.options(
+            joinedload(Publicacion_Servicio.proveedor_servicio).joinedload(Proveedor_Servicio.usuario),
+            joinedload(Publicacion_Servicio.imagen_publicacion),
+            joinedload(Publicacion_Servicio.etiqueta),
+            joinedload(Publicacion_Servicio.categoria_servicio)
+        ).all()
+            
+        # 🔹 6. Construir respuesta
+        resultado = []
+        for pub in publicaciones:
+            url_portada = None
+            if pub.imagen_publicacion:
+                try:
+                    foto_portada = sorted(pub.imagen_publicacion, key=lambda x: x.orden)[0]
+                    url_portada = s3_service.get_presigned_url(foto_portada.url_imagen)
+                except Exception as e:
+                    logger.error(f"Error al generar URL pre-firmada para {pub.imagen_publicacion[0].url_imagen}: {e}")
+            
+            # (Descomenta si ya tienes el modelo Etiqueta funcionando)
+            # etiquetas = [e.nombre_etiqueta for e in pub.etiqueta] 
+            
+            resultado.append({
+                "id_publicacion": pub.id_publicacion,
+                "titulo": pub.titulo,
+                "descripcion_corta": pub.descripcion[:150] + "..." if len(pub.descripcion) > 150 else pub.descripcion,
+                
+                "id_proveedor": pub.id_proveedor,
+                "nombre_proveedor": pub.proveedor_servicio.nombre_completo if pub.proveedor_servicio else "N/A",
+                "foto_perfil_proveedor": pub.proveedor_servicio.foto_perfil if pub.proveedor_servicio else None,
+                "calificacion_proveedor": pub.proveedor_servicio.calificacion_promedio if pub.proveedor_servicio else 0,
+                
+                "categoria": pub.categoria_servicio.nombre_categoria if pub.categoria_servicio else "Sin categoría",
+                "rango_precio_min": pub.rango_precio_min,
+                "rango_precio_max": pub.rango_precio_max,
+                "url_imagen_portada": url_portada, # <-- URL Temporal
+                # "etiquetas": etiquetas
+            })
+
+        return resultado
+
+    except Exception as e:
+        logger.error(f"Error al listar publicaciones: {e}")
+        raise HTTPException(status_code=500, detail="Error al obtener las publicaciones.")
