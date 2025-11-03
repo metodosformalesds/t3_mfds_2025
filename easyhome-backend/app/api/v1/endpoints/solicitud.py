@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
+from sqlalchemy.orm import joinedload
 from typing import List, Optional
 from datetime import datetime
 from app.core.database import get_db
@@ -157,35 +158,74 @@ def listar_solicitudes_admin(db: Session = Depends(get_db)):
     """
     Muestra todas las solicitudes de proveedores (pendientes, aprobadas, rechazadas).
     Solo debe ser consumido por un usuario Administrador.
+    AHORA INCLUYE URLs temporales (pre-firmadas) para ver las fotos de evidencia.
     """
     try:
-        # Query para traer todas las solicitudes y la información del usuario asociado
-        solicitudes = db.query(Proveedor_Servicio, Usuario.correo_electronico, Usuario.nombre, Usuario.numero_telefono)\
-            .join(Usuario, Proveedor_Servicio.id_proveedor == Usuario.id_usuario)\
+        # 1. Cargar solicitudes con sus relaciones (usuario y fotos)
+        # Usamos joinedload para cargar las relaciones de forma eficiente
+        solicitudes = db.query(Proveedor_Servicio)\
+            .options(
+                joinedload(Proveedor_Servicio.usuario),
+                joinedload(Proveedor_Servicio.foto_trabajo) # Cargar la relación a Foto_Trabajo_Anterior
+            )\
             .order_by(Proveedor_Servicio.fecha_solicitud.desc())\
             .all()
 
         resultado = []
-        for s, email, nombre, telefono in solicitudes:
+        
+        # Iterar sobre cada solicitud encontrada
+        for s in solicitudes:
+            
+            # 2. Generar URLs pre-firmadas para las fotos de CADA solicitud
+            fotos_con_urls = []
+            if s.foto_trabajo: # Si hay fotos asociadas
+                for foto in s.foto_trabajo:
+                    try:
+                        # foto.url_imagen contiene la S3 key (ej: "work-images/uuid.jpg")
+                        presigned_url = s3_service.get_presigned_url(
+                            object_name=foto.url_imagen,
+                            expiration=3600 # Damos 1 hora de validez
+                        )
+                        fotos_con_urls.append({
+                            "id_foto": foto.id_foto, # Asumiendo que el ID se llama id_foto (como en tu endpoint 4)
+                            "url_temporal": presigned_url,
+                            "descripcion": foto.descripcion
+                        })
+                    except Exception as e:
+                        logger.error(f"Error generando URL para foto {foto.url_imagen}: {e}")
+                        fotos_con_urls.append({
+                            "id_foto": foto.id_foto, # Asumiendo ID
+                            "url_temporal": None, # Indicar que falló
+                            "error": str(e)
+                        })
+
+            # 3. Construir el objeto JSON de respuesta para esta solicitud
             resultado.append({
                 "id_proveedor": s.id_proveedor,
                 "nombre_completo": s.nombre_completo,
-                "email_usuario": email,
-                "nombre_usuario": nombre,
-                "telefono_usuario": telefono, # Se añade el teléfono del usuario base
+                
+                # Datos del usuario (cargados con joinedload)
+                "email_usuario": s.usuario.correo_electronico if s.usuario else None,
+                "nombre_usuario": s.usuario.nombre if s.usuario else None,
+                "telefono_usuario": s.usuario.numero_telefono if s.usuario else None,
+                
                 "direccion": s.direccion,
                 "curp": s.curp,
                 "años_experiencia": s.años_experiencia,
                 "estado_solicitud": s.estado_solicitud,
                 "fecha_solicitud": s.fecha_solicitud,
                 "fecha_aprobacion": s.fecha_aprobacion,
-                "especializaciones": s.especializaciones
+                "especializaciones": s.especializaciones,
+                
+                # 4. Añadir la lista de fotos con sus URLs temporales
+                "fotos_evidencia": fotos_con_urls
             })
+            
         return resultado
+        
     except Exception as e:
         logger.error(f"Error al listar solicitudes de admin: {e}")
         raise HTTPException(status_code=500, detail="Error al obtener las solicitudes.")
-
 
 # =========================================================
 # 3️⃣ APROBAR O RECHAZAR SOLICITUD (ADMINISTRADOR)
