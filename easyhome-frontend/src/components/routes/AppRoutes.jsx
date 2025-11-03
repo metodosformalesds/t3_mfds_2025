@@ -6,6 +6,7 @@ import Auth from '../../pages/auth/Auth';
 import Unauthorized from '../../pages/auth/Unauthorized';
 import Subscriptions from '../../pages/Subscriptions';
 import Advertise from '../../pages/Advertise';
+import Postulate from '../../pages/Postulate';
 
 // Páginas de Cliente
 import ClienteDashboard from '../../pages/cliente/Dashboard';
@@ -22,6 +23,7 @@ import AdminDashboard from '../../pages/admin/AdminDashboard';
 import AdminCategories from '../../pages/admin/AdminCategories';
 import AdminUsuarios from '../../pages/admin/AdminUsuarios';
 import AdminReportes from '../../pages/admin/AdminReportes';
+import AdminSolicitudes from '../../pages/admin/AdminSolicitudes';
 
 const AppRoutes = () => {
   return (
@@ -33,6 +35,16 @@ const AppRoutes = () => {
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/subscriptions" element={<Subscriptions />} />
       <Route path="/advertise" element={<Advertise />} />
+      
+      {/* Ruta de postulación - Solo para clientes autenticados */}
+      <Route 
+        path="/postulate" 
+        element={
+          <ProtectedRoute allowedRoles={['Clientes']}>
+            <Postulate />
+          </ProtectedRoute>
+        } 
+      />
 
       {/* Rutas de Cliente (prioridad 1 - incluye Google) */}
       <Route 
@@ -116,6 +128,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['Admin']}>
             <AdminCategories />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/solicitudes" 
+        element={
+          <ProtectedRoute allowedRoles={['Admin']}>
+            <AdminSolicitudes />
           </ProtectedRoute>
         } 
       />

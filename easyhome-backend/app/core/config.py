@@ -38,6 +38,17 @@ class Settings(BaseSettings):
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = []
     
+    # AWS Cognito Configuration
+    AWS_REGION: str = "us-east-1"
+    AWS_ACCESS_KEY_ID: str | None = None
+    AWS_SECRET_ACCESS_KEY: str | None = None
+    COGNITO_USER_POOL_ID: str | None = None
+    COGNITO_DEFAULT_GROUP: str = "Clientes"
+    
+    # AWS S3 Configuration
+    S3_BUCKET_NAME: str
+    S3_REGION: str
+    
     class Config:
         env_file = os.path.join(BASE_DIR, ".env")
         case_sensitive = True

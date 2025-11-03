@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from 'react-oidc-context'
 import HeroSection from '../components/features/HeroSection'
 import Categories from '../components/features/Categories'
 import { Button } from '../components/ui'
@@ -8,6 +10,19 @@ import "../assets/styles/como_funciona.css"
 
 function Home() {
   const [count, setCount] = useState(0)
+  const navigate = useNavigate()
+  const auth = useAuth()
+
+  const handlePostulateClick = () => {
+    // Verificar si el usuario está autenticado
+    if (!auth.isAuthenticated) {
+      // Si no está autenticado, redirigir al login
+      navigate('/auth')
+    } else {
+      // Si está autenticado, ir a la página de postulación
+      navigate('/postulate')
+    }
+  }
 
   return (
     <>
@@ -122,7 +137,7 @@ function Home() {
             <Button 
               variant="primary" 
               size="medium"
-              onClick={() => window.location.href = '#'}
+              onClick={handlePostulateClick}
               className="cta-button"
             >
               Postúlate aquí
