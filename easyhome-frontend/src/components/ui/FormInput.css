@@ -9,6 +9,7 @@
   font-weight: 500;
   font-size: var(--font-size-small);
   font-family: var(--font-text);
+  text-align: left;
 }
 
 .required {
@@ -30,12 +31,11 @@
 
 .form-input:focus {
   outline: none;
-  border-color: var(--color-bg-medium);
-  box-shadow: 0 0 0 3px rgba(102, 187, 106, 0.2);
+  border-color: var(--color-primary);
 }
 
 .form-input:hover {
-  border-color: var(--color-bg-medium);
+  border-color: var(--color-primary);
 }
 
 .form-input::placeholder {
