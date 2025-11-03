@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from 'react-oidc-context';
-import { Button } from '../components/ui';
+import { Button, FormInput, FormSelect, FormTextarea } from '../components/ui';
 import usePostulacion from '../hooks/usePostulacion';
 import categoryService from '../services/categoryService';
 import '../assets/styles/postulate.css';
@@ -246,38 +246,26 @@ const Postulate = () => {
             <h2 className="section-title">Información Personal</h2>
 
             <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="curp">
-                  CURP <span className="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="curp"
-                  name="curp"
-                  value={formData.curp}
-                  onChange={handleInputChange}
-                  placeholder="CURP"
-                  maxLength={18}
-                  className="form-input"
-                  required
-                />
-              </div>
+              <FormInput
+                label="CURP"
+                name="curp"
+                type="text"
+                value={formData.curp}
+                onChange={handleInputChange}
+                placeholder="CURP"
+                maxLength={18}
+                required
+              />
 
-              <div className="form-group">
-                <label htmlFor="direccion">
-                  Dirección <span className="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="direccion"
-                  name="direccion"
-                  value={formData.direccion}
-                  onChange={handleInputChange}
-                  placeholder="Calle, Núm ext..."
-                  className="form-input"
-                  required
-                />
-              </div>
+              <FormInput
+                label="Dirección"
+                name="direccion"
+                type="text"
+                value={formData.direccion}
+                onChange={handleInputChange}
+                placeholder="Calle, Núm ext..."
+                required
+              />
             </div>
           </section>
 
@@ -286,41 +274,24 @@ const Postulate = () => {
             <h2 className="section-title">Información Profesional</h2>
 
             <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="anios_experiencia">
-                  Años de experiencia <span className="required">*</span>
-                </label>
-                <select
-                  id="anios_experiencia"
-                  name="anios_experiencia"
-                  value={formData.anios_experiencia}
-                  onChange={handleInputChange}
-                  className="form-select"
-                  required
-                >
-                  {experienciaOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <FormSelect
+                label="Años de experiencia"
+                name="anios_experiencia"
+                value={formData.anios_experiencia}
+                onChange={handleInputChange}
+                options={experienciaOptions}
+                required
+              />
 
-              <div className="form-group">
-                <label htmlFor="descripcion_servicios">
-                  Descripción de tus servicios <span className="required">*</span>
-                </label>
-                <textarea
-                  id="descripcion_servicios"
-                  name="descripcion_servicios"
-                  value={formData.descripcion_servicios}
-                  onChange={handleInputChange}
-                  placeholder="Escribe las habilidades, especialidades y qué te hace preferible frente a otros competidores..."
-                  className="form-textarea"
-                  rows={4}
-                  required
-                />
-              </div>
+              <FormTextarea
+                label="Descripción de tus servicios"
+                name="descripcion_servicios"
+                value={formData.descripcion_servicios}
+                onChange={handleInputChange}
+                placeholder="Escribe las habilidades, especialidades y qué te hace preferible frente a otros competidores..."
+                rows={4}
+                required
+              />
             </div>
 
             <div className="form-group">

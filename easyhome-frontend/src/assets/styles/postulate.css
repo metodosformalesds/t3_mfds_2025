@@ -109,6 +109,7 @@
   margin-bottom: 10px;
   padding-left: 10px;
   border-left: 4px solid #0b2f4a;
+  align-items: flex-start;
 }
 
 .form-row {
