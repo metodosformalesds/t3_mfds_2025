@@ -48,11 +48,7 @@ class ReseñaResponse(BaseModel):
 
 # Actualizar el perfil del cliente
 @router.put("/{id_cliente}", response_model=ClienteResponse)
-def actualizar_perfil_cliente(
-    id_cliente: int,
-    cliente_update: ClienteUpdate,
-    db: Session = Depends(get_db)
-):
+def actualizar_perfil_cliente(id_cliente: int, cliente_update: ClienteUpdate, db: Session = Depends(get_db)):
     cliente = db.query(Usuario).filter(Usuario.id_usuario == id_cliente, Usuario.rol == 'cliente').first()
     if not cliente:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
@@ -64,3 +60,12 @@ def actualizar_perfil_cliente(
     db.commit()
     db.refresh(cliente)
     return cliente
+
+# Obtener los servicios contratados por el cliente
+@router.get("/{id_cliente}/servicios", response_model=List[ServicioResponse])
+def obtener_servicios_contratados(id_cliente: int, db: Session = Depends(get_db)):
+    try:
+        servicios = db.query(Servicio_Contratado).filter(Servicio_Contratado.id_cliente == id_cliente).all()
+        return servicios    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al crear categoría: {str(e)}")
