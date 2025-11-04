@@ -232,3 +232,63 @@ def listar_publicaciones(
     except Exception as e:
         logger.error(f"Error al listar publicaciones: {e}")
         raise HTTPException(status_code=500, detail="Error al obtener las publicaciones.")
+    
+# =========================================================
+# 3️⃣ (NUEVO) OBTENER MIEMBROS PREMIUM
+# (Para la barra lateral)
+# =========================================================
+@router.get("/miembros-premium", response_model=None)
+def listar_miembros_premium(
+    limit: int = Query(3, description="Número de miembros a mostrar (default: 3)"),
+    db: Session = Depends(get_db)
+):
+    """
+    Obtiene una lista de los proveedores suscritos ("Premium"),
+    ordenados por la calificación más alta (RF-15)[cite: 402], 
+    para mostrar en la barra lateral[cite: 96].
+    """
+    try:
+        # 🔹 1. Query para buscar Proveedores Premium
+        # Hacemos 'join' con Usuario para verificar que la cuenta esté activa
+        query = db.query(Proveedor_Servicio)\
+            .join(Proveedor_Servicio.usuario)\
+            .filter(
+                # Tienen que tener un plan de suscripción (RF-15) 
+                Proveedor_Servicio.id_plan_suscripcion != None, 
+                # Tienen que estar 'aprobados'
+                Proveedor_Servicio.estado_solicitud == 'aprobado',
+                # Y su cuenta de 'usuario' debe estar 'activa' [cite: 451]
+                Usuario.estado_cuenta == 'activo'
+            )\
+            .order_by(
+                # Ordenar por mejor calificación (RF-15) 
+                Proveedor_Servicio.calificacion_promedio.desc().nullslast()
+            )\
+            .limit(limit) # Limitar a los 3 (o N) primeros
+
+        proveedores_premium = query.all()
+
+        # 🔹 2. Construir respuesta con URLs pre-firmadas
+        resultado = []
+        for prov in proveedores_premium:
+            url_foto = None
+            # Generar URL pre-firmada para la foto de perfil
+            if prov.foto_perfil:
+                try:
+                    # Asumimos que foto_perfil es una S3 key
+                    url_foto = s3_service.get_presigned_url(prov.foto_perfil)
+                except Exception as e:
+                    logger.error(f"Error S3 URL para foto de perfil {prov.foto_perfil}: {e}")
+            
+            resultado.append({
+                "id_proveedor": prov.id_proveedor,
+                "nombre_completo": prov.nombre_completo,
+                "calificacion_promedio": prov.calificacion_promedio,
+                "foto_perfil_url": url_foto # URL Temporal
+            })
+            
+        return resultado
+
+    except Exception as e:
+        logger.error(f"Error al obtener miembros premium: {e}")
+        raise HTTPException(status_code=500, detail="Error al obtener miembros premium.")
