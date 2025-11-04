@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from app.api.v1.endpoints import example
+from fastapi.middleware.cors import CORSMiddleware
+from app.api.v1.endpoints import example, auth, categories, solicitud
 
 app = FastAPI(
     title="EasyHome Backend API",
@@ -7,7 +8,19 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Configurar CORS para permitir peticiones desde el frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "https://d84l1y8p4kdic.cloudfront.net"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(example.router, prefix="/api/v1")
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
+app.include_router(categories.router, prefix="/api/v1/categories", tags=["Categories"])
+app.include_router(solicitud.router, prefix="/api/v1")  # El prefix ya está definido en el router como "/solicitudes"
 
 @app.get("/")
 def root():
