@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from app.core.database import get_db
 from app.models import Usuario, Servicio_Contratado, Reseña_Servicio 
 
-router = APIRouter()
+router = APIRouter(prefix="/Perfil_Cliente", tags=["Perfil Cliente"])
 
 class ClienteUpdate(BaseModel):
     nombre: str | None = None
@@ -45,3 +45,22 @@ class ReseñaResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+# Actualizar el perfil del cliente
+@router.put("/{id_cliente}", response_model=ClienteResponse)
+def actualizar_perfil_cliente(
+    id_cliente: int,
+    cliente_update: ClienteUpdate,
+    db: Session = Depends(get_db)
+):
+    cliente = db.query(Usuario).filter(Usuario.id_usuario == id_cliente, Usuario.rol == 'cliente').first()
+    if not cliente:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+
+    for var, value in vars(cliente_update).items():
+        if value is not None:
+            setattr(cliente, var, value)
+
+    db.commit()
+    db.refresh(cliente)
+    return cliente
