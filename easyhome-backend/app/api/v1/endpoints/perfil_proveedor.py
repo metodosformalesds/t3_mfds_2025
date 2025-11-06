@@ -8,11 +8,17 @@ from typing import List
 
 # --- Imports de Modelos y Esquemas ---
 # Asegúrate que estas rutas coincidan con tu proyecto
-from app.schemas.proveedor import ProveedorPerfilAboutSchema, PublicacionServicioSchema, ImagenPublicacionSchema
-from app.models.reseña_servicio import Reseña_Servicio
+from app.schemas.proveedor import (
+    ProveedorPerfilAboutSchema, 
+    PublicacionServicioSchema, 
+    ImagenPublicacionSchema,
+    ReseñaPublicaSchema  # <-- Import para Endpoint 4
+)
 from app.models.user import Proveedor_Servicio, Usuario
 from app.models.property import Publicacion_Servicio, Imagen_Publicacion
 from app.models.servicio_contratado import Servicio_Contratado
+from app.models.reseña_servicio import Reseña_Servicio
+from app.models.imagen_reseña import Imagen_Reseña  # <-- Import para Endpoint 4
 from app.core.database import get_db 
 
 router = APIRouter(
@@ -55,13 +61,9 @@ def get_perfil_about(id_proveedor: int, db: Session = Depends(get_db)):
         años_activo = int(delta.days / 365.25)
 
     # 4. Construir la respuesta (Forma limpia)
-    # Añadimos los campos calculados directamente al objeto SQLAlchemy
     proveedor.total_reseñas = total_reseñas
     proveedor.años_activo = años_activo
 
-    # Retornamos el objeto 'proveedor' directamente.
-    # Pydantic (con from_attributes=True) se encargará de mapear
-    # tanto 'proveedor' como su relación 'proveedor.usuario'.
     return proveedor
 
 # -----------------------------------------------------------------
@@ -78,7 +80,7 @@ def get_perfil_servicios(id_proveedor: int, db: Session = Depends(get_db)):
     para CADA publicación.
     """
 
-    # 1. Subconsulta... (Esta parte está perfecta)
+    # 1. Subconsulta...
     subquery_agregados = db.query(
         Servicio_Contratado.id_publicacion,
         cast(
@@ -94,7 +96,7 @@ def get_perfil_servicios(id_proveedor: int, db: Session = Depends(get_db)):
 
     agregados = aliased(subquery_agregados, name="agregados")
 
-    # 2. Consulta Principal... (Esta parte está perfecta)
+    # 2. Consulta Principal...
     query_results = (
         db.query(
             Publicacion_Servicio,
@@ -109,17 +111,13 @@ def get_perfil_servicios(id_proveedor: int, db: Session = Depends(get_db)):
         .all()
     )
 
-    # 3. Construir la Respuesta (¡CORREGIDO!)
+    # 3. Construir la Respuesta
     lista_publicaciones = []
     for publicacion, avg_rating, count_reviews in query_results:
         
-        # --- ESTA ES LA FORMA CORRECTA ---
-        # Añade los campos calculados directamente al objeto SQLAlchemy
         publicacion.calificacion_promedio_publicacion = avg_rating
-        publicacion.total_reseñas_publicacion = count_reviews or 0 # Si es None, pone 0
+        publicacion.total_reseñas_publicacion = count_reviews or 0
         
-        # Añade el objeto completo. Pydantic lo mapeará.
-        # Esto SÍ incluirá 'imagen_publicacion'
         lista_publicaciones.append(publicacion)
 
     return lista_publicaciones
@@ -137,19 +135,40 @@ def get_perfil_portafolio(id_proveedor: int, db: Session = Depends(get_db)):
     publicaciones activas de un proveedor.
     """
     
-    # 1. Consulta:
-    # Buscamos todas las 'Imagen_Publicacion'
-    # uniéndolas con 'Publicacion_Servicio'
-    # para poder filtrar por 'id_proveedor'.
     fotos = (
         db.query(Imagen_Publicacion)
         .join(Publicacion_Servicio, Publicacion_Servicio.id_publicacion == Imagen_Publicacion.id_publicacion)
         .filter(Publicacion_Servicio.id_proveedor == id_proveedor)
-        .filter(Publicacion_Servicio.estado == "activo") # Opcional: solo fotos de pubs activas
-        .order_by(Imagen_Publicacion.fecha_subida.desc()) # Ordenar por más nuevas
+        .filter(Publicacion_Servicio.estado == "activo")
+        .order_by(Imagen_Publicacion.fecha_subida.desc())
         .all()
     )
     
-    # 2. Retorno:
-    # Pydantic (response_model) se encarga de formatear la lista
     return fotos
+
+# -----------------------------------------------------------------
+# --- Endpoint 4: Pestaña "Reseñas" (AÑADIDO) ---
+# -----------------------------------------------------------------
+@router.get(
+    "/{id_proveedor}/reseñas",
+    response_model=List[ReseñaPublicaSchema]
+)
+def get_perfil_reseñas(id_proveedor: int, db: Session = Depends(get_db)):
+    """
+    Obtiene la lista de todas las reseñas que ha recibido
+    un proveedor, incluyendo las imágenes adjuntas y el
+    nombre del cliente.
+    """
+    reseñas = (
+        db.query(Reseña_Servicio)
+        .options(
+            joinedload(Reseña_Servicio.usuario), # Para el nombre del cliente
+            joinedload(Reseña_Servicio.servicio_contratado), # Para la fecha
+            joinedload(Reseña_Servicio.imagen_reseña) # Para las fotos
+        )
+        .filter(Reseña_Servicio.id_proveedor == id_proveedor)
+        .filter(Reseña_Servicio.estado == "activa") # Solo reseñas activas
+        .order_by(Reseña_Servicio.fecha_reseña.desc()) # Más nuevas primero
+        .all()
+    )
+    return reseñas
