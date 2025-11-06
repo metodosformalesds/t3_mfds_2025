@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from app.core.database import get_db
-from app.models.user import Usuario
+from app.models.user import Usuario, Proveedor_Servicio
 from app.services.cognito_service import cognito_service
 import logging
 
@@ -101,13 +101,21 @@ def sync_cognito_user(user_data: CognitoUserSync, db: Session = Depends(get_db))
 def get_user_info(email: str, db: Session = Depends(get_db)):
     """
     Obtiene información del usuario por email.
+    Incluye id_proveedor si el usuario es un trabajador aprobado.
     """
     user = db.query(Usuario).filter(Usuario.correo_electronico == email).first()
     
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
-    return {
+    # Buscar si el usuario tiene un perfil de proveedor aprobado
+    # id_proveedor es FK de id_usuario, por lo que buscamos por id_proveedor directamente
+    proveedor = db.query(Proveedor_Servicio).filter(
+        Proveedor_Servicio.id_proveedor == user.id_usuario,
+        Proveedor_Servicio.estado_solicitud == "aprobado"
+    ).first()
+    
+    response = {
         "id_usuario": user.id_usuario,
         "nombre": user.nombre,
         "correo_electronico": user.correo_electronico,
@@ -116,5 +124,8 @@ def get_user_info(email: str, db: Session = Depends(get_db)):
         "tipo_usuario": user.tipo_usuario,
         "estado_cuenta": user.estado_cuenta,
         "fecha_registro": user.fecha_registro,
-        "ultima_sesion": user.ultima_sesion
+        "ultima_sesion": user.ultima_sesion,
+        "id_proveedor": proveedor.id_proveedor if proveedor else None
     }
+    
+    return response
