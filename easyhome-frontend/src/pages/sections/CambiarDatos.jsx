@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { FormInput } from '../../components/ui';
+import '../../assets/styles/CambiarDatos.css';
 
 function CambiarDatos({ userData, splitName, calculateAge }) {
   const { nombres: nombresIniciales, apellidos: apellidosIniciales } = splitName(userData.nombre);
@@ -10,13 +12,12 @@ function CambiarDatos({ userData, splitName, calculateAge }) {
     apellidos: apellidosIniciales,
     edad: edadCalculada || '',
     telefono: userData.numero_telefono || '',
-    email: userData.correo_electronico || '',
-    fotoPerfil: null
+    email: userData.correo_electronico || ''
   });
 
-  const [fotoPreview, setFotoPreview] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const [mensaje, setMensaje] = useState(null);
+  const [modoEdicion, setModoEdicion] = useState(false);
 
   useEffect(() => {
     const { nombres, apellidos } = splitName(userData.nombre);
@@ -35,20 +36,6 @@ function CambiarDatos({ userData, splitName, calculateAge }) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData(prev => ({ ...prev, fotoPerfil: file }));
-      
-      // Preview de la imagen
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFotoPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setGuardando(true);
@@ -60,11 +47,31 @@ function CambiarDatos({ userData, splitName, calculateAge }) {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       setMensaje({ type: 'success', text: 'Datos actualizados correctamente' });
+      setModoEdicion(false); // Volver a modo lectura después de guardar
     } catch (error) {
       setMensaje({ type: 'error', text: 'Error al guardar los datos' });
     } finally {
       setGuardando(false);
     }
+  };
+
+  const handleEditar = () => {
+    setModoEdicion(true);
+    setMensaje(null);
+  };
+
+  const handleCancelar = () => {
+    // Restaurar los valores originales
+    const { nombres, apellidos } = splitName(userData.nombre);
+    setFormData({
+      nombres,
+      apellidos,
+      edad: calculateAge(userData.fecha_nacimiento) || '',
+      telefono: userData.numero_telefono || '',
+      email: userData.correo_electronico || ''
+    });
+    setModoEdicion(false);
+    setMensaje(null);
   };
 
   const handleCambiarContrasena = () => {
@@ -74,7 +81,7 @@ function CambiarDatos({ userData, splitName, calculateAge }) {
 
   return (
     <div className="cambiar-datos-container">
-      <h2>Cambiar Datos</h2>
+      <h2>Datos Personales</h2>
 
       {mensaje && (
         <div className={`mensaje ${mensaje.type}`}>
@@ -84,44 +91,54 @@ function CambiarDatos({ userData, splitName, calculateAge }) {
 
       <form onSubmit={handleSubmit} className="datos-form">
         <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="nombres">Nombres *</label>
-            <input
-              type="text"
-              id="nombres"
+          {modoEdicion ? (
+            <FormInput
+              label="Nombres"
               name="nombres"
               value={formData.nombres}
               onChange={handleInputChange}
               placeholder="Pon aquí tus nombres..."
               required
             />
-          </div>
+          ) : (
+            <div className="form-group">
+              <label>Nombres</label>
+              <div className="field-value">{formData.nombres || 'No especificado'}</div>
+            </div>
+          )}
 
-          <div className="form-group">
-            <label htmlFor="apellidos">Apellido</label>
-            <input
-              type="text"
-              id="apellidos"
+          {modoEdicion ? (
+            <FormInput
+              label="Apellido"
               name="apellidos"
               value={formData.apellidos}
               onChange={handleInputChange}
               placeholder="Pon aquí tu apellido..."
             />
-          </div>
+          ) : (
+            <div className="form-group">
+              <label>Apellido</label>
+              <div className="field-value">{formData.apellidos || 'No especificado'}</div>
+            </div>
+          )}
 
-          <div className="form-group">
-            <label htmlFor="edad">Edad</label>
-            <input
-              type="number"
-              id="edad"
+          {modoEdicion ? (
+            <FormInput
+              label="Edad"
               name="edad"
+              type="number"
               value={formData.edad}
               onChange={handleInputChange}
               placeholder="Pon aquí tu edad..."
               min="18"
               max="120"
             />
-          </div>
+          ) : (
+            <div className="form-group">
+              <label>Edad</label>
+              <div className="field-value">{formData.edad || 'No especificado'} años</div>
+            </div>
+          )}
         </div>
 
         <div className="form-row">
@@ -137,37 +154,34 @@ function CambiarDatos({ userData, splitName, calculateAge }) {
               </button>
             </div>
           </div>
-
-          <div className="form-group">
-            <label htmlFor="fotoPerfil">Foto de perfil</label>
-            <div className="foto-input-container">
-              <input
-                type="file"
-                id="fotoPerfil"
-                name="fotoPerfil"
-                onChange={handleFotoChange}
-                accept="image/*"
-                className="foto-input"
-              />
-              <label htmlFor="fotoPerfil" className="foto-label">
-                {fotoPreview ? (
-                  <img src={fotoPreview} alt="Preview" className="foto-preview" />
-                ) : (
-                  <>
-                    <i className="icon">📁</i>
-                    <span>Fotodeperfil1.jpg</span>
-                  </>
-                )}
-              </label>
-            </div>
-          </div>
         </div>
 
         <div className="form-actions">
-          <button type="submit" className="btn-guardar" disabled={guardando}>
-            {guardando ? 'Guardando...' : 'GUARDAR'}
-            <i className="icon">💾</i>
-          </button>
+          {modoEdicion ? (
+            <>
+              <button 
+                type="button" 
+                className="btn-cancelar" 
+                onClick={handleCancelar}
+                disabled={guardando}
+              >
+                Cancelar
+              </button>
+              <button type="submit" className="btn-guardar" disabled={guardando}>
+                {guardando ? 'Guardando...' : 'GUARDAR'}
+                <i className="icon">💾</i>
+              </button>
+            </>
+          ) : (
+            <button 
+              type="button" 
+              className="btn-editar" 
+              onClick={handleEditar}
+            >
+              Editar
+              <i className="icon">✏️</i>
+            </button>
+          )}
         </div>
       </form>
     </div>
