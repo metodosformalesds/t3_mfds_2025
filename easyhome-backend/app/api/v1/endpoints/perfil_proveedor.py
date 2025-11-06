@@ -8,16 +8,16 @@ from typing import List
 
 # --- Imports de Modelos y Esquemas ---
 # Asegúrate que estas rutas coincidan con tu proyecto
-from app.schemas.proveedor import ProveedorPerfilAboutSchema, PublicacionServicioSchema
+from app.schemas.proveedor import ProveedorPerfilAboutSchema, PublicacionServicioSchema, ImagenPublicacionSchema
 from app.models.reseña_servicio import Reseña_Servicio
 from app.models.user import Proveedor_Servicio, Usuario
 from app.models.property import Publicacion_Servicio, Imagen_Publicacion
 from app.models.servicio_contratado import Servicio_Contratado
-from app.core.database import get_db  # Asumo que esta es la ruta a tu 'get_db'
+from app.core.database import get_db 
 
 router = APIRouter(
     prefix="/proveedores",
-    tags=["Perfil Proveedor"]  # Etiqueta para la documentación de Swagger
+    tags=["Perfil Proveedor"]  
 )
 
 # -----------------------------------------------------------------
@@ -123,3 +123,33 @@ def get_perfil_servicios(id_proveedor: int, db: Session = Depends(get_db)):
         lista_publicaciones.append(publicacion)
 
     return lista_publicaciones
+
+# -----------------------------------------------------------------
+# --- Endpoint 3: Pestaña "Portafolio" ---
+# -----------------------------------------------------------------
+@router.get(
+    "/{id_proveedor}/portafolio",
+    response_model=List[ImagenPublicacionSchema] # Devuelve una lista de imágenes
+)
+def get_perfil_portafolio(id_proveedor: int, db: Session = Depends(get_db)):
+    """
+    Obtiene una galería de todas las imágenes de todas las
+    publicaciones activas de un proveedor.
+    """
+    
+    # 1. Consulta:
+    # Buscamos todas las 'Imagen_Publicacion'
+    # uniéndolas con 'Publicacion_Servicio'
+    # para poder filtrar por 'id_proveedor'.
+    fotos = (
+        db.query(Imagen_Publicacion)
+        .join(Publicacion_Servicio, Publicacion_Servicio.id_publicacion == Imagen_Publicacion.id_publicacion)
+        .filter(Publicacion_Servicio.id_proveedor == id_proveedor)
+        .filter(Publicacion_Servicio.estado == "activo") # Opcional: solo fotos de pubs activas
+        .order_by(Imagen_Publicacion.fecha_subida.desc()) # Ordenar por más nuevas
+        .all()
+    )
+    
+    # 2. Retorno:
+    # Pydantic (response_model) se encarga de formatear la lista
+    return fotos
