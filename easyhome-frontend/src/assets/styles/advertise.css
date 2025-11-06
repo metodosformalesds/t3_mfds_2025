@@ -1,0 +1,304 @@
+/* ========================================================================= */
+/* --- ESTILOS DE LA SECCIÓN DE TARJETAS (PRICING CARDS) --- */
+/* ========================================================================= */
+.pricing-section {
+    padding: 60px 20px;
+    text-align: center;
+    font-family: 'Nunito Sans', sans-serif;
+    background-color: white; 
+}
+
+.pricing-title {
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.pricing-subtitle {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 40px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+/* --- Contenedor de Tarjetas (Flexbox) --- */
+.pricing-cards-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* --- Estilos Base de Cada Tarjeta (Uniforme) --- */
+.pricing-card {
+    flex: 1 1 300px; 
+    padding: 30px;
+    border-radius: 10px;
+    
+    background-color: white; 
+    border: 1px solid #ddd; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    
+    /* Transición para el efecto hover suave */
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; 
+}
+
+/* --- EFECTO HOVER: Se aplica a TODAS las tarjetas --- */
+.pricing-card:hover {
+    background-color: #ccd7de; 
+    border-color: #ccd7de;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-plan-name {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #333;
+    text-align: left;
+}
+
+.card-divider {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 0 0 20px 0;
+}
+
+.card-price {
+    font-size: 30px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.price-currency {
+    font-size: 18px;
+    font-weight: 400;
+    color: #555;
+}
+
+/* --- Estilos de la Lista de Características --- */
+.card-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 30px 0;
+    text-align: left;
+    flex-grow: 1; 
+}
+
+.feature {
+    font-size: 15px;
+    color: #555;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    padding-left: 25px; 
+    position: relative;
+}
+
+/* --- Estilos de Íconos (usando caracteres Unicode) --- */
+.feature.check::before {
+    content: '✓'; 
+    color: #4CAF50; 
+    font-size: 18px;
+    font-weight: 900;
+    position: absolute;
+    left: 0;
+}
+
+.feature.cross::before {
+    content: '✕'; 
+    color: #F44336;
+    font-size: 16px;
+    font-weight: 900;
+    position: absolute;
+    left: 0;
+}
+
+/* --- Estilos del Botón --- */
+.card-button {
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: 600;
+    display: block; 
+    text-align: center;
+    
+    /* Estilo uniforme para todos los botones: Borde Azul, Fondo Blanco */
+    background-color: white;
+    color: #0b2f4a; 
+    border: 1px solid #0b2f4a;
+    transition: all 0.3s ease;
+}
+
+.card-button:hover {
+    background-color: #0b2f4a;
+    color: white;
+}
+
+/* --- Adaptación Responsiva --- */
+@media (max-width: 992px) {
+    .pricing-cards-container {
+        flex-wrap: wrap; 
+    }
+
+    .pricing-card {
+        flex: 1 1 45%; 
+    }
+}
+
+@media (max-width: 600px) {
+    .pricing-card {
+        flex: 1 1 100%; 
+    }
+}
+
+
+/* ========================================================================= */
+/* --- ESTILOS DE LA TABLA DE COMPARACIÓN (COMPARISON GRID) --- */
+/* ========================================================================= */
+
+.comparison-section {
+    padding: 60px 20px;
+    margin-top: 150px; /* Puedes ajustar este valor (ej: 50px, 100px) */
+    text-align: center;
+    font-family: 'Nunito Sans', sans-serif;
+    background-color: white; 
+}
+
+.comparison-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 40px; 
+    margin-top: 60px;
+    margin-bottom: 40px;
+    color: #333;
+}
+
+/* --- Estructura Principal (Grid) --- */
+.comparison-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr; 
+}
+
+/* --- Estilos de la Fila de Cabecera (ACTUALIZADO: 4 columnas iguales) --- */
+.plan-header-row {
+    display: grid;
+    /* 4 columnas IGUALES (1fr) para Características + 3 Planes */
+    grid-template-columns: repeat(4, 1fr); 
+    align-items: end;
+    text-align: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* 🚫 ELIMINADO: Ya no se necesita el estilo para la etiqueta 'Más Popular' */
+.popular-tag {
+    display: none; 
+}
+
+.plan-column {
+    padding: 10px;
+    position: relative;
+
+    margin: 0 -1px; 
+    z-index: 10;
+}
+
+
+.plan-name {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.plan-tagline {
+    font-size: 14px;
+    color: #888;
+    min-height: 40px; 
+    margin-bottom: 15px;
+}
+
+/* --- Estilo del Botón (Similar al de los planes anteriores) --- */
+.plan-button {
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: 600;
+    display: inline-block; 
+    background-color: #0b2f4a;
+    color: white; 
+    transition: background-color 0.3s ease;
+}
+
+.plan-button:hover {
+    background-color: #051a28;
+}
+
+/* --- Estilos de la Fila de Características (Cuerpo de la Tabla) --- */
+.characteristics-name {
+    padding: 10px 0;
+    text-align: left;
+}
+
+.characteristics-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    margin-top: 30px;
+}
+
+.comparison-feature-row {
+    display: grid;
+    /* 4 columnas IGUALES (1fr) para las filas de verificación */
+    grid-template-columns: repeat(4, 1fr); 
+    align-items: center;
+    border-top: 1px solid #f0f0f0;
+    padding: 15px 0;
+    text-align: center;
+}
+
+.feature-label {
+    text-align: left;
+    color: #555;
+    font-size: 15px;
+}
+
+/* --- Íconos de Verificación/Cruz (Usando ::before para mayor control) --- */
+.plan-check {
+    display: block;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.plan-check.check::before {
+    content: '✓'; 
+    color: #4CAF50; /* Verde */
+}
+
+.plan-check.cross::before {
+    content: '✕'; 
+    color: #F44336; /* Rojo */
+}
+
+/* --- Responsive: Adaptación simple para móviles --- */
+@media (max-width: 768px) {
+    .plan-header-row, .comparison-feature-row {
+        /* Mantenemos el grid, pero forzamos el desbordamiento si es necesario */
+        grid-template-columns: 100px repeat(3, 1fr); 
+        overflow-x: auto;
+    }
+}

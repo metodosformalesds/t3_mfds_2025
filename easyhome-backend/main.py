@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1.endpoints import example, auth, categories, solicitud, publicacion
+from app.api.v1.endpoints import example, auth, categories, solicitud, publicacion, perfil_proveedor
 
 app = FastAPI(
     title="EasyHome Backend API",
@@ -20,8 +20,9 @@ app.add_middleware(
 app.include_router(example.router, prefix="/api/v1")
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(categories.router, prefix="/api/v1/categories", tags=["Categories"])
-app.include_router(solicitud.router, prefix="/api/v1")  # El prefix ya está definido en el router como "/solicitudes"
 app.include_router(publicacion.router, prefix="/api/v1", tags=["Publicaciones"])
+app.include_router(solicitud.router, prefix="/api/v1") 
+app.include_router(perfil_proveedor.router, prefix="/api/v1")
 
 @app.get("/")
 def root():

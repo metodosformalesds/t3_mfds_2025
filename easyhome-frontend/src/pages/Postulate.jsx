@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from 'react-oidc-context';
-import { Button } from '../components/ui';
+import { Button, FormInput, FormSelect, FormTextarea, ServiceCheckboxGroup } from '../components/ui';
 import usePostulacion from '../hooks/usePostulacion';
 import categoryService from '../services/categoryService';
 import '../assets/styles/postulate.css';
@@ -34,30 +34,9 @@ const Postulate = () => {
     const fetchCategorias = async () => {
       try {
         const data = await categoryService.getAll();
-        console.log('Categorías cargadas:', data);
-        console.log('Primera categoría:', data[0]);
-        console.log('Estructura de la primera categoría:', JSON.stringify(data[0], null, 2));
         
         // Verificar si data es un array
         if (Array.isArray(data)) {
-          // Verificar que todas las categorías tengan un ID único
-          const idsUnicos = new Set(data.map(cat => cat.id_categoria || cat.id));
-          console.log('IDs únicos:', Array.from(idsUnicos));
-          console.log('Total categorías:', data.length);
-          console.log('Total IDs únicos:', idsUnicos.size);
-          
-          if (idsUnicos.size !== data.length) {
-            console.warn('Advertencia: Hay categorías con IDs duplicados');
-          }
-          
-          // Verificar nombres
-          data.forEach((cat, idx) => {
-            console.log(`Categoría ${idx}:`, { 
-              id: cat.id_categoria || cat.id, 
-              nombre: cat.nombre_categoria || cat.nombre
-            });
-          });
-          
           setCategorias(data);
           setErrorCategorias(null);
         } else {
@@ -96,7 +75,6 @@ const Postulate = () => {
 
   // Manejar selección de servicios (checkboxes) - Ahora guarda nombres
   const handleServicioToggle = (categoriaNombre) => {
-    console.log('Toggle servicio nombre:', categoriaNombre);
     setFormData(prev => {
       const serviciosActuales = prev.servicios_ofrece;
       const yaSeleccionado = serviciosActuales.includes(categoriaNombre);
@@ -104,9 +82,6 @@ const Postulate = () => {
       const nuevosServicios = yaSeleccionado
         ? serviciosActuales.filter(nombre => nombre !== categoriaNombre)
         : [...serviciosActuales, categoriaNombre];
-      
-      console.log('Servicios actuales:', serviciosActuales);
-      console.log('Nuevos servicios:', nuevosServicios);
       
       return {
         ...prev,
@@ -246,38 +221,26 @@ const Postulate = () => {
             <h2 className="section-title">Información Personal</h2>
 
             <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="curp">
-                  CURP <span className="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="curp"
-                  name="curp"
-                  value={formData.curp}
-                  onChange={handleInputChange}
-                  placeholder="CURP"
-                  maxLength={18}
-                  className="form-input"
-                  required
-                />
-              </div>
+              <FormInput
+                label="CURP"
+                name="curp"
+                type="text"
+                value={formData.curp}
+                onChange={handleInputChange}
+                placeholder="CURP"
+                maxLength={18}
+                required
+              />
 
-              <div className="form-group">
-                <label htmlFor="direccion">
-                  Dirección <span className="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="direccion"
-                  name="direccion"
-                  value={formData.direccion}
-                  onChange={handleInputChange}
-                  placeholder="Calle, Núm ext..."
-                  className="form-input"
-                  required
-                />
-              </div>
+              <FormInput
+                label="Dirección"
+                name="direccion"
+                type="text"
+                value={formData.direccion}
+                onChange={handleInputChange}
+                placeholder="Calle, Núm ext..."
+                required
+              />
             </div>
           </section>
 
@@ -286,85 +249,41 @@ const Postulate = () => {
             <h2 className="section-title">Información Profesional</h2>
 
             <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="anios_experiencia">
-                  Años de experiencia <span className="required">*</span>
-                </label>
-                <select
-                  id="anios_experiencia"
-                  name="anios_experiencia"
-                  value={formData.anios_experiencia}
-                  onChange={handleInputChange}
-                  className="form-select"
-                  required
-                >
-                  {experienciaOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <FormSelect
+                label="Años de experiencia"
+                name="anios_experiencia"
+                value={formData.anios_experiencia}
+                onChange={handleInputChange}
+                options={experienciaOptions}
+                required
+              />
 
-              <div className="form-group">
-                <label htmlFor="descripcion_servicios">
-                  Descripción de tus servicios <span className="required">*</span>
-                </label>
-                <textarea
-                  id="descripcion_servicios"
-                  name="descripcion_servicios"
-                  value={formData.descripcion_servicios}
-                  onChange={handleInputChange}
-                  placeholder="Escribe las habilidades, especialidades y qué te hace preferible frente a otros competidores..."
-                  className="form-textarea"
-                  rows={4}
-                  required
-                />
-              </div>
+              <FormTextarea
+                label="Descripción de tus servicios"
+                name="descripcion_servicios"
+                value={formData.descripcion_servicios}
+                onChange={handleInputChange}
+                placeholder="Escribe las habilidades, especialidades y qué te hace preferible frente a otros competidores..."
+                rows={4}
+                required
+              />
             </div>
 
-            <div className="form-group">
-              <label className="services-label">
-                Servicios que ofreces <span className="required">*</span>
-              </label>
-              <p className="help-text">Selecciona todos los que apliquen</p>
-              
-              <div className="services-grid">
-                {loadingCategorias ? (
-                  <p>Cargando servicios...</p>
-                ) : errorCategorias ? (
-                  <div className="alert alert-error">
-                    <p>Error al cargar servicios: {errorCategorias}</p>
-                    <p style={{ fontSize: '12px', marginTop: '5px' }}>
-                      Verifica que el backend esté corriendo y que el endpoint /api/v1/categories/ esté disponible.
-                    </p>
-                  </div>
-                ) : categorias.length > 0 ? (
-                  categorias.map((categoria, index) => {
-                    const categoriaId = categoria.id_categoria || categoria.id;
-                    const categoriaNombre = categoria.nombre_categoria || categoria.nombre || categoria.name || 'Sin nombre';
-                    
-                    return (
-                      <div key={categoriaId || `categoria-${index}`} className="service-checkbox">
-                        <input
-                          type="checkbox"
-                          id={`servicio-${categoriaId || index}`}
-                          name={`servicio-${categoriaId || index}`}
-                          value={categoriaNombre}
-                          checked={formData.servicios_ofrece.includes(categoriaNombre)}
-                          onChange={() => handleServicioToggle(categoriaNombre)}
-                        />
-                        <label htmlFor={`servicio-${categoriaId || index}`} className="checkbox-label">
-                          {categoriaNombre}
-                        </label>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <p>No hay servicios disponibles. Por favor contacta al administrador.</p>
-                )}
-              </div>
-            </div>
+            <ServiceCheckboxGroup
+              label="Servicios que ofreces"
+              helpText="Selecciona todos los que apliquen"
+              required={true}
+              options={categorias.map((categoria) => ({
+                id: categoria.id_categoria || categoria.id,
+                value: categoria.nombre_categoria || categoria.nombre || categoria.name || 'Sin nombre',
+                label: categoria.nombre_categoria || categoria.nombre || categoria.name || 'Sin nombre',
+              }))}
+              selectedValues={formData.servicios_ofrece}
+              onChange={handleServicioToggle}
+              loading={loadingCategorias}
+              error={errorCategorias}
+              columns="auto"
+            />
           </section>
 
           {/* Sección: Evidencia Fotográfica */}
