@@ -4,6 +4,9 @@ import { useUserProfile } from "../hooks/useUserProfile";
 import { useUserCapabilities } from "../hooks/useUserCapabilities";
 import "../assets/styles/Perfil.css";
 import "../assets/styles/sections/CambiarDatos.css";
+import "../assets/styles/sections/AcercaDe.css";
+import "../assets/styles/sections/MisServicios.css";
+import "../assets/styles/sections/Portafolio.css";
 
 // Componentes de las secciones
 import CambiarDatos from './sections/CambiarDatos';
@@ -81,11 +84,11 @@ function Perfil() {
       case 'resenasRealizadas':
         return <ResenasRealizadas />;
       case 'acercaDe':
-        return <AcercaDe userData={userData} />;
+        return <AcercaDe idProveedor={userData.id_proveedor} />;
       case 'misServicios':
-        return <MisServicios />;
+        return <MisServicios idProveedor={userData.id_proveedor} />;
       case 'portafolio':
-        return <Portafolio />;
+        return <Portafolio idProveedor={userData.id_proveedor} />;
       case 'resenas':
         return <Resenas />;
       case 'servicios':
