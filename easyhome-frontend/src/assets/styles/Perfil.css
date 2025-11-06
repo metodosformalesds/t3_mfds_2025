@@ -3,7 +3,7 @@
 .perfil-container {
   display: flex;
   min-height: 100vh;
-  background: var(--color-bg-soft);
+  background: var(--color-white);
   font-family: var(--font-text);
   gap: 2rem;
   padding: 2rem;
@@ -84,6 +84,14 @@
   gap: 1.5rem;
 }
 
+.perfil-avatar-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .perfil-avatar {
   width: 120px;
   height: 120px;
@@ -96,6 +104,28 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.edit-photo-btn {
+  background: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(22, 57, 79, 0.2);
+}
+
+.edit-photo-btn:hover {
+  background: var(--color-primary-dark);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(22, 57, 79, 0.3);
 }
 
 .perfil-nombre {
@@ -173,7 +203,7 @@
   align-items: center;
   gap: 0.75rem;
   font-size: var(--font-size-small);
-  color: var(--color-tertiary);
+  color: var(--color-white);
 }
 
 .contact-item .icon,
@@ -193,33 +223,35 @@
 /* Tabs Navigation */
 .perfil-tabs {
   display: flex;
-  background: var(--color-bg-light);
-  border-bottom: 2px solid var(--color-primary);
+  justify-content: center;
+  background: var(--color-bg-white);
+  border-bottom: none;
+  gap: 0.25rem;
+  padding: 0.25rem;
   overflow-x: auto;
-  scrollbar-width: thin;
+  scrollbar-width: none; /* Firefox */
 }
 
+/* Ocultar scrollbar en Chrome, Safari y Edge */
 .perfil-tabs::-webkit-scrollbar {
-  height: 4px;
-}
-
-.perfil-tabs::-webkit-scrollbar-thumb {
-  background: var(--color-primary);
-  border-radius: 4px;
+  display: none;
 }
 
 .tab-btn {
-  padding: 1rem 1.5rem;
+  flex: 0 0 auto;
+  padding: 0.75rem 1rem;
   background: transparent;
   border: none;
   border-bottom: 3px solid transparent;
+  border-radius: 6px 6px 0 0;
   font-family: var(--font-text);
-  font-size: var(--font-size-small);
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--color-tertiary);
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
+  text-align: center;
 }
 
 .tab-btn:hover {
@@ -261,6 +293,11 @@
     flex-direction: row;
     flex-wrap: wrap;
   }
+
+  .tab-btn {
+    padding: 0.7rem 0.85rem;
+    font-size: 0.75rem;
+  }
 }
 
 @media (max-width: 768px) {
@@ -277,7 +314,7 @@
   }
 
   .tab-btn {
-    padding: 0.75rem 1rem;
-    font-size: var(--font-size-xs);
+    padding: 0.65rem 0.7rem;
+    font-size: 0.7rem;
   }
 }
