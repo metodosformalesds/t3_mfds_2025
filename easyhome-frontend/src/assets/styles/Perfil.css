@@ -84,14 +84,6 @@
   gap: 1.5rem;
 }
 
-.perfil-avatar-container {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-}
-
 .perfil-avatar {
   width: 120px;
   height: 120px;
@@ -104,28 +96,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.edit-photo-btn {
-  background: var(--color-primary);
-  color: var(--color-white);
-  border: none;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(22, 57, 79, 0.2);
-}
-
-.edit-photo-btn:hover {
-  background: var(--color-primary-dark);
-  transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(22, 57, 79, 0.3);
 }
 
 .perfil-nombre {
@@ -242,8 +212,8 @@
   padding: 0.75rem 1rem;
   background: transparent;
   border: none;
-  border-bottom: 3px solid transparent;
-  border-radius: 6px 6px 0 0;
+  border-bottom: 1px solid transparent;
+  border-radius: 6px 6px 6px 6px;
   font-family: var(--font-text);
   font-size: 0.8rem;
   font-weight: 600;
@@ -255,14 +225,19 @@
 }
 
 .tab-btn:hover {
+  border-bottom: 1px solid transparent;
   background: rgba(22, 57, 79, 0.05);
   color: var(--color-primary);
 }
 
 .tab-btn.active {
+  border: none;
   background: var(--color-primary);
   color: var(--color-white);
-  border-bottom-color: var(--color-secondary);
+}
+
+.tab-btn:focus {
+  outline: none;
 }
 
 /* Content Area */
