@@ -111,6 +111,8 @@ def get_user_info(email: str, db: Session = Depends(get_db)):
         "id_usuario": user.id_usuario,
         "nombre": user.nombre,
         "correo_electronico": user.correo_electronico,
+        "numero_telefono": user.numero_telefono,
+        "fecha_nacimiento": user.fecha_nacimiento,
         "tipo_usuario": user.tipo_usuario,
         "estado_cuenta": user.estado_cuenta,
         "fecha_registro": user.fecha_registro,
