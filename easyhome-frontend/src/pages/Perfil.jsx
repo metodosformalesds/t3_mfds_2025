@@ -17,6 +17,7 @@ import MisServicios from './sections/MisServicios';
 import Portafolio from './sections/Portafolio';
 import Resenas from './sections/Resenas';
 import Servicios from './sections/Servicios';
+import EditarFotoModal from '../components/common/EditarFotoModal';
 
 function Perfil() {
   const auth = useAuth();
@@ -25,6 +26,8 @@ function Perfil() {
   
   // Por defecto, si es trabajador muestra "Acerca de", si no "Cambiar datos"
   const [activeTab, setActiveTab] = useState(isWorker ? 'acercaDe' : 'cambiarDatos');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState(null);
 
   if (loading) {
     return (
@@ -74,6 +77,12 @@ function Perfil() {
   // Combinar tabs según el rol
   const tabs = isWorker ? [...clientTabs, ...workerTabs] : clientTabs;
 
+  const handleSavePhoto = (file, preview) => {
+    setProfilePhoto(preview);
+    console.log('Foto guardada:', file);
+    // Aquí iría la lógica para subir al backend
+  };
+
   // Renderizar el contenido según la tab activa
   const renderContent = () => {
     switch (activeTab) {
@@ -102,11 +111,20 @@ function Perfil() {
     <div className="perfil-container">
       {/* Sidebar con info del usuario */}
       <aside className="perfil-sidebar">
-        <div className="perfil-avatar">
-          <img 
-            src={auth.user?.profile?.picture || 'https://via.placeholder.com/120'} 
-            alt={userData.nombre}
-          />
+        <div className="perfil-avatar-container">
+          <div className="perfil-avatar">
+            <img 
+              src={profilePhoto || auth.user?.profile?.picture || 'https://via.placeholder.com/120'} 
+              alt={userData.nombre}
+            />
+          </div>
+          <button 
+            className="edit-photo-btn"
+            onClick={() => setIsModalOpen(true)}
+            title="Editar foto de perfil"
+          >
+            ✏️
+          </button>
         </div>
         
         <h2 className="perfil-nombre">{userData.nombre}</h2>
@@ -189,6 +207,14 @@ function Perfil() {
           {renderContent()}
         </div>
       </main>
+
+      {/* Modal para editar foto */}
+      <EditarFotoModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        currentPhoto={profilePhoto || auth.user?.profile?.picture || 'https://via.placeholder.com/120'}
+        onSave={handleSavePhoto}
+      />
     </div>
   );
 }
