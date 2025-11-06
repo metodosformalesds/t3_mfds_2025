@@ -100,7 +100,7 @@
 
 .perfil-nombre {
   font-family: var(--font-titles);
-  font-size: var(--font-size-h4);
+  font-size: var(--font-size-h5);
   color: var(--color-primary);
   margin: 0;
   text-align: center;
@@ -109,8 +109,8 @@
 .perfil-badge {
   background: var(--color-primary);
   color: var(--color-white);
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
+  padding: 0.4rem 1rem;
+  border-radius: 10px;
   font-size: var(--font-size-small);
   font-weight: 600;
   text-align: center;
@@ -132,10 +132,12 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  background-color: var(--color-white) !important;
+  color: var(--color-black);
 }
 
 .stat-value {
-  font-size: var(--font-size-h3);
+  font-size: var(--font-size-h);
   font-weight: 700;
   color: var(--color-primary);
   font-family: var(--font-titles);
