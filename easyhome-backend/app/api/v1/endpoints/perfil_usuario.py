@@ -64,3 +64,19 @@ async def actualizar_foto_perfil(
             detail="Error al subir la foto de perfil"
         )
 
+
+# -----------------------------------------------------------------
+# 2️⃣ Obtener foto de perfil
+# -----------------------------------------------------------------
+@router.get("/{id_usuario}/foto-perfil")
+def obtener_foto_perfil(id_usuario: int, db: Session = Depends(get_db)):
+    """
+    Devuelve la URL firmada de la foto de perfil del usuario si existe.
+    """
+    usuario = db.query(Usuario).filter(Usuario.id_usuario == id_usuario).first()
+    if not usuario or not usuario.foto_perfil:
+        raise HTTPException(status_code=404, detail="Foto de perfil no encontrada")
+
+    presigned_url = s3_service.get_presigned_url(usuario.foto_perfil)
+    return {"foto_perfil_url": presigned_url}
+
