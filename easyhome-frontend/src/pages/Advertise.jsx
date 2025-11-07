@@ -1,7 +1,7 @@
 import React from 'react';
 import FAQSection from '../components/features/FAQSection'
 import "../assets/styles/FAQSection.css"
-import "../assets/styles/advertise.css"
+import "../assets/styles/advertise.css" 
 
 function CheckIcon() {
   return (
@@ -32,145 +32,119 @@ function CircleXIcon({ size = 24, color = "#dc3545", className = "" }) {
   );
 }
 
+
 function Advertise() {
     return (
         <section className="pricing-section">
-            <h2 className="pricing-title">¡Muestra tu marca en EasyHome!</h2>
+            <h1 className="pricing-title">¡Muestra tu marca en EasyHome!</h1>
             <p className="pricing-subtitle">
                 ¿Buscas darle mayor visibilidad a tu empresa y tu público se relaciona con los Servicios del Hogar? <br />Llegaste al lugar indicado.
             </p>
 
             <div className="pricing-cards-container">
 
-                {/* TARJETA 1: Estándar (Bloque de Tarjetas) */}
-                <div className="pricing-card standard">
-                    <h3 className="card-plan-name">Estándar</h3>
-                    <hr className="card-divider" />
-                    <div className="card-price">
-                        $29.99 <span className="price-currency">USD/mes</span>
-                    </div>
+                {/* Plan Básico */}
+                <div className="pricing-card">
+                    <div className="card-header">Básico</div>
+                    <div className="card-separator"></div>
+                    <div className="card-price">Gratis</div>
                     <ul className="card-features">
-                            <li className="feature check"><CheckIcon /> Banner rotatorio</li>
-                            <li className="feature check"><CheckIcon /> Posicionado en el centro del sitio.</li>
-                            <li className="feature cross"><CircleXIcon /> Compartido con otros anunciantes.</li>
-                        </ul>
-                    <a href="#" className="card-button">Comenzar Ahora</a>
+                        <li><CheckIcon /> 1 publicación semanal</li>
+                        <li><CheckIcon /> Acceso a la comunidad</li>
+                        <li><CircleXIcon /> Publicaciones ilimitadas</li>
+                        <li><CircleXIcon /> Mayor visualización en búsquedas</li>
+                        <li><CircleXIcon /> Acceso a reportes de demanda</li>
+                    </ul>
+                    <button className="card-button">Comenzar Ahora</button>
                 </div>
 
-                {/* TARJETA 2: Lateral (Bloque de Tarjetas) */}
-                <div className="pricing-card lateral featured">
-                    <h3 className="card-plan-name">Lateral</h3>
-                    <hr className="card-divider" />
-                    <div className="card-price">
-                        $39.99 <span className="price-currency">USD/mes</span>
-                    </div>
+                {/* Plan Esencial */}
+                <div className="pricing-card">
+                    <div className="card-header">Esencial</div>
+                    <div className="card-separator"></div>
+                    <div className="card-price">$7.50 USD/mes</div>
                     <ul className="card-features">
-                            <li className="feature check"><CheckIcon /> Banner lateral.</li>
-                            <li className="feature check"><CheckIcon /> Los clientes no dejarán de ver su marca.</li>
-                            <li className="feature check"><CheckIcon /> Espacio exclusivo para usted.</li>
-                        </ul>
-                    <a href="#" className="card-button">Comenzar Ahora</a>
+                        <li><CheckIcon /> Publicaciones ilimitadas</li>
+                        <li><CheckIcon /> Acceso a la comunidad</li>
+                        <li><CircleXIcon /> Mayor visualización en búsquedas</li>
+                        <li><CircleXIcon /> Acceso a reportes de demanda</li>
+                    </ul>
+                    <button className="card-button">Comenzar Ahora</button>
                 </div>
 
-                {/* TARJETA 3: Superior (Bloque de Tarjetas) */}
-                <div className="pricing-card superior">
-                    <h3 className="card-plan-name">Superior</h3>
-                    <hr className="card-divider" />
-                    <div className="card-price">
-                        $49.99 <span className="price-currency">USD/mes</span>
-                    </div>
+                {/* Plan Premium */}
+                <div className="pricing-card">
+                    <div className="card-header">Premium</div>
+                    <div className="card-separator"></div>
+                    <div className="card-price">$15.00 USD/mes</div>
                     <ul className="card-features">
-                            <li className="feature check"><CheckIcon /> Banner superior.</li>
-                            <li className="feature check"><CheckIcon /> Los clientes no dejarán de ver su marca.</li>
-                            <li className="feature check"><CheckIcon /> Espacio exclusivo para usted.</li>
-                            <li className="feature check"><CheckIcon /> Nivel más alto de visibilidad en el sitio.</li>
-                            <li className="feature check"><CheckIcon /> El banner más grande de la plataforma.</li>
-                        </ul>
-                    <a href="#" className="card-button">Comenzar Ahora</a>
-                </div>
-                
+                        <li><CheckIcon /> Publicaciones ilimitadas</li>
+                        <li><CheckIcon /> Acceso a la comunidad</li>
+                        <li><CheckIcon /> Mayor visualización en búsquedas</li>
+                        <li><CheckIcon /> Acceso a reportes de demanda</li>
+                    </ul>
+                    <button className="card-button">Comenzar Ahora</button>
+                </div> 
             </div>
+
+            <br />
+            <h1 className="comparison-title">Compara todos los planes</h1>
+            <br />
 
             {/* --- TABLA DE COMPARACIÓN --- */}
-            <h2 className="comparison-title">Compara todos los planes</h2>
-            
-            <div className="comparison-grid">
-                
-                {/* 1. CABECERA Y PLANES (AJUSTADO PARA UNIFORMIDAD) */}
-                <div className="plan-header-row">
-                    
-                    {/* Columna de Título de Características  */}
-                    <div className="plan-column characteristics-label">
-                        <h3 className="plan-name">Características</h3>
-                    </div>
-                    
-                    {/* Plan Estándar */}
-                    <div className="plan-column">
-                        <h3 className="plan-name">Estándar</h3>
-                        <p className="plan-tagline">La opción más accesible para mostrar tu marca.</p>
-                        <a href="#" className="plan-button">Comenzar ahora</a>
-                    </div>
-                    
-                    {/* Plan Lateral */}
-                    <div className="plan-column featured">
-                        <h3 className="plan-name">Lateral</h3>
-                        <p className="plan-tagline">Sólida publicidad para tu empresa.</p>
-                        <a href="#" className="plan-button">Comenzar ahora</a>
-                    </div>
-                    
-                    {/* Plan Superior */}
-                    <div className="plan-column">
-                        <h3 className="plan-name">Superior</h3>
-                        <p className="plan-tagline">Convierte tu compañía en el centro de atención.</p>
-                        <a href="#" className="plan-button">Comenzar ahora</a>
-                    </div>
+            <div className="comparison-table">
+                <div className="compare-column features-column">
+                    <h2>Características</h2>
+                    <ul className="compare-feature-labels">
+                        <li>Banner publicitario</li>
+                        <li>Espacio exclusivo</li>
+                        <li>Nivel más alto de visibilidad</li>
+                        <li>Banner de mayor tamaño</li>
+                    </ul>
                 </div>
-
-                {/* 2. CARACTERÍSTICAS Y FILAS DE COMPARACIÓN (AJUSTADO PARA 4 COLUMNAS IGUALES) */}
-                <div className="characteristics-row">
-                    
-                    {/* Las etiquetas de características se manejan dentro de cada fila: */}
-                    
-                    {/* Fila 1 */}
-                    <div className="comparison-feature-row">
-                        <div className="feature-label">Banner publicitario.</div>
-                        <div className="plan-check check"><CheckIcon /></div>
-                        <div className="plan-check check"><CheckIcon /></div>
-                        <div className="plan-check check"><CheckIcon /></div>
+                <div className="compare-column compare-plan-column">
+                    <div className="compare-header">
+                        <h3>Estándar</h3>
+                        <button className="compare-cta-button">Comenzar ahora</button>
+                        <p className="compare-description">La opción más accesible para mostrar tu marca.</p>
                     </div>
-                    
-                    {/* Fila 2 */}
-                    <div className="comparison-feature-row">
-                        <div className="feature-label">Espacio exclusivo.</div>
-                        <div className="plan-check cross"><CircleXIcon /></div>
-                        <div className="plan-check check"><CheckIcon /></div>
-                        <div className="plan-check check"><CheckIcon /></div>
-                    </div>
-
-                    {/* Fila 3 */}
-                    <div className="comparison-feature-row">
-                        <div className="feature-label">Nivel más alto de visibilidad.</div>
-                        <div className="plan-check cross"><CircleXIcon /></div>
-                        <div className="plan-check cross"><CircleXIcon /></div>
-                        <div className="plan-check check"><CheckIcon /></div>
-                    </div>
-
-                    {/* Fila 4 */}
-                    <div className="comparison-feature-row">
-                        <div className="feature-label">Banner de mayor tamaño.</div>
-                        <div className="plan-check cross"><CircleXIcon /></div>
-                        <div className="plan-check cross"><CircleXIcon /></div>
-                        <div className="plan-check check"><CheckIcon /></div>
-                    </div>
+                    <ul className="compare-features-list">
+                        <li><CheckIcon /></li>
+                        <li><CircleXIcon /></li>
+                        <li><CircleXIcon /></li>
+                        <li><CircleXIcon /></li>
+                    </ul>
                 </div>
-
-            </div>
+                <div className="compare-column compare-plan-column">
+                    <div className="compare-header">
+                        <h3>Lateral</h3>
+                        <button className="compare-cta-button">Comenzar ahora</button>
+                        <p className="compare-description">Sólida publicidad para tu empresa.</p>
+                    </div>
+                    <ul className="compare-features-list">
+                        <li><CheckIcon /></li>
+                        <li><CheckIcon /></li>
+                        <li><CircleXIcon /></li>
+                        <li><CircleXIcon /></li>
+                    </ul>
+                </div>
+                <div className="compare-column compare-plan-column">
+                    <div className="compare-header">
+                        <h3>Premium</h3>
+                        <button className="compare-cta-button">Comenzar ahora</button>
+                        <p className="compare-description">Convierte tu compañía en el centro de atención.</p>
+                    </div>
+                    <ul className="compare-features-list">
+                        <li><CheckIcon /></li>
+                        <li><CheckIcon /></li>
+                        <li><CheckIcon /></li>
+                        <li><CheckIcon /></li>
+                    </ul>
+                </div>
+            </div> 
 
             <FAQSection /> 
-
         </section>
-
-        
     );
 }
 

@@ -1,6 +1,5 @@
-/* ========================================================================= */
-/* --- ESTILOS DE LA SECCIÓN DE TARJETAS (PRICING CARDS) --- */
-/* ========================================================================= */
+
+/* --- ESTILOS DE LA SECCIÓN DE TARJETAS --- */
 .pricing-section {
     padding: 60px 20px;
     text-align: center;
@@ -25,106 +24,107 @@
     line-height: 1.6;
 }
 
-/* --- Contenedor de Tarjetas (Flexbox) --- */
+/* --- Contenedor de Tarjetas --- */
 .pricing-cards-container {
     display: flex;
     justify-content: center;
     gap: 30px;
     max-width: 1200px;
     margin: 0 auto;
+    align-items: stretch; 
+    flex-wrap: wrap; /* Para responsividad */
 }
 
-/* --- Estilos Base de Cada Tarjeta (Uniforme) --- */
+/* --- Estilos Base de Cada Tarjeta --- */
 .pricing-card {
     flex: 1 1 300px; 
-    padding: 30px;
-    border-radius: 10px;
-    
+    border-radius: 15px; 
     background-color: white; 
-    border: 1px solid #ddd; 
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    border: 2px solid #0d2644; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); 
     display: flex;
     flex-direction: column;
-    
-    /* Transición para el efecto hover suave */
+    overflow: hidden; 
     transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; 
 }
 
-/* --- EFECTO HOVER: Se aplica a TODAS las tarjetas --- */
-.pricing-card:hover {
-    background-color: #ccd7de; 
-    border-color: #ccd7de;
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-}
-
-.card-plan-name {
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 15px;
-    color: #333;
+/* --- Nuevos estilos para la estructura interna --- */
+.card-header {
+    font-size: 24px;
+    font-weight: 800;
+    padding: 30px 30px 10px 30px;
     text-align: left;
+    color: #333;
 }
 
-.card-divider {
-    border: none;
-    border-top: 1px solid #eee;
-    margin: 0 0 20px 0;
+.card-separator {
+    width: calc(100% - 60px); 
+    height: 2px;
+    background-color: #0d2644; 
+    margin: 0 30px 15px 30px; 
 }
 
 .card-price {
     font-size: 30px;
     font-weight: 700;
     color: #333;
-    margin-bottom: 25px;
-    text-align: left;
-}
-
-.price-currency {
-    font-size: 18px;
-    font-weight: 400;
-    color: #555;
-}
-
-/* --- Estilos de la Lista de Características --- */
-.card-features {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 30px 0;
-    text-align: left;
-    flex-grow: 1; 
-}
-
-.feature {
-    font-size: 15px;
-    color: #555;
-    line-height: 1.5;
-    margin-bottom: 10px;
-    padding-left: 25px; 
-    position: relative;
-}
-
-
-
-/* --- Estilos del Botón --- */
-.card-button {
-    text-decoration: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    font-size: 15px;
-    font-weight: 600;
-    display: block; 
+    padding: 10px 30px 30px 30px;
     text-align: center;
-    
-    /* Estilo uniforme para todos los botones: Borde Azul, Fondo Blanco */
-    background-color: white;
-    color: #0b2f4a; 
-    border: 1px solid #0b2f4a;
-    transition: all 0.3s ease;
+}
+
+.card-features {
+    list-style: none; 
+    padding: 0 30px;
+    margin: 0;
+    flex-grow: 1;
+}
+
+/* Estilos aplicados al <li>  */
+.card-features li {
+    display: flex; 
+    align-items: center;
+    font-size: 16px;
+    margin-bottom: 15px;
+    text-align: left;
+    line-height: 1.4;
+    color: #555;
+}
+
+/* Estilos aplicados al <svg> */
+.card-features li svg {
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+/* --- Nuevos estilos para el Botón --- */
+.card-button {
+    display: block;
+    width: calc(100% - 60px); 
+    padding: 15px 20px;
+    margin: 30px 30px 30px 30px; 
+    background-color: #0d2644; 
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    border-radius: 5px; 
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .card-button:hover {
-    background-color: #0b2f4a;
-    color: white;
+    background-color: #1a3a5e; 
+}
+
+
+
+/* --- HOVER  --- */
+.pricing-card:hover {
+    background-color: #E1E8ED; 
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    transform: translateY(-5px);
 }
 
 /* --- Adaptación Responsiva --- */
@@ -132,7 +132,6 @@
     .pricing-cards-container {
         flex-wrap: wrap; 
     }
-
     .pricing-card {
         flex: 1 1 45%; 
     }
@@ -144,12 +143,18 @@
     }
 }
 
+/* --- ESTILOS DE LA TABLA DE COMPARACIÓN --- */
 
-/* --- ESTILOS DE LA TABLA DE COMPARACIÓN (COMPARISON GRID) --- */
+.comparison-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr; 
+}
 
 .comparison-section {
     padding: 60px 20px;
-    margin-top: 150px; /* Puedes ajustar este valor (ej: 50px, 100px) */
+    margin-top: 150px; 
     text-align: center;
     font-family: 'Nunito Sans', sans-serif;
     background-color: white; 
@@ -159,48 +164,47 @@
     font-size: 32px;
     font-weight: 800;
     margin-bottom: 40px; 
-    margin-top: 60px;
-    margin-bottom: 40px;
     color: #333;
 }
 
-/* --- Estructura Principal (Grid) --- */
-.comparison-grid {
-    max-width: 1200px;
-    margin: 0 auto;
+/* --- ESTRUCTURA DEL GRID (4 COLUMNAS IGUALES) --- */
+.plan-header-row, .comparison-feature-row {
     display: grid;
-    grid-template-columns: 1fr; 
-}
-
-/* --- Estilos de la Fila de Cabecera (ACTUALIZADO: 4 columnas iguales) --- */
-.plan-header-row {
-    display: grid;
-    /* 4 columnas IGUALES (1fr) para Características + 3 Planes */
     grid-template-columns: repeat(4, 1fr); 
-    align-items: end;
+    align-items: center;
     text-align: center;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #ddd;
 }
 
-.popular-tag {
-    display: none; 
+.plan-header-row {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 20px;
 }
 
 .plan-column {
-    padding: 10px;
+    padding: 0 10px;
     position: relative;
-
-    margin: 0 -1px; 
     z-index: 10;
+    background-color: white;
+    padding-top: 5px; 
+    padding-bottom: 5px; 
 }
-
 
 .plan-name {
     font-size: 20px;
     font-weight: 700;
     margin-bottom: 5px;
     color: #333;
+}
+
+/* SE ELIMINÓ .plan-column.featured */
+
+.characteristics-label {
+    text-align: left;
+    padding-left: 10px;
+}
+
+.characteristics-plan-name {
+    text-align: left;
 }
 
 .plan-tagline {
@@ -210,67 +214,41 @@
     margin-bottom: 15px;
 }
 
-/* --- Estilo del Botón (Similar al de los planes anteriores) --- */
 .plan-button {
-    text-decoration: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    font-size: 15px;
-    font-weight: 600;
-    display: inline-block; 
     background-color: #0b2f4a;
-    color: white; 
-    transition: background-color 0.3s ease;
+    color: white;
 }
 
-.plan-button:hover {
-    background-color: #051a28;
-}
-
-/* --- Estilos de la Fila de Características (Cuerpo de la Tabla) --- */
-.characteristics-name {
-    padding: 10px 0;
-    text-align: left;
-}
-
-.characteristics-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: #333;
+/* --- CUERPO DE LA TABLA --- */
+.comparison-body-rows {
+    display: grid;
+    grid-template-columns: 1fr; 
     margin-top: 30px;
 }
 
 .comparison-feature-row {
-    display: grid;
-    /* 4 columnas IGUALES (1fr) para las filas de verificación */
-    grid-template-columns: repeat(4, 1fr); 
-    align-items: center;
     border-top: 1px solid #f0f0f0;
     padding: 15px 0;
-    text-align: center;
 }
 
 .feature-label {
     text-align: left;
-    color: #555;
+    color: #333;
     font-size: 15px;
+    font-weight: 600;
+    padding-left: 10px;
 }
 
-/* --- Íconos de Verificación/Cruz (Usando ::before para mayor control) --- */
 .plan-check {
-    display: block;
-    text-align: center;
-    font-size: 18px;
-    font-weight: 900;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-
-/* --- Responsive: Adaptación simple para móviles --- */
+/* Responsive Tabla */
 @media (max-width: 768px) {
     .plan-header-row, .comparison-feature-row {
-        /* Mantenemos el grid, pero forzamos el desbordamiento si es necesario */
-        grid-template-columns: 100px repeat(3, 1fr); 
+        grid-template-columns: 150px repeat(3, 1fr); 
         overflow-x: auto;
     }
 }
-
