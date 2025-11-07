@@ -80,3 +80,28 @@ def obtener_foto_perfil(id_usuario: int, db: Session = Depends(get_db)):
     presigned_url = s3_service.get_presigned_url(usuario.foto_perfil)
     return {"foto_perfil_url": presigned_url}
 
+
+# -----------------------------------------------------------------
+# 3️⃣ Eliminar foto de perfil
+# -----------------------------------------------------------------
+@router.delete("/{id_usuario}/foto-perfil")
+def eliminar_foto_perfil(id_usuario: int, db: Session = Depends(get_db)):
+    """
+    Elimina la foto de perfil del usuario tanto de S3 como de la base de datos.
+    """
+    usuario = db.query(Usuario).filter(Usuario.id_usuario == id_usuario).first()
+    if not usuario or not usuario.foto_perfil:
+        raise HTTPException(status_code=404, detail="Foto de perfil no encontrada")
+
+    try:
+        s3_service.delete_file(usuario.foto_perfil)
+        usuario.foto_perfil = None
+        db.commit()
+        logger.info(f"Foto de perfil eliminada para usuario {id_usuario}")
+        return {"message": "Foto de perfil eliminada correctamente"}
+    except Exception as e:
+        logger.error(f"Error al eliminar foto de perfil: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al eliminar la foto de perfil"
+        )
