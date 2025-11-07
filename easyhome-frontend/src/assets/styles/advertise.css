@@ -103,24 +103,7 @@
     position: relative;
 }
 
-/* --- Estilos de Íconos (usando caracteres Unicode) --- */
-.feature.check::before {
-    content: '✓'; 
-    color: #4CAF50; 
-    font-size: 18px;
-    font-weight: 900;
-    position: absolute;
-    left: 0;
-}
 
-.feature.cross::before {
-    content: '✕'; 
-    color: #F44336;
-    font-size: 16px;
-    font-weight: 900;
-    position: absolute;
-    left: 0;
-}
 
 /* --- Estilos del Botón --- */
 .card-button {
@@ -162,9 +145,7 @@
 }
 
 
-/* ========================================================================= */
 /* --- ESTILOS DE LA TABLA DE COMPARACIÓN (COMPARISON GRID) --- */
-/* ========================================================================= */
 
 .comparison-section {
     padding: 60px 20px;
@@ -202,7 +183,6 @@
     border-bottom: 1px solid #ddd;
 }
 
-/* 🚫 ELIMINADO: Ya no se necesita el estilo para la etiqueta 'Más Popular' */
 .popular-tag {
     display: none; 
 }
@@ -284,15 +264,6 @@
     font-weight: 900;
 }
 
-.plan-check.check::before {
-    content: '✓'; 
-    color: #4CAF50; /* Verde */
-}
-
-.plan-check.cross::before {
-    content: '✕'; 
-    color: #F44336; /* Rojo */
-}
 
 /* --- Responsive: Adaptación simple para móviles --- */
 @media (max-width: 768px) {
@@ -302,3 +273,4 @@
         overflow-x: auto;
     }
 }
+
