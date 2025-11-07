@@ -1,0 +1,89 @@
+/* --- Estilos de la Sección de Listados (Contenedor General) --- */
+.service-listings-section {
+    padding: 20px;
+    background-color: white; 
+    font-family: Arial, sans-serif;
+}
+
+.section-title {
+    font-size: 30px;
+    font-weight: 800;
+    margin-bottom: 25px;
+    text-align: left;
+    color: #333;
+}
+
+/* ---  Tarjeta Principal --- */
+.service-card {
+    max-width: 700px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* --- CABECERA Y ETIQUETA PREMIUM --- */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.provider-info {
+    /*  información del perfil (momentaneamente oculta)*/
+    display: none; 
+}
+
+.premium-tag {
+    background-color: #f7a049; 
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 4px;
+}
+
+/* --- CONTENIDO --- */
+.card-body, .price-range {
+    display: none; /* texto y rango de precio *momentaneamente oculto*/
+}
+
+
+/* --- GALERÍA E IMÁGENES --- */
+.gallery-container {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+    position: relative; 
+}
+
+.work-image {
+    width: 50%;
+    height: auto;
+    border-radius: 6px;
+    object-fit: cover;
+    display: block;
+}
+
+/* --- "IR AL PERFIL" --- */
+.profile-button {
+    position: absolute; 
+    right: 25px; 
+    bottom: 25px; 
+    
+    /* Estilos visuales del botón */
+    background-color: #0b2f4a; 
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 15px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.profile-button:hover {
+    background-color: #051a28;
+}
