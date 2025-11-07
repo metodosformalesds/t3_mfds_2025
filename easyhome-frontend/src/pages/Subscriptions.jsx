@@ -126,28 +126,26 @@ function Subscriptions() {
         </div>
 
         {/* Plan Esencial */}
-        <div className="plan-card-featured">
-          <div className="plan-card">
-            <div className="plan-header">
-              <h2>Esencial</h2>
-            </div>
-            <div className="price">$7.50 USD/mes</div>
-            <ul className="features">
-              <li>
-                <CheckIcon />
-                Publicaciones ilimitadas</li>
-              <li>
-                <CheckIcon />
-                Acceso a la comunidad</li>
-              <li>
-                <CircleXIcon />
-                Mayor visualización en búsquedas</li>
-              <li>
-                <CircleXIcon />
-                Acceso a reportes de demanda</li>
-            </ul>
-            <button className="plan-button">Comenzar Ahora</button>
+        <div className="plan-card">
+          <div className="plan-header">
+            <h2>Esencial</h2>
           </div>
+          <div className="price">$7.50 USD/mes</div>
+          <ul className="features">
+            <li>
+              <CheckIcon />
+              Publicaciones ilimitadas</li>
+            <li>
+              <CheckIcon />
+              Acceso a la comunidad</li>
+            <li>
+              <CircleXIcon />
+              Mayor visualización en búsquedas</li>
+            <li>
+              <CircleXIcon />
+              Acceso a reportes de demanda</li>
+          </ul>
+          <button className="plan-button">Comenzar Ahora</button>
         </div>
 
         {/* Plan Premium */}

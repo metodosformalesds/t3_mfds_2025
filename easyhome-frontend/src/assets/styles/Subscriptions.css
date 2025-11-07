@@ -86,43 +86,19 @@
 
 /* botones */
 .plan-button {
-  background-color: #ffffff;
-  color: #000000;
-  border: 2px solid #16394F;
+  background-color: #16394F;
+  color: #ffffff;
   padding: 10px 20px; 
   border-radius: 5px;
-  cursor: pointer;
+  border: none;
   font-size: 14px; 
   width: 100%;
 }
 
-.plan-button:hover {
-  background-color: #16394f70;
-}
-
-.plan-card-featured {
-  margin-top: -180px;
-
-}
-
-.plan-card-featured .plan-card {
-  background-color: #385d745b;
-
-}
-
-.plan-card-featured .plan-button {
-  background: #385d745b;
-
-}
-
-.plan-card-featured .plan-button:hover {
-  background-color: #385d7483;
-
-}
-
-.plan-card:nth-child(1),
-.plan-card:nth-child(3) {
-  transform: translateY(60px); 
+.plan-card:hover {
+    background-color: #ccd7de; 
+    border-color: #ccd7de;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 }
 
 /* Seccion: tabla de comparacion */
