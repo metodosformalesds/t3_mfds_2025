@@ -1,0 +1,28 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from typing import List
+from pydantic import BaseModel
+from app.core.database import get_db
+from app.models import Categoria_Servicio
+
+router = APIRouter()
+
+class ServiceFormCreate(BaseModel):
+    id_proveedor: int
+    id_categoria: int
+    titulo : str
+    descripcion_servicio: str 
+    rango_precio_min: float
+    rango_precio_max: float
+
+class ServiceFormResponse(BaseModel):
+    id_formulario: int
+    id_usuario: int
+    id_categoria: int
+    descripcion_servicio: str
+    direccion_servicio: str
+    fecha_solicitud: str
+
+    class Config:
+        from_attributes = Truestatus_code=400, detail="Ya existe una categoría con ese nombre."
+
