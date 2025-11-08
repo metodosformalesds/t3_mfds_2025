@@ -1,4 +1,5 @@
 
+import Publicaciones from '../../components/features/Publicaciones'
 function feed() {
   return (
     <div style={{ padding: '20px' }}>
@@ -13,6 +14,10 @@ function feed() {
         padding: '10px',
         borderRadius: '4px'
       }}>
+
+        <h1> Servicios disponibles </h1>
+
+        <Publicaciones />
       </div>
     </div>
   );
