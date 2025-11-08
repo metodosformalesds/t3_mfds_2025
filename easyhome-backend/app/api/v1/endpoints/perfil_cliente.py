@@ -8,7 +8,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/Perfil_Cliente", tags=["Perfil Cliente"])
+router = APIRouter(tags=["Perfil Cliente"])
 
 class ClienteUpdate(BaseModel):
     nombre: str | None = None
@@ -78,13 +78,13 @@ async def obtener_servicios_contratados(id_cliente: int, db: Session = Depends(g
         servicios = db.query(Servicio_Contratado).filter(Servicio_Contratado.id_cliente == id_cliente).all()
         return servicios    
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error al crear categoría: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error al obtener los servicios: {str(e)}")
 
 # Obtener las reseñas realizadas por el cliente
 @router.get("/{id_cliente}/reseñas", response_model=List[ReseñaResponse])
 def obtener_reseñas_cliente(id_cliente: int, db: Session = Depends(get_db)):
     try:
-        reseñas = db.query(Reseña_Servicio).filter(Reseña_Servicio.id_usuario == id_cliente).all()
+        reseñas = db.query(Reseña_Servicio).filter(Reseña_Servicio.id_cliente == id_cliente).all()
         return reseñas
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener reseñas: {str(e)}")
