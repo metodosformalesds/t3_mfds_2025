@@ -49,9 +49,9 @@ function Header() {
                 </li>
               )}
               <li>
-                <a href="#">
+                <Link to="/perfil">
                   👤 Perfil
-                </a>
+                </Link>
               </li>
               <li>
                 <a href="#" onClick={(e) => { e.preventDefault(); handleLogout(); }}>

@@ -11,13 +11,12 @@ import logging
 from app.core.database import get_db
 from app.models.user import Usuario, Proveedor_Servicio
 # Ajusta esta importación si tus modelos están en archivos separados
-from app.models.publicacion_servicio import Publicacion_Servicio, Categoria_Servicio, Imagen_Publicacion
+from app.models.property import Publicacion_Servicio, Categoria_Servicio, Imagen_Publicacion
 # from app.models.etiqueta import Etiqueta 
 
 # --- Importaciones de Servicios ---
 from app.services.s3_service import s3_service # Usamos el mismo servicio S3
-# Asumo que tienes una forma de obtener el usuario actual (ajusta si es necesario)
-from app.services.cognito_service import get_current_user 
+from app.services.cognito_service import cognito_service # Servicio de Cognito
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/publicaciones", tags=["Publicaciones de Servicios"])
@@ -36,24 +35,32 @@ async def crear_publicacion(
     rango_precio_min: float = Form(...),
     rango_precio_max: float = Form(...),
     fotos: List[UploadFile] = File(..., description="Máximo 10 fotos"),
+    user_email: str = Form(..., description="Email del usuario autenticado"),
     
     # --- Datos de autenticación y BD ---
-    db: Session = Depends(get_db),
-    current_user: Usuario = Depends(get_current_user) 
+    db: Session = Depends(get_db)
 ):
     """
     Permite a un PROVEEDOR autenticado crear una nueva publicación de servicio.
     Sube las fotos de referencia a S3 y guarda la S3 Key.
     """
     
-    # 🔹 1. Verificar que el usuario sea un Proveedor
+    # 🔹 1. Obtener el usuario desde la BD por email
+    current_user = db.query(Usuario).filter(Usuario.correo_electronico == user_email).first()
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Usuario no encontrado."
+        )
+    
+    # 🔹 2. Verificar que el usuario sea un Proveedor
     if not current_user.tipo_usuario == "proveedor" or not current_user.proveedor_servicio:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Solo los proveedores de servicio pueden crear publicaciones."
         )
     
-    # 🔹 2. Verificar límite de fotos (Máximo 10)
+    # 🔹 3. Verificar límite de fotos (Máximo 10)
     if len(fotos) > 10:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

@@ -11,8 +11,7 @@ from app.schemas.proveedor import (
     ProveedorPerfilAboutSchema, 
     PublicacionServicioSchema, 
     ImagenPublicacionSchema,
-    ReseñaPublicaSchema,
-    ServicioHistorialSchema  # <-- Import para Endpoints 5 y 6
+    ReseñaPublicaSchema
 )
 
 # --- Imports de Modelos ---
@@ -170,81 +169,81 @@ def get_perfil_reseñas(id_proveedor: int, db: Session = Depends(get_db)):
     return reseñas
 
 # -----------------------------------------------------------------
-# --- Endpoint 5: Pestaña "Servicios" (Panel de Trabajos ACTIVOS) ---
+# --- Endpoint 5 y 6: COMENTADOS - Requieren ServicioHistorialSchema ---
 # -----------------------------------------------------------------
-@router.get(
-    "/{id_proveedor}/historial-servicios-activos",
-    response_model=List[ServicioHistorialSchema]
-)
-def get_perfil_historial_servicios_activos(id_proveedor: int, db: Session = Depends(get_db)):
-    """
-    Obtiene el panel de trabajos ACTIVOS de un proveedor 
-    (confirmados o en proceso) para su panel de gestión.
-    """
-    
-    # Estados que representan un trabajo "activo" (pendiente de finalizar)
-    ESTADOS_ACTIVOS = ['confirmado', 'en_proceso']
-    
-    servicios = (
-        db.query(Servicio_Contratado)
-        .options(
-            joinedload(Servicio_Contratado.usuario) # Cargar el 'usuario' (cliente)
-        )
-        .filter(Servicio_Contratado.id_proveedor == id_proveedor)
-        .filter(Servicio_Contratado.estado_servicio.in_(ESTADOS_ACTIVOS))
-        .order_by(Servicio_Contratado.fecha_contacto.desc())
-        .all()
-    )
-    
-    return servicios
+# TODO: Implementar ServicioHistorialSchema en app/schemas/proveedor.py
+# y descomentar estos endpoints
 
-# -----------------------------------------------------------------
-# --- Endpoint 6: ACCIÓN para "Finalizar Servicio" ---
-# -----------------------------------------------------------------
-@router.patch(
-    "/servicios/{id_servicio_contratado}/finalizar",
-    response_model=ServicioHistorialSchema
-)
-def finalizar_servicio(
-    id_servicio_contratado: int, 
-    db: Session = Depends(get_db)
-    # current_user: Usuario = Depends(get_current_user) # <-- Añadir seguridad después
-):
-    """
-    Permite a un proveedor marcar un servicio como 'finalizado'.
-    (Cumple RF-19)
-    """
-    
-    # 1. Buscar el servicio
-    servicio = db.query(Servicio_Contratado)\
-                 .options(joinedload(Servicio_Contratado.usuario))\
-                 .filter(Servicio_Contratado.id_servicio_contratado == id_servicio_contratado)\
-                 .first()
+# @router.get(
+#     "/{id_proveedor}/historial-servicios-activos",
+#     response_model=List[ServicioHistorialSchema]
+# )
+# def get_perfil_historial_servicios_activos(id_proveedor: int, db: Session = Depends(get_db)):
+#     """
+#     Obtiene el panel de trabajos ACTIVOS de un proveedor 
+#     (confirmados o en proceso) para su panel de gestión.
+#     """
+#     
+#     # Estados que representan un trabajo "activo" (pendiente de finalizar)
+#     ESTADOS_ACTIVOS = ['confirmado', 'en_proceso']
+#     
+#     servicios = (
+#         db.query(Servicio_Contratado)
+#         .options(
+#             joinedload(Servicio_Contratado.usuario) # Cargar el 'usuario' (cliente)
+#         )
+#         .filter(Servicio_Contratado.id_proveedor == id_proveedor)
+#         .filter(Servicio_Contratado.estado_servicio.in_(ESTADOS_ACTIVOS))
+#         .order_by(Servicio_Contratado.fecha_contacto.desc())
+#         .all()
+#     )
+#     
+#     return servicios
 
-    if not servicio:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Servicio contratado no encontrado"
-        )
-    
-    # 2. (Aquí iría la lógica de seguridad)
-    # if servicio.id_proveedor != current_user.id_usuario:
-    #    raise HTTPException(status_code=403, detail="No autorizado")
-
-    # 3. Validar estado (Solo se puede finalizar algo 'confirmado' o 'en_proceso')
-    if servicio.estado_servicio not in ['confirmado', 'en_proceso']:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"No se puede finalizar un servicio que está '{servicio.estado_servicio}'"
-        )
-        
-    # 4. Actualizar el estado
-    servicio.estado_servicio = "finalizado"
-    servicio.fecha_finalizacion = datetime.now(timezone.utc)
-    
-    db.commit()
-    db.refresh(servicio)
-    
-    # 5. (Aquí iría la lógica para enviar la alerta al cliente, RF-20)
-    
-    return servicio
+# @router.patch(
+#     "/servicios/{id_servicio_contratado}/finalizar",
+#     response_model=ServicioHistorialSchema
+# )
+# def finalizar_servicio(
+#     id_servicio_contratado: int, 
+#     db: Session = Depends(get_db)
+#     # current_user: Usuario = Depends(get_current_user) # <-- Añadir seguridad después
+# ):
+#     """
+#     Permite a un proveedor marcar un servicio como 'finalizado'.
+#     (Cumple RF-19)
+#     """
+#     
+#     # 1. Buscar el servicio
+#     servicio = db.query(Servicio_Contratado)\
+#                  .options(joinedload(Servicio_Contratado.usuario))\
+#                  .filter(Servicio_Contratado.id_servicio_contratado == id_servicio_contratado)\
+#                  .first()
+# 
+#     if not servicio:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail="Servicio contratado no encontrado"
+#         )
+#     
+#     # 2. (Aquí iría la lógica de seguridad)
+#     # if servicio.id_proveedor != current_user.id_usuario:
+#     #    raise HTTPException(status_code=403, detail="No autorizado")
+# 
+#     # 3. Validar estado (Solo se puede finalizar algo 'confirmado' o 'en_proceso')
+#     if servicio.estado_servicio not in ['confirmado', 'en_proceso']:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail=f"No se puede finalizar un servicio que está '{servicio.estado_servicio}'"
+#         )
+#         
+#     # 4. Actualizar el estado
+#     servicio.estado_servicio = "finalizado"
+#     servicio.fecha_finalizacion = datetime.now(timezone.utc)
+#     
+#     db.commit()
+#     db.refresh(servicio)
+#     
+#     # 5. (Aquí iría la lógica para enviar la alerta al cliente, RF-20)
+#     
+#     return servicio
