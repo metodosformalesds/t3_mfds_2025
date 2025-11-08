@@ -1,10 +1,11 @@
+import React from 'react';
 import '../../assets/styles/publicaciones.css';
 
 
 function ServiceCard() {
     return (
         <section className="service-listings-section">
-            <h2 className="section-title">Servicios disponibles</h2>
+            <h2 className="section-title">Servicios </h2>
             
             <div className="service-card">
                 

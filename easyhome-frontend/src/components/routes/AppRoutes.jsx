@@ -12,6 +12,7 @@ import Perfil from '../../pages/Perfil';
 // Páginas de Cliente
 import ClienteDashboard from '../../pages/cliente/Dashboard';
 import ClienteServicios from '../../pages/cliente/Servicios';
+import Clientefeed from '../../pages/cliente/feed';
 
 // Páginas de Trabajador
 import TrabajadorDashboard from '../../pages/trabajador/Dashboard';
@@ -30,7 +31,7 @@ const AppRoutes = () => {
       {/* Rutas públicas */}
       <Route path="/" element={<Home />} />
       <Route path="/auth" element={<Auth />} />
-      <Route path="/callback" element={<Callback />} /> 
+      <Route path="/callback" element={<Callback />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/subscriptions" element={<Subscriptions />} />
       <Route path="/advertise" element={<Advertise />} />
@@ -43,6 +44,15 @@ const AppRoutes = () => {
             <Postulate />
           </ProtectedRoute>
         } 
+      />
+
+      <Route
+        path="/cliente/feed"
+        element={
+          <ProtectedRoute allowedRoles={['Clientes']}>
+            <Clientefeed />
+          </ProtectedRoute>
+        }
       />
 
       {/* Perfil unificado - Todos los autenticados */}
