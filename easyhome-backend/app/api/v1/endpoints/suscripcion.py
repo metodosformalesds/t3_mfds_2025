@@ -24,3 +24,17 @@ router = APIRouter(
     tags=["Suscripciones"]
 )
 
+# ────────────────────────────────────────────────
+# GET /api/v1/suscripciones/planes
+# ────────────────────────────────────────────────
+@router.get("/planes")
+def listar_planes(db: Session = Depends(get_db)):
+    """
+    Devuelve la lista de planes de suscripción activos.
+    """
+    planes = db.query(Plan_Suscripcion).filter(Plan_Suscripcion.estado == "activo").all()
+    if not planes:
+        raise HTTPException(status_code=404, detail="No hay planes disponibles.")
+    return planes
+
+
