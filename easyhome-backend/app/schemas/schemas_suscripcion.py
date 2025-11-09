@@ -25,3 +25,19 @@ class CheckoutRequest(BaseModel):
 class CheckoutResponse(BaseModel):
     checkout_url: str
     session_id: str
+
+
+# ────────────────────────────────────────────────
+# Esquema de respuesta para historial de suscripciones
+# ────────────────────────────────────────────────
+class HistorialSuscripcionResponse(BaseModel):
+    id_historial_suscripcion: int
+    id_plan: int
+    estado: str
+    monto_pagado: float
+    fecha_inicio: str | None
+    fecha_fin: str | None
+
+    class Config:
+        orm_mode = True
+
