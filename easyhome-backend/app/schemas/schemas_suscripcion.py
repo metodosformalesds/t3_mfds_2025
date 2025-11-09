@@ -7,3 +7,13 @@
 #   de entrada y salida relacionados con las suscripciones y pagos.
 # ────────────────────────────────────────────────
 
+from pydantic import BaseModel
+
+# ────────────────────────────────────────────────
+# Solicitud para crear una sesión de pago en Stripe
+# ────────────────────────────────────────────────
+class CheckoutRequest(BaseModel):
+    id_proveedor: int
+    id_plan: int
+    success_url: str
+    cancel_url: str
