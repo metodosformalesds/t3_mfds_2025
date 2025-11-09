@@ -21,7 +21,7 @@
   color: #000000;
   margin-bottom: 40px;
   font-family: Poppins, sans-serif;
-  font-size: 20px; 
+  font-size: 15px; 
 }
 
 .plans-container {
@@ -86,43 +86,19 @@
 
 /* botones */
 .plan-button {
-  background-color: #ffffff;
-  color: #000000;
-  border: 2px solid #16394F;
+  background-color: #16394F;
+  color: #ffffff;
   padding: 10px 20px; 
   border-radius: 5px;
-  cursor: pointer;
+  border: none;
   font-size: 14px; 
   width: 100%;
 }
 
-.plan-button:hover {
-  background-color: #16394f70;
-}
-
-.plan-card-featured {
-  margin-top: -180px;
-
-}
-
-.plan-card-featured .plan-card {
-  background-color: #385d745b;
-
-}
-
-.plan-card-featured .plan-button {
-  background: #385d745b;
-
-}
-
-.plan-card-featured .plan-button:hover {
-  background-color: #385d7483;
-
-}
-
-.plan-card:nth-child(1),
-.plan-card:nth-child(3) {
-  transform: translateY(60px); 
+.plan-card:hover {
+    background-color: #ccd7de; 
+    border-color: #ccd7de;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 }
 
 /* Seccion: tabla de comparacion */
@@ -286,85 +262,100 @@
 
 
 /* Seccion: preguntas frecuentes */
-.faq-section-container {
+/* --- ESTILOS GENERALES --- */
+.faq-section {
     padding: 60px 20px;
-    max-width: 750px;
+    text-align: center;
+    font-family: 'Nunito Sans', sans-serif;
+    background-color: white; 
+}
+
+.faq-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 40px;
+    color: #333;
+}
+
+.faq-accordion {
+    max-width: 800px;
     margin: 0 auto;
+}
+
+/* --- ESTILOS DEL ITEM INDIVIDUAL --- */
+.faq-item {
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.3s ease;
+    overflow: hidden; /* Oculta el contenido antes del despliegue */
+}
+
+.faq-item:hover {
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* --- ESTILOS DE LA CABECERA (BOTÓN) --- */
+.faq-question-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    background: white;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    transition: background-color 0.3s;
+}
+
+/* Estilo para el borde del item activo (color morado) */
+.faq-item.active {
+    border-color: #0b2f4a; /* Morado */
+    box-shadow: 0 0 0 2px #0b2f4a; 
+}
+
+/* --- ICONOS Y FLECHA --- */
+.faq-icon {
+    font-size: 18px;
+    margin-right: 15px;
+    color: #555;
+    width: 25px; /* Ancho fijo para alinear los iconos */
     text-align: center;
 }
 
-.faq-list {
-    text-align: left;
-}
-
-/* Contenedor de la Pregunta */
-.faq-item {
-    border-left: 1px solid #e0e0e0;
-    border-right: 1px solid #e0e0e0;
-    margin-bottom: 0; 
-    overflow: hidden;
-}
-
-.faq-item:first-child {
-    border-top: 1px solid #e0e0e0;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-}
-
-.faq-item:last-child {
-    border-bottom: 1px solid #e0e0e0;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-}
-
-/* Botón de la Pregunta */
-.faq-question-button {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: 18px 20px; 
-    background-color: #ffffff; 
-    border: none;
-    cursor: pointer;
-    text-align: left;
-    font-size: 18px;
-    font-weight: 400; 
-    color: #000000;
-}
-
-.faq-question-button:hover {
-    background-color: #f7f7f7;
-}
-
-/* Pregunta */
-.faq-question-content {
-    display: flex;
-    align-items: center;
-    gap: 15px; 
-}
-
-/* Icono de flecha */
-.faq-chevron {
+.faq-arrow {
+    margin-left: auto; /* Empuja la flecha a la derecha */
     transition: transform 0.3s ease;
-    color: #000000;
-    stroke-width: 2.5;
 }
 
-.faq-chevron.rotate {
+/* Gira la flecha cuando el ítem está activo */
+.faq-item.active .faq-arrow {
     transform: rotate(180deg);
 }
 
-/* Panel de respuesta */
-.faq-answer {
-    padding: 10px 20px 20px 60px; 
-    color: #000000;
-    line-height: 1.6;
-    border-top: 1px solid #f0f0f0; 
+/* --- ESTILOS DE LA RESPUESTA (CONTENIDO DESPLEGABLE) --- */
+.faq-answer-content {
+    /* Clave para la animación de altura en React/JS */
+    max-height: 0; 
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+    background-color: #f9f9f9;
+    padding: 0 20px; /* Relleno inicial de 0 */
 }
 
-.faq-answer p {
+/* Estilo para mostrar la respuesta (manejar la altura con JS) */
+.faq-item.active .faq-answer-content {
+    max-height: 200px; /* Suficientemente grande para el contenido */
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+}
+
+.faq-answer-content p {
     margin: 0;
-    font-family: Nunito Sans, sans-serif;
-    font-size: 16px;
+    font-size: 15px;
+    color: #555;
+    line-height: 1.5;
 }

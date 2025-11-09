@@ -78,3 +78,56 @@ export const hasAnyRole = (user, allowedRoles) => {
   const groups = getUserGroups(user);
   return allowedRoles.some(role => groups.includes(role));
 };
+
+/**
+ * Verifica si el usuario puede crear publicaciones (es trabajador)
+ * @param {Object} user - Usuario de react-oidc-context
+ * @returns {boolean}
+ */
+export const canCreatePublication = (user) => {
+  return isWorker(user);
+};
+
+/**
+ * Verifica si el usuario puede ver el panel de trabajador
+ * @param {Object} user - Usuario de react-oidc-context
+ * @returns {boolean}
+ */
+export const canAccessWorkerPanel = (user) => {
+  return isWorker(user);
+};
+
+/**
+ * Verifica si el usuario puede editar su perfil de trabajador
+ * @param {Object} user - Usuario de react-oidc-context
+ * @returns {boolean}
+ */
+export const canEditWorkerProfile = (user) => {
+  return isWorker(user);
+};
+
+/**
+ * Verifica si el usuario puede contratar servicios
+ * @param {Object} user - Usuario de react-oidc-context
+ * @returns {boolean}
+ */
+export const canHireServices = (user) => {
+  return isClient(user);
+};
+
+/**
+ * Obtiene las capacidades/permisos del usuario
+ * @param {Object} user - Usuario de react-oidc-context
+ * @returns {Object} Objeto con booleanos de capacidades
+ */
+export const getUserCapabilities = (user) => {
+  return {
+    canCreatePublication: canCreatePublication(user),
+    canAccessWorkerPanel: canAccessWorkerPanel(user),
+    canEditWorkerProfile: canEditWorkerProfile(user),
+    canHireServices: canHireServices(user),
+    isWorker: isWorker(user),
+    isClient: isClient(user),
+    isAdmin: isAdmin(user),
+  };
+};
