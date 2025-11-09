@@ -67,3 +67,40 @@ def crear_checkout_session(db: Session, id_proveedor: int, id_plan: int, success
 
     return {"checkout_url": session.url, "session_id": session.id}
 
+# Webhook para confirmar pago
+def manejar_webhook_stripe(db: Session, request: Request, endpoint_secret: str):
+    """
+    Maneja los eventos enviados por Stripe (pago completado o fallido).
+    """
+
+    payload = request.body()
+    sig_header = request.headers.get("stripe-signature")
+
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+    except stripe.error.SignatureVerificationError:
+        raise HTTPException(status_code=400, detail="Firma Stripe inválida")
+
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+
+        # Buscar la suscripción correspondiente en la base
+        historial = db.query(Historial_Suscripcion).filter(
+            Historial_Suscripcion.id_pago_stripe == session["id"]
+        ).first()
+
+        if historial:
+            historial.estado = "activa"
+            historial.fecha_inicio = datetime.utcnow()
+
+            # Actualizar el plan actual del proveedor
+            proveedor = db.query(Proveedor_Servicio).filter(
+                Proveedor_Servicio.id_proveedor == historial.id_proveedor
+            ).first()
+
+            if proveedor:
+                proveedor.id_plan_suscripcion = historial.id_plan
+
+            db.commit()
+
+    return {"status": "success"}
