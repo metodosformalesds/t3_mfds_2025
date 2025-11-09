@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,200;0,300;0,400;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+:root {
+    --primary-color: #16394f; 
+    --border-color: #D3D3D3;
+    --text-color: #333;
+    --placeholder-color: #888;
+    --background-light: #f9f9f9;
+}
+
+.form-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: white;
+    font-family: Nunito Sans, sans-serif;
+}
+
+.form-title {
+    text-align: center;
+    font-size: 25px;
+    font-family: Poppins, sans-serif;
+    margin-bottom: 30px;
+    color: var(--text-color);
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.required-star {
+    color: red; 
+    margin-left: 3px; 
+    font-weight: bold; 
+}
+
+input[type="text"], 
+input[type="number"], 
+select, 
+textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+    color: var(--text-color);
+}
+
+.custom-select-wrapper {
+    position: relative; 
+    display: block;
+}
+
+.custom-select-wrapper select {
+    /* Ocultar la flecha nativa */
+    -webkit-appearance: none; 
+    -moz-appearance: none;    
+    appearance: none;         
+    
+    padding-right: 30px; 
+    width: 100%; 
+}
+
+.select-icon {
+    position: absolute;
+    top: 50%; 
+    right: 20px; 
+    transform: translateY(-50%); 
+    pointer-events: none; 
+}
+
+.select-icon svg {
+    width: 12px; 
+    height: 12px;
+    display: block; 
+}
