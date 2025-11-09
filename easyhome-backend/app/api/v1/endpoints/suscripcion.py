@@ -104,3 +104,14 @@ def obtener_historial_suscripciones(id_proveedor: int, db: Session = Depends(get
     if not historial:
         raise HTTPException(status_code=404, detail="Sin historial de suscripciones.")
     return historial
+
+# ────────────────────────────────────────────────
+# POST /api/v1/suscripciones/cancelar/{id_proveedor}
+# ────────────────────────────────────────────────
+@router.post("/cancelar/{id_proveedor}")
+def cancelar_plan(id_proveedor: int, db: Session = Depends(get_db)):
+    """
+    Cancela la suscripción activa de un proveedor en la base de datos
+    y lo regresa al plan gratuito por defecto.
+    """
+    return cancelar_suscripcion(db, id_proveedor)
