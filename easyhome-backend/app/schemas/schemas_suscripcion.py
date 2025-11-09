@@ -41,3 +41,9 @@ class HistorialSuscripcionResponse(BaseModel):
     class Config:
         orm_mode = True
 
+# ────────────────────────────────────────────────
+# Esquema de respuesta para el plan actual
+# ────────────────────────────────────────────────
+class PlanActualResponse(BaseModel):
+    plan_actual: str
+    precio: float | None = None
