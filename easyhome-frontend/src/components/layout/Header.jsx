@@ -11,8 +11,8 @@ function Header() {
   };
 
   const handleLogout = () => {
-    const clientId = "478qnp7vk39jamq13sl8k4sp7t";
-    const logoutUri = "http://localhost:5173";
+    const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID || "478qnp7vk39jamq13sl8k4sp7t";
+    const logoutUri = import.meta.env.VITE_APP_URL || window.location.origin;
     const cognitoDomain = "https://us-east-1gbsgbtrls.auth.us-east-1.amazoncognito.com";
     
     // Primero remover el usuario localmente
