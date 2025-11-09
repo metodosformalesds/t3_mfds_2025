@@ -28,9 +28,7 @@ class ServiceFormResponse(BaseModel):
 
 @router.post("/" , response_model=ServiceFormCreate, status_code=201)
 async def formulario_crear_servicio(form: ServiceFormCreate, db: Session = Depends(get_db)):
-    """
-    Crea un nuevo formulario de servicio.
-    """
+
 
     try:
         new_form = Publicacion_Servicio(
