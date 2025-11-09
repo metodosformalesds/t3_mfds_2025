@@ -65,4 +65,25 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
     endpoint_secret = "whsec_TU_SECRET_DE_WEBHOOK"
     return manejar_webhook_stripe(db, request, endpoint_secret)
 
+# ────────────────────────────────────────────────
+# GET /api/v1/suscripciones/actual/{id_proveedor}
+# ────────────────────────────────────────────────
+@router.get("/actual/{id_proveedor}")
+def obtener_plan_actual(id_proveedor: int, db: Session = Depends(get_db)):
+    """
+    Devuelve la información del plan actual de un proveedor.
+    """
+    proveedor = db.query(Proveedor_Servicio).filter(
+        Proveedor_Servicio.id_proveedor == id_proveedor
+    ).first()
+    if not proveedor:
+        raise HTTPException(status_code=404, detail="Proveedor no encontrado.")
+
+    if not proveedor.id_plan_suscripcion:
+        return {"plan_actual": "Gratis"}
+
+    plan = db.query(Plan_Suscripcion).filter(
+        Plan_Suscripcion.id_plan == proveedor.id_plan_suscripcion
+    ).first()
+    return {"plan_actual": plan.nombre_plan, "precio": plan.precio_mensual}
 
