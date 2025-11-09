@@ -1,8 +1,7 @@
 // hooks/useCognitoSync.js
 import { useEffect } from 'react';
 import { useAuth } from 'react-oidc-context';
-
-const API_URL = 'http://localhost:8000';
+import apiClient from '../config/api';
 
 export const useCognitoSync = () => {
   const auth = useAuth();
@@ -19,22 +18,11 @@ export const useCognitoSync = () => {
             cognito_groups: auth.user.profile['cognito:groups'] || []
           };
 
-          const response = await fetch(`${API_URL}/api/v1/auth/sync-cognito-user`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(userData)
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            console.log('Usuario sincronizado:', data);
-          } else {
-            console.error('Error al sincronizar usuario:', response.statusText);
-          }
+          const response = await apiClient.post('/api/v1/auth/sync-cognito-user', userData);
+          
+          console.log('Usuario sincronizado:', response.data);
         } catch (error) {
-          console.error('Error al sincronizar usuario con la BD:', error);
+          console.error('Error al sincronizar usuario con la BD:', error.response?.data || error.message);
         }
       }
     };
