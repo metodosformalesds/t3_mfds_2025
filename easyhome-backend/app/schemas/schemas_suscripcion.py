@@ -17,3 +17,11 @@ class CheckoutRequest(BaseModel):
     id_plan: int
     success_url: str
     cancel_url: str
+
+
+# ────────────────────────────────────────────────
+# Respuesta al crear la sesión de pago
+# ────────────────────────────────────────────────
+class CheckoutResponse(BaseModel):
+    checkout_url: str
+    session_id: str
