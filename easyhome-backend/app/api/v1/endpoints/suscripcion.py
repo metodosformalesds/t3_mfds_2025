@@ -52,3 +52,17 @@ def crear_sesion_checkout(data: CheckoutRequest, db: Session = Depends(get_db)):
         success_url=data.success_url,
         cancel_url=data.cancel_url,
     )
+
+# ────────────────────────────────────────────────
+# POST /api/v1/suscripciones/webhook
+# ────────────────────────────────────────────────
+@router.post("/webhook")
+async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
+    """
+    Webhook que recibe los eventos automáticos enviados por Stripe
+    (por ejemplo, cuando un pago es completado o cancelado).
+    """
+    endpoint_secret = "whsec_TU_SECRET_DE_WEBHOOK"
+    return manejar_webhook_stripe(db, request, endpoint_secret)
+
+
