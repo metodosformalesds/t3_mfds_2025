@@ -104,3 +104,32 @@ def manejar_webhook_stripe(db: Session, request: Request, endpoint_secret: str):
             db.commit()
 
     return {"status": "success"}
+
+# Cancelar suscripción manualmente
+def cancelar_suscripcion(db: Session, id_proveedor: int):
+    """
+    Cancela la suscripción activa del proveedor en la base de datos
+    y lo regresa al plan gratuito.
+    """
+    historial = db.query(Historial_Suscripcion).filter(
+        Historial_Suscripcion.id_proveedor == id_proveedor,
+        Historial_Suscripcion.estado == "activa"
+    ).first()
+
+    if not historial:
+        raise HTTPException(status_code=404, detail="No hay suscripción activa para cancelar")
+
+    historial.estado = "cancelada"
+    historial.fecha_fin = datetime.utcnow()
+
+    proveedor = db.query(Proveedor_Servicio).filter(
+        Proveedor_Servicio.id_proveedor == id_proveedor
+    ).first()
+
+    if proveedor:
+        proveedor.id_plan_suscripcion = None  # Regresa al plan gratuito por defecto
+
+    db.commit()
+
+    return {"message": "Suscripción cancelada correctamente"}
+
