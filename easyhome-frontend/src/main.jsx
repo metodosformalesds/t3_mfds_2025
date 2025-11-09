@@ -4,6 +4,10 @@ import App from './App.jsx'
 import './assets/styles/index.css'
 import './assets/styles/App.css'
 import { AuthProvider } from "react-oidc-context";
+import { Amplify } from 'aws-amplify';
+import awsConfig from './aws-config';
+
+Amplify.configure(awsConfig);
 
 const cognitoAuthConfig = {
   authority: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_GBsGBTRls",
