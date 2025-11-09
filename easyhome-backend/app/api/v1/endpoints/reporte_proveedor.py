@@ -22,7 +22,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.models import Reporte_Usuario, Servicio_Contratado, Alerta_Sistema
-from app.db import get_db
+from app.core.database import get_db
 from app.schemas.reporte_schemas import ReporteCreate, ReporteResponse
 
 router = APIRouter(prefix="/reportes", tags=["Reportes"])
