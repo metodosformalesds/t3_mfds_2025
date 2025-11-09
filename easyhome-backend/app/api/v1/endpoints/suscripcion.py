@@ -87,3 +87,20 @@ def obtener_plan_actual(id_proveedor: int, db: Session = Depends(get_db)):
     ).first()
     return {"plan_actual": plan.nombre_plan, "precio": plan.precio_mensual}
 
+# ────────────────────────────────────────────────
+# GET /api/v1/suscripciones/historial/{id_proveedor}
+# ────────────────────────────────────────────────
+@router.get("/historial/{id_proveedor}")
+def obtener_historial_suscripciones(id_proveedor: int, db: Session = Depends(get_db)):
+    """
+    Devuelve el historial de todas las suscripciones realizadas por un proveedor.
+    """
+    historial = (
+        db.query(Historial_Suscripcion)
+        .filter(Historial_Suscripcion.id_proveedor == id_proveedor)
+        .order_by(Historial_Suscripcion.fecha_inicio.desc())
+        .all()
+    )
+    if not historial:
+        raise HTTPException(status_code=404, detail="Sin historial de suscripciones.")
+    return historial
