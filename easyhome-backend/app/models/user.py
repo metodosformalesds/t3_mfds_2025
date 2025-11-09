@@ -28,6 +28,7 @@ class Usuario(Base):
     estado_cuenta = Column(String(20), nullable=False, default="activo")
     metodo_autenticacion = Column(String(20), nullable=False, default="local")
     google_id = Column(String(255), nullable=True)
+    foto_perfil = Column(String(500), nullable=True)  # S3 key de la foto de perfil
     fecha_registro = Column(TIMESTAMP(timezone=True), server_default=func.now())
     ultima_sesion = Column(TIMESTAMP(timezone=True), nullable=True)
 
