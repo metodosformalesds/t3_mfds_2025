@@ -1,5 +1,6 @@
 
 import Publicaciones from '../../components/features/Publicaciones'
+
 function feed() {
   return (
     <div style={{ padding: '20px' }}>
