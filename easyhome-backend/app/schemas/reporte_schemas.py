@@ -19,3 +19,14 @@ class ReporteCreate(BaseModel):
     descripcion: str = Field(..., description="Descripción detallada del incidente o queja")
 
 
+class ReporteResponse(BaseModel):
+    """Respuesta devuelta después de crear un reporte."""
+    id_reporte: int
+    id_usuario_reportador: int
+    id_proveedor_reportado: int
+    motivo: str
+    descripcion: str
+    estado: str
+
+    class Config:
+        orm_mode = True
