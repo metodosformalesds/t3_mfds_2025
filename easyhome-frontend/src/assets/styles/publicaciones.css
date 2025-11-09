@@ -8,8 +8,9 @@
     background-color: #ffffff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); 
     font-family: Arial, sans-serif;
-    margin-left: auto; /* Centrar la tarjeta */
+    margin-left: 0; /* Centrar la tarjeta */
     margin-right: auto; /* Centrar la tarjeta */
+    margin-bottom: 30px;
 }
 
 /* --- HEADER (Avatar, Nombre, Rating) --- */
@@ -153,6 +154,7 @@
 
 .boton-perfil:hover {
     background-color: #385D74;
+    color: #ffffff; 
 }
 
 /* --- TÍTULO DE SECCIÓN ("Servicios") --- */
@@ -160,7 +162,7 @@
     margin-bottom: 25px;
     
     max-width: 780px; 
-    margin-left: auto;
+    margin-left: 0;
     margin-right: auto;
     
     padding-left: 20px; 

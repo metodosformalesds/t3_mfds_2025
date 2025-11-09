@@ -21,7 +21,6 @@ export default function Publicaciones() {
     return (
         // Usamos la clase del contenedor principal del CSS: .publicacion-card
         <section className="service-listings-section">
-            <h1 className="section-title">Servicios </h1>
             
             {/* Contenedor de la publicación individual */}
             <div className="publicacion-card">
