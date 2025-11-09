@@ -37,4 +37,18 @@ def listar_planes(db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No hay planes disponibles.")
     return planes
 
-
+# ────────────────────────────────────────────────
+# POST /api/v1/suscripciones/checkout
+# ────────────────────────────────────────────────
+@router.post("/checkout")
+def crear_sesion_checkout(data: CheckoutRequest, db: Session = Depends(get_db)):
+    """
+    Crea una sesión de pago en Stripe para el proveedor que selecciona un plan.
+    """
+    return crear_checkout_session(
+        db,
+        id_proveedor=data.id_proveedor,
+        id_plan=data.id_plan,
+        success_url=data.success_url,
+        cancel_url=data.cancel_url,
+    )
