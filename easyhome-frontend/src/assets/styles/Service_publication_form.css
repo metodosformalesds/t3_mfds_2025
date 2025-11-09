@@ -76,3 +76,112 @@ textarea {
     height: 12px;
     display: block; 
 }
+
+
+#categoria {
+    color: var(--placeholder-color); 
+    font-family: 'Nunito Sans', sans-serif;
+}
+#categoria option {
+    color: var(--text-color); 
+    font-family: 'Nunito Sans', sans-serif;
+}
+/* Estilo para el placeholder */
+::placeholder {
+    color: var(--placeholder-color);
+    opacity: 1;
+}
+:-ms-input-placeholder {
+    color: var(--placeholder-color); 
+}
+::-ms-input-placeholder {
+    color: var(--placeholder-color);
+}
+
+/* --- Estilos de la seccion para subir fotos --- */
+.file-upload-box {
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    text-align: center;
+    padding: 20px;
+    cursor: pointer;
+    background-color: var(--background-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.file-upload-label {
+    display: block;
+    cursor: pointer;
+    text-align: center;
+    align-items: center;
+}
+
+.file-upload-box p {
+    margin: 5px 0 5px 0;
+    font-size: 15px;
+    text-align: center;
+    color: var(--text-color);
+}
+
+.file-upload-box small {
+    display: block;
+    color: var(--placeholder-color);
+    text-align: center;
+}
+
+.upload-icon {
+    display: block; 
+    width: 100%; 
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.upload-icon svg {
+    width: 40px; 
+    height: 40px;
+}
+
+/* --- Estilos del Rango de Precio --- */
+.price-range {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.price-input {
+    flex-grow: 1;
+    width: auto; 
+    text-align: center;
+}
+
+.separator {
+    background-color: var(--primary-color); 
+    height: 4px; 
+    width: 20%; 
+    margin: 30px 0; 
+    border-radius: 1px; 
+}
+
+/* --- Estilo del Botón --- */
+.submit-button {
+    background-color: #16394F;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    width: 60%;
+}
+
+.submit-button:hover {
+    background-color: #2a4966; 
+}
+
