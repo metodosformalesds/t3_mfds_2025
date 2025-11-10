@@ -40,7 +40,8 @@ def get_categories(db: Session = Depends(get_db)):
     """
     try:
         categories = db.query(Categoria_Servicio).order_by(Categoria_Servicio.orden_visualizacion).all()
-        return categories
+        # Convertir explícitamente a lista de diccionarios para asegurar serialización
+        return [CategoryResponse.model_validate(cat) for cat in categories]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener categorías: {str(e)}")
 
