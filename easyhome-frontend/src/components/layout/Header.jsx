@@ -12,7 +12,7 @@ function Header() {
 
   const handleLogout = () => {
   const clientId = "478qnp7vk39jamq13sl8k4sp7t";
-  const logoutUri = "http://localhost:5173";
+  const logoutUri = "https://main.d30cfshgj52c8r.amplifyapp.com";
   const cognitoDomain = "https://us-east-1gbsgbtrls.auth.us-east-1.amazoncognito.com";
   
   auth.removeUser();
