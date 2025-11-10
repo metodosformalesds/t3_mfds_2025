@@ -11,17 +11,11 @@ function Header() {
   };
 
   const handleLogout = () => {
-    const userPoolId = import.meta.env.VITE_COGNITO_USER_POOL_ID || "us-east-1_GBsGBTRls";
-    const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID || "478qnp7vk39jamq13sl8k4sp7t";
-    const region = import.meta.env.VITE_AWS_REGION || "us-east-1";
-    const logoutUri = window.location.origin;
-    const cognitoDomain = `https://${userPoolId}.auth.${region}.amazoncognito.com`;
-    
-    // Primero remover el usuario localmente
-    auth.removeUser();
-    
-    // Luego redirigir al logout de Cognito para cerrar la sesión completamente
-    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+    // Usar el método de logout de react-oidc-context
+    // Esto manejará correctamente la URL de logout
+    auth.signoutRedirect({
+      post_logout_redirect_uri: window.location.origin
+    });
   };
 
   return (
