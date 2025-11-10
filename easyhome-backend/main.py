@@ -11,7 +11,11 @@ app = FastAPI(
 # Configurar CORS para permitir peticiones desde el frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://d84l1y8p4kdic.cloudfront.net"],
+    allow_origins=[
+        "http://localhost:5173",  # Desarrollo local
+        "https://d84l1y8p4kdic.cloudfront.net",  # CloudFront
+        "https://main.d30cfshgj52c8r.amplifyapp.com",  # Amplify App
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
