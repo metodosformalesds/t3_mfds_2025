@@ -8,9 +8,8 @@ from typing import Generator, AsyncGenerator
 from app.core.config import settings
 
 # Synchronous database engine (using psycopg2)
-sync_database_url = settings.database_url.replace("postgresql+asyncpg://", "postgresql://")
 engine = create_engine(
-    sync_database_url,
+    settings.database_url,  # Already returns sync URL (postgresql://)
     pool_pre_ping=True,  # Verify connections before using them
     echo=settings.DEBUG,  # Log SQL queries in debug mode
     pool_size=10,  # Maximum number of connections to keep in the pool

@@ -56,10 +56,12 @@ class Settings(BaseSettings):
     @property
     def database_url(self) -> str:
         """
-        Construct database URL from components or use provided DATABASE_URL
+        Construct synchronous database URL from components or use provided DATABASE_URL
+        Always returns URL compatible with psycopg2 (without +asyncpg)
         """
         if self.DATABASE_URL:
-            return self.DATABASE_URL
+            # Remove +asyncpg if present to ensure sync compatibility
+            return self.DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
         
         return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
     
@@ -68,7 +70,8 @@ class Settings(BaseSettings):
         """
         Async database URL for async database operations
         """
-        return self.database_url.replace("postgresql://", "postgresql+asyncpg://")
+        base_url = self.database_url
+        return base_url.replace("postgresql://", "postgresql+asyncpg://")
 
 
 # Global settings instance
