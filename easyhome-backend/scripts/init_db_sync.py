@@ -3,11 +3,15 @@ Script para inicializar la base de datos (VERSION SINCRONA PURA)
 Ejecutar con: python scripts/init_db_sync.py
 """
 import sys
+import os
 from pathlib import Path
 
 # Añadir el directorio raíz al path
 ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT_DIR))
+
+# Asegurarse de que cargue el .env del directorio correcto
+os.chdir(ROOT_DIR)
 
 from sqlalchemy import create_engine
 from app.core.config import settings
@@ -18,6 +22,8 @@ def main():
     print("=" * 80)
     print("INICIALIZANDO BASE DE DATOS EASYHOME (SYNC)")
     print("=" * 80)
+    print(f"\n📁 Directorio de trabajo: {os.getcwd()}")
+    print(f"📁 Directorio del script: {ROOT_DIR}")
     print(f"\n📋 Configuración:")
     print(f"   - Base de datos: {settings.DB_NAME}")
     print(f"   - Usuario: {settings.DB_USER}")

@@ -6,8 +6,27 @@ from typing import List
 import os
 from pathlib import Path
 
-# Base directory
+# Base directory (easyhome-backend/)
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# Buscar .env en múltiples ubicaciones
+def find_env_file():
+    """Busca el archivo .env en el directorio actual y directorios padre"""
+    possible_locations = [
+        BASE_DIR / ".env",  # /opt/easyhome/easyhome-backend/.env
+        BASE_DIR.parent / ".env",  # /opt/easyhome/.env
+        Path(".env"),  # ./env en el directorio actual
+    ]
+    
+    for env_path in possible_locations:
+        if env_path.exists():
+            print(f"📄 Archivo .env encontrado en: {env_path}")
+            return str(env_path)
+    
+    print(f"⚠️  No se encontró archivo .env. Buscado en: {[str(p) for p in possible_locations]}")
+    return str(BASE_DIR / ".env")  # Fallback
+
+ENV_FILE = find_env_file()
 
 
 class Settings(BaseSettings):
@@ -50,7 +69,7 @@ class Settings(BaseSettings):
     S3_REGION: str
     
     class Config:
-        env_file = os.path.join(BASE_DIR, ".env")
+        env_file = ENV_FILE
         case_sensitive = True
     
     @property
