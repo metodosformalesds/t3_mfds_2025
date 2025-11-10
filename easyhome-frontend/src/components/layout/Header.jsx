@@ -11,12 +11,13 @@ function Header() {
   };
 
   const handleLogout = () => {
-    // Usar el método de logout de react-oidc-context
-    // Esto manejará correctamente la URL de logout
-    auth.signoutRedirect({
-      post_logout_redirect_uri: window.location.origin
-    });
-  };
+  const clientId = "478qnp7vk39jamq13sl8k4sp7t";
+  const logoutUri = "http://localhost:5173";
+  const cognitoDomain = "https://us-east-1gbsgbtrls.auth.us-east-1.amazoncognito.com";
+  
+  auth.removeUser();
+  window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+};
 
   return (
     <header className="app-header">
