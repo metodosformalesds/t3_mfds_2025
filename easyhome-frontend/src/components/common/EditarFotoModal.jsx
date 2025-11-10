@@ -52,11 +52,14 @@ function EditarFotoModal({ isOpen, onClose, currentPhoto, onSave }) {
     
     setUploading(true);
     try {
-      // Aquí iría la lógica para subir la imagen al backend
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulación
+      // Llamar a la función de guardado pasada por props
+      const result = await onSave(selectedFile);
       
-      onSave(selectedFile, preview);
-      handleClose();
+      if (result?.success) {
+        handleClose();
+      } else {
+        alert(result?.error || 'Error al subir la foto');
+      }
     } catch (error) {
       console.error('Error al subir la foto:', error);
       alert('Error al subir la foto');
