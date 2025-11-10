@@ -34,7 +34,7 @@ class CategoryResponse(BaseModel):
 
 
 @router.get("/", response_model=List[CategoryResponse])
-async def get_categories(db: Session = Depends(get_db)):
+def get_categories(db: Session = Depends(get_db)):
     """
     Obtiene todas las categorías de servicios ordenadas por orden de visualización.
     """
@@ -46,7 +46,7 @@ async def get_categories(db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=CategoryResponse, status_code=201)
-async def create_category(category: CategoryCreate, db: Session = Depends(get_db)):
+def create_category(category: CategoryCreate, db: Session = Depends(get_db)):
     """
     Crea una nueva categoría de servicio.
     """
@@ -83,7 +83,7 @@ async def create_category(category: CategoryCreate, db: Session = Depends(get_db
 
 
 @router.delete("/{category_id}", status_code=204)
-async def delete_category(category_id: int, db: Session = Depends(get_db)):
+def delete_category(category_id: int, db: Session = Depends(get_db)):
     """
     Elimina una categoría de servicio.
     """
@@ -107,7 +107,7 @@ async def delete_category(category_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{category_id}", response_model=CategoryResponse)
-async def update_category(category_id: int, category_update: CategoryUpdate, db: Session = Depends(get_db)):
+def update_category(category_id: int, category_update: CategoryUpdate, db: Session = Depends(get_db)):
     """
     Actualiza una categoría de servicio.
     """
