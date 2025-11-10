@@ -25,9 +25,14 @@ const cognitoAuthConfig = {
   post_logout_redirect_uri: appUrl + "/",
   response_type: "code",
   scope: "email openid phone",
-  // Configuración manual de endpoints
+  // Configuración manual de todos los endpoints de Cognito
   metadata: {
-    end_session_endpoint: `${cognitoDomain}/logout`
+    issuer: `https://cognito-idp.${region}.amazonaws.com/${userPoolId}`,
+    authorization_endpoint: `${cognitoDomain}/oauth2/authorize`,
+    token_endpoint: `${cognitoDomain}/oauth2/token`,
+    userinfo_endpoint: `${cognitoDomain}/oauth2/userInfo`,
+    end_session_endpoint: `${cognitoDomain}/logout`,
+    jwks_uri: `https://cognito-idp.${region}.amazonaws.com/${userPoolId}/.well-known/jwks.json`
   }
 };
 
