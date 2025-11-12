@@ -5,9 +5,8 @@ import apiClient from '../config/api';
 const servicePublicationService = {
 
     /**
-     * 1️⃣ CREAR PUBLICACIÓN DE SERVICIO (POST /publicaciones/)
-     * Envía los datos del formulario de publicación de servicio a FastAPI, incluyendo fotos.
-     * @param {FormData} formData - Objeto FormData con todos los campos (texto, ID, precios, email y archivos 'fotos').
+     * Crear publicacion de servicio (
+     * @param {FormData} formData 
      */
     createPublication: async (formData) => {
     try {
