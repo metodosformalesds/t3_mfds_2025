@@ -12,6 +12,7 @@ import Perfil from '../../pages/Perfil';
 // Páginas de Cliente
 import ClienteDashboard from '../../pages/cliente/Dashboard';
 import ClienteServicios from '../../pages/cliente/Servicios';
+import ClienteFeed from '../../pages/cliente/feed';
 
 // Páginas de Trabajador
 import TrabajadorDashboard from '../../pages/trabajador/Dashboard';
