@@ -81,15 +81,14 @@ function PublicarServicio() {
     // Manejo de envío del formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("auth.user.profile:", auth.user?.profile);
 
         if (!auth?.user?.profile?.email) {
-            alert("⚠️ Error: El usuario no está autenticado o el email no se pudo extraer.");
+            alert("Error: El usuario no está autenticado o el email no se pudo extraer.");
             return;
         }
 
         if (selectedCategory === '' || fotos.length === 0) {
-            alert("⚠️ Por favor, selecciona una categoría y al menos una foto.");
+            alert("Por favor, selecciona una categoría y al menos una foto.");
             return;
         }
 
@@ -110,11 +109,8 @@ function PublicarServicio() {
             formData.append("fotos", file);
             });
 
-            console.log("📤 Enviando publicación con email:", auth.user.profile.email);
-
             // Llamada al servicio
             const response = await servicePublicationService.createPublication(formData);
-            console.log("Publicación exitosa:", response);
 
             // Mostrar mensaje inmediato
             alert(`Servicio "${response.titulo}" publicado con éxito.`);
