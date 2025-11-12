@@ -57,6 +57,14 @@ const AppRoutes = () => {
       />
 
       {/* Rutas de Cliente (prioridad 1 - incluye Google) */}
+        <Route 
+          path="/cliente/feed"
+          element={
+            <ProtectedRoute allowedRoles={['Clientes']}>
+              <ClienteFeed />
+            </ProtectedRoute>
+          }
+        />
       <Route 
         path="/cliente/dashboard" 
         element={
