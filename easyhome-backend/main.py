@@ -24,6 +24,7 @@ app.include_router(publicacion.router, prefix="/api/v1", tags=["Publicaciones"])
 app.include_router(solicitud.router, prefix="/api/v1") 
 app.include_router(perfil_proveedor.router, prefix="/api/v1")
 app.include_router(perfil_usuario.router, prefix="/api/v1")
+app.include_router(Paquete_publicitario.router, prefix="/api/v1")
 
 
 @app.get("/")
