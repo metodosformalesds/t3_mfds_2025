@@ -29,38 +29,52 @@ function PublicarServicio() {
      //Cargar categorías existentes
 
     useEffect(() => {
-
         const fetchCategories = async () => {
-
             try {
-
                 const data = await categoryService.getAll();
-
                 setCategories(data);
-
             } catch (err) {
-
                 console.error("Error al cargar categorías:", err);
-
             } finally {
-
                 setLoadingCategories(false);
-
             }
-
         };
-
-
 
         fetchCategories();
 
     }, []); // El array vacío asegura que se ejecuta solo una vez al montar
 
 
-
-    // Función para manejar el cambio de archivos
     const handleFileChange = (e) => {
-        setFotos(Array.from(e.target.files));
+        const files = Array.from(e.target.files);
+        const fotosActuales = fotos.length;
+        const espacioDisponible = 10 - fotosActuales;
+        
+        // Validar que no exceda el límite de 10 fotos
+        if (fotosActuales >= 10) {
+            alert('Ya alcanzaste el límite de 10 fotos');
+            return;
+        }
+        
+        // Validar tamaño (5MB por archivo)
+        const archivosValidos = files.filter(file => {
+            if (file.size > 5 * 1024 * 1024) {
+                alert(`${file.name} excede el tamaño máximo de 5MB`);
+                return false;
+            }
+            return true;
+        });
+        
+        // Tomar las fotos que caben dentro del límite
+        const fotosAgregar = archivosValidos.slice(0, espacioDisponible);
+        
+        if (archivosValidos.length > espacioDisponible) {
+            alert(`Solo se pueden agregar ${espacioDisponible} foto(s) más. Límite: 10 fotos`);
+        }
+        
+        setFotos([...fotos, ...fotosAgregar]);
+        
+        e.target.value = '';
     };
 
     // Manejo de envío del formulario
@@ -99,25 +113,18 @@ function PublicarServicio() {
         
         try {
             const response = await servicePublicationService.createPublication(formData);
-
             console.log("Publicación exitosa:", response);
-            alert(`Servicio "${response.titulo}" publicado con ID: ${response.id_publicacion}`);
-            
+            alert(`Servicio "${response.titulo}" publicado con éxito.`);
         } catch (error) {
             let errorMessage = "Error desconocido.";
-            
             if (error.response && error.response.data && Array.isArray(error.response.data.detail)) {
-                
                 const validationErrors = error.response.data.detail.map(err => {
                     return `${err.loc.join('.')}: ${err.msg}`;
                 }).join('\n');
-                
                 errorMessage = "Error de Validación (422):\n" + validationErrors;
-                
             } else if (error.message) {
                  errorMessage = error.message;
             }
-
             console.error("Error final:", errorMessage, error);
             alert(`FALLO DE ENVÍO:\n${errorMessage}`);
         }
@@ -190,6 +197,7 @@ function PublicarServicio() {
             </div>
             
             {/* Subir Fotos */}
+    
             <div className="form-group">
                 <label htmlFor="fotos">Agregar fotos de referencia 
                     {fotos.length > 0 && 
@@ -197,28 +205,46 @@ function PublicarServicio() {
                         ({fotos.length} seleccionada{fotos.length > 1 ? 's' : ''})
                     </span>
                     }
-                    <span className="required-star">*</span></label>
-                <div className="file-upload-box">
-                <input 
-                    type="file" 
-                    id="fotos" 
-                    multiple 
-                    accept="image/jpeg, image/png" 
-                    style={{ display: 'none' }} 
-                    required 
-                    onChange={handleFileChange}
-                />
-                <label htmlFor="fotos" className="file-upload-label">
-                    {/* ... SVG Icon ... */}
-                    <p><b>Haz click </b>para subir fotos</p>
-                    {fotos.length > 0 && (
-                    <small style={{ display: 'block', marginTop: '5px' }}>
-                        Archivos listos para enviar.
-                    </small>
-                    )}
-                    <small>JPG, PNG hasta 5MB (máximo 10 fotos)</small>
+                    <span className="required-star">*</span>
                 </label>
+                
+                <div className="file-upload-box">
+                    <input type="file" id="fotos" multiple accept="image/jpeg, image/png" style={{ display: 'none' }} 
+                        required onChange={handleFileChange} disabled={fotos.length >= 10}
+                    />
+                    <label htmlFor="fotos" className={`file-upload-label ${fotos.length >= 10 ? 'disabled' : ''}`}>
+                        {/* ... SVG Icon ... */}
+                        <p><b>Haz click </b>para subir fotos</p>
+                        {fotos.length >= 10 ? (
+                            <small style={{ color: '#d32f2f', fontWeight: 'bold' }}>
+                                Límite alcanzado (10/10 fotos)
+                            </small>
+                        ) : (
+                            <small>JPG, PNG hasta 5MB (máximo 10 fotos)</small>
+                        )}
+                    </label>
                 </div>
+
+                {/* Preview de las fotos seleccionadas */}
+                {fotos.length > 0 && (
+                    <div className="photo-previews-container">
+                        <div className="photo-previews-grid">
+                            {fotos.map((foto, index) => (
+                                <div key={index} className="photo-preview-card">
+                                    <img src={URL.createObjectURL(foto)} alt={`Preview ${index + 1}`} className="photo-preview-image"/>
+                                    <div className="photo-preview-info">
+                                        <div className="photo-preview-name" title={foto.name}>{foto.name}</div>
+                                        <div className="photo-preview-size">{(foto.size / 1024).toFixed(1)} KB
+                                        </div>
+                                    </div>
+                                    <button type="button" onClick={() => { const newFotos = fotos.filter((_, i) => i !== index);
+                                            setFotos(newFotos);}} className="photo-preview-delete"
+                                            title="Eliminar foto"> × </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Rango de precio*/}
@@ -227,24 +253,12 @@ function PublicarServicio() {
                 <div className="price-range">
                     
                     {/* Input Mínimo (Min) */}
-                    <input 
-                        type="number" 
-                        value={minPrice} 
-                        onChange={handleMinRangeChange}
-                        className="price-input min" 
-                        placeholder="Min $" 
-                    />
-                    
+                    <input type="number" value={minPrice} onChange={handleMinRangeChange} className="price-input min" 
+                        placeholder="Min $" />
                     <div className="separator"></div>
-                    
                     {/* Input Máximo (Max) */}
-                    <input 
-                        type="number" 
-                        value={maxPrice} 
-                        onChange={handleMaxRangeChange}
-                        className="price-input max" 
-                        placeholder="Max $" 
-                    />
+                    <input type="number" value={maxPrice} onChange={handleMaxRangeChange} className="price-input max" 
+                        placeholder="Max $" />
                 </div>
             </div>
             
