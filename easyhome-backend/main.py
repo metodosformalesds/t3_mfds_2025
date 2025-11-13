@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1.endpoints import example, auth, categories, solicitud, perfil_proveedor, perfil_usuario, publicacion, reporte_proveedor, perfil_cliente, Paquete_publicitario
+from app.api.v1.endpoints import example, auth, categories, solicitud, perfil_proveedor, perfil_usuario, publicacion, reporte_proveedor, perfil_cliente, Paquete_publicitario, suscripcion
 
 app = FastAPI(
     title="EasyHome Backend API",
@@ -25,6 +25,7 @@ app.include_router(perfil_cliente.router, prefix="/api/v1/perfil-cliente")
 app.include_router(publicacion.router, prefix="/api/v1", tags=["Publicaciones"])
 app.include_router(perfil_proveedor.router, prefix="/api/v1")
 app.include_router(perfil_usuario.router, prefix="/api/v1")
+app.include_router(suscripcion.router)
 app.include_router(Paquete_publicitario.router, prefix="/api/v1")
 app.include_router(reporte_proveedor.router)
 
