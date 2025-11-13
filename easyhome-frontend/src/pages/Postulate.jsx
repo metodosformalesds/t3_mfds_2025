@@ -273,11 +273,11 @@ const Postulate = () => {
               label="Servicios que ofreces"
               helpText="Selecciona todos los que apliquen"
               required={true}
-              options={categorias.map((categoria) => ({
+              options={Array.isArray(categorias) ? categorias.map((categoria) => ({
                 id: categoria.id_categoria || categoria.id,
                 value: categoria.nombre_categoria || categoria.nombre || categoria.name || 'Sin nombre',
                 label: categoria.nombre_categoria || categoria.nombre || categoria.name || 'Sin nombre',
-              }))}
+              })) : []}
               selectedValues={formData.servicios_ofrece}
               onChange={handleServicioToggle}
               loading={loadingCategorias}

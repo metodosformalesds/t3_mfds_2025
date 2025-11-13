@@ -71,14 +71,72 @@ function CancelIcon() {
     );
 }
 
-function ChevronDownIcon({ isActive }) {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" 
-          stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" 
-          className={`faq-chevron ${isActive ? 'rotate' : ''}`}>
-          <path d="m6 9 6 6 6-6"/>
-        </svg>
-    );
+function FAQSection() {
+  // Lista de preguntas y respuestas
+  const faqData = [
+    { 
+      id: 1, 
+      icon: <ExchangeIcon />,
+      question: '¿Puedo cambiar de plan en cualquier momento?', 
+      answer: 'Sí, puedes actualizar o degradar tu plan en cualquier momento desde tu panel de control. Los cambios se aplicarán en el siguiente ciclo de facturación.' 
+    },
+    { 
+      id: 2, 
+      icon: <ReceiptIcon />,
+      question: '¿Cómo funciona la facturación?', 
+      answer: 'La facturación es mensual y se realiza automáticamente a tu método de pago registrado el día que te suscribiste.' 
+    },
+    { 
+      id: 3, 
+      icon: <TaxIcon />,
+      question: '¿Existen costos ocultos o cargos adicionales?', 
+      answer: 'No, todos nuestros planes son transparentes. El precio mensual indicado es el costo total que pagarás, sin cargos ocultos.' 
+    },
+    { 
+      id: 4, 
+      icon: <CancelIcon />,
+      question: '¿Puedo cancelar mi plan cuando quiera?', 
+      answer: 'Sí, puedes cancelar tu suscripción sin penalizaciones en cualquier momento. La cancelación será efectiva al final de tu ciclo de facturación actual.' 
+    },
+  ];
+
+  // Estado para controlar qué pregunta está abierta
+  const [activeIndex, setActiveIndex] = useState(null);
+
+  const toggleFAQ = (id) => {
+    setActiveIndex(activeIndex === id ? null : id);
+  };
+
+  return (
+    <section className="faq-section">
+      <h2 className="faq-title">Preguntas Frecuentes</h2>
+      
+      <div className="faq-accordion">
+        {faqData.map((item) => (
+          <div key={item.id} className={`faq-item ${activeIndex === item.id ? 'active' : ''}`}>
+            
+            {/* Cabecera de la Pregunta */}
+            <button 
+              className="faq-question-header" 
+              onClick={() => toggleFAQ(item.id)}
+            >
+              <span className="faq-icon">{item.icon}</span>
+              <span className="faq-question-text">{item.question}</span>
+              <span className="faq-arrow">
+                {/* Ícono de la flecha rotatoria */}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </span>
+            </button>
+            
+            {/* Contenido de la Respuesta (Se despliega/pliega) */}
+            <div className="faq-answer-content">
+              <p>{item.answer}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 function Subscriptions() {
@@ -93,87 +151,54 @@ function Subscriptions() {
     <div className="subscriptions-page">
 
       {/* Seccion planes de suscripción */}
-      <br />
+      <br /><br />
       <h1>Encuentra el Plan Perfecto para Ti</h1>
       <p>Selecciona uno y obtén sus beneficios</p>
-      
-      <div className="plans-container">
-        
+      <br /><br />
+      <div className="pricing-cards-container">
         {/* Plan Básico */}
-        <div className="plan-card">
-          <div className="plan-header">
-            <h2>Básico</h2>
-          </div>
-          <div className="price">Gratis</div>
-          <ul className="features">
-            <li>
-              <CheckIcon /> 
-              1 publicación semanal</li>
-            <li>
-              <CheckIcon />
-              Acceso a la comunidad</li>
-            <li>
-              <CircleXIcon />
-              Publicaciones ilimitadas</li>
-            <li>
-              <CircleXIcon />
-              Mayor visualización en búsquedas</li>
-            <li>
-              <CircleXIcon />
-              Acceso a reportes de demanda</li>
-          </ul>
-          <button className="plan-button">Comenzar Ahora</button>
+        <div className="pricing-card">
+            <div className="card-header">Básico</div>
+            <div className="card-separator"></div>
+            <div className="card-price">Gratis</div>
+            <ul className="card-features">
+                <li><CheckIcon /> 1 publicación semanal</li>
+                <li><CheckIcon /> Acceso a la comunidad</li>
+                <li><CircleXIcon /> Publicaciones ilimitadas</li>
+                <li><CircleXIcon /> Mayor visualización en búsquedas</li>
+                <li><CircleXIcon /> Acceso a reportes de demanda</li>
+            </ul>
+            <button className="card-button">Comenzar Ahora</button>
         </div>
 
         {/* Plan Esencial */}
-        <div className="plan-card-featured">
-          <div className="plan-card">
-            <div className="plan-header">
-              <h2>Esencial</h2>
-            </div>
-            <div className="price">$7.50 USD/mes</div>
-            <ul className="features">
-              <li>
-                <CheckIcon />
-                Publicaciones ilimitadas</li>
-              <li>
-                <CheckIcon />
-                Acceso a la comunidad</li>
-              <li>
-                <CircleXIcon />
-                Mayor visualización en búsquedas</li>
-              <li>
-                <CircleXIcon />
-                Acceso a reportes de demanda</li>
+        <div className="pricing-card">
+            <div className="card-header">Esencial</div>
+            <div className="card-separator"></div>
+            <div className="card-price">$7.50 USD/mes</div>
+            <ul className="card-features">
+                <li><CheckIcon /> Publicaciones ilimitadas</li>
+                <li><CheckIcon /> Acceso a la comunidad</li>
+                <li><CircleXIcon /> Mayor visualización en búsquedas</li>
+                <li><CircleXIcon /> Acceso a reportes de demanda</li>
             </ul>
-            <button className="plan-button">Comenzar Ahora</button>
-          </div>
+            <button className="card-button">Comenzar Ahora</button>
         </div>
 
         {/* Plan Premium */}
-        <div className="plan-card">
-          <div className="plan-header">
-            <h2>Premium</h2>
-          </div>
-          <div className="price">$15.00 USD/mes</div>
-          <ul className="features">
-            <li>
-              <CheckIcon />
-              Publicaciones ilimitadas</li>
-            <li>
-              <CheckIcon />
-              Acceso a la comunidad</li>
-            <li>
-              <CheckIcon />
-              Mayor visualización en búsquedas</li>
-            <li>
-              <CheckIcon />
-              Acceso a reportes de demanda</li>
-          </ul>
-          <button className="plan-button">Comenzar Ahora</button>
-        </div>
-
-      </div> 
+        <div className="pricing-card">
+            <div className="card-header">Premium</div>
+            <div className="card-separator"></div>
+            <div className="card-price">$15.00 USD/mes</div>
+            <ul className="card-features">
+                <li><CheckIcon /> Publicaciones ilimitadas</li>
+                <li><CheckIcon /> Acceso a la comunidad</li>
+                <li><CheckIcon /> Mayor visualización en búsquedas</li>
+                <li><CheckIcon /> Acceso a reportes de demanda</li>
+            </ul>
+            <button className="card-button">Comenzar Ahora</button>
+        </div> 
+      </div>
   
       <br />
       <h1 className="comparison-title">Compara todos los planes</h1>
@@ -239,94 +264,7 @@ function Subscriptions() {
       </div> 
       
       {/* Sección preguntas frecuentes */}
-      <div className="faq-section-container">
-          <h1 className="faq-title">Preguntas Frecuentes</h1> <br />
-          <div className="faq-list">
-
-              {/* Pregunta 1 */}
-              <div className="faq-item">
-                  <button 
-                      className="faq-question-button" 
-                      onClick={() => togglePanel(0)} 
-                      aria-expanded={openIndex === 0}
-                  >
-                      <div className="faq-question-content">
-                          <ExchangeIcon /> 
-                          <span className="faq-question-text">¿Puedo cambiar de plan en cualquier momento?</span>
-                      </div>
-                      <ChevronDownIcon isActive={openIndex === 0} />
-                  </button>
-                  {openIndex === 0 && (
-                      <div className="faq-answer">
-                          <p>¡Sí, por supuesto! Puedes cambiar de plan en cualquier momento.</p>
-                      </div>
-                  )}
-              </div>
-
-              {/* Pregunta 2 */}
-              <div className="faq-item">
-                  <button 
-                      className="faq-question-button" 
-                      onClick={() => togglePanel(1)}
-                      aria-expanded={openIndex === 1}
-                  >
-                      <div className="faq-question-content">
-                          <ReceiptIcon />
-                          <span className="faq-question-text">¿Cómo funciona la facturación?</span>
-                      </div>
-                      <ChevronDownIcon isActive={openIndex === 1} />
-                  </button>
-                  
-                  {openIndex === 1 && (
-                      <div className="faq-answer">
-                          <p>El cobro se realiza el día en que te diste de alta y se repite cada mes ese mismo día.</p>
-                      </div>
-                  )}
-              </div>
-              
-              {/* Pregunta 3 */}
-              <div className="faq-item">
-                  <button 
-                      className="faq-question-button" 
-                      onClick={() => togglePanel(2)}
-                      aria-expanded={openIndex === 2}
-                  >
-                      <div className="faq-question-content">
-                          <TaxIcon />
-                          <span className="faq-question-text">¿Existen costos ocultos o cargos adicionales?</span>
-                      </div>
-                      <ChevronDownIcon isActive={openIndex === 2} />
-                  </button>
-                  
-                  {openIndex === 2 && (
-                      <div className="faq-answer">
-                          <p>No, no existen costos ocultos ni cargos adicionales. Únicamente se cobra el precio publicado de tu plan o paquete de suscripción.</p>
-                      </div>
-                  )}
-              </div>
-              
-              {/* Pregunta 4 */}
-              <div className="faq-item">
-                  <button 
-                      className="faq-question-button" 
-                      onClick={() => togglePanel(3)}
-                      aria-expanded={openIndex === 3}
-                  >
-                      <div className="faq-question-content">
-                          <CancelIcon />
-                          <span className="faq-question-text">¿Puedo cancelar mi plan cuando quiera?</span>
-                      </div>
-                      <ChevronDownIcon isActive={openIndex === 3} />
-                  </button>
-                  
-                  {openIndex === 3 && (
-                      <div className="faq-answer">
-                          <p>Sí, puedes cancelar tu plan en cualquier momento. La cancelación es inmediata y tu suscripción permanecerá activa hasta el final del ciclo de facturación que ya hayas pagado.</p>
-                      </div>
-                  )}
-              </div>
-          </div>
-      </div>
+      <FAQSection />
 
     </div>
   );

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1.endpoints import example, auth, categories, solicitud, perfil_proveedor, perfil_usuario, publicacion, formulario_servicio 
+from fastapi.middleware.cors import CORSMiddleware 
+from app.api.v1.endpoints import example, auth, categories, solicitud, perfil_proveedor, perfil_usuario, publicacion, reporte_proveedor, perfil_cliente, Paquete_publicitario, suscripcion, formulario_servicio 
 
 app = FastAPI(
     title="EasyHome Backend API",
@@ -11,7 +11,11 @@ app = FastAPI(
 # Configurar CORS para permitir peticiones desde el frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://d84l1y8p4kdic.cloudfront.net"],
+    allow_origins=[
+        "http://localhost:5173",  # Desarrollo local
+        "https://d84l1y8p4kdic.cloudfront.net",  # CloudFront
+        "https://main.d30cfshgj52c8r.amplifyapp.com",  # Amplify App
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -20,11 +24,16 @@ app.add_middleware(
 app.include_router(example.router, prefix="/api/v1")
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(categories.router, prefix="/api/v1/categories", tags=["Categories"])
+app.include_router(solicitud.router, prefix="/api/v1")  # El prefix ya está definido en el router como "/solicitudes"
+app.include_router(perfil_cliente.router, prefix="/api/v1/perfil-cliente")
 app.include_router(publicacion.router, prefix="/api/v1", tags=["Publicaciones"])
-app.include_router(solicitud.router, prefix="/api/v1") 
 app.include_router(perfil_proveedor.router, prefix="/api/v1")
 app.include_router(perfil_usuario.router, prefix="/api/v1")
 app.include_router(formulario_servicio.router, prefix="/api/v1/formulario-servicio")
+app.include_router(suscripcion.router)
+app.include_router(Paquete_publicitario.router, prefix="/api/v1")
+app.include_router(reporte_proveedor.router)
+
 
 
 @app.get("/")

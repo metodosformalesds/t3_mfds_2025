@@ -6,8 +6,27 @@ from typing import List
 import os
 from pathlib import Path
 
-# Base directory
+# Base directory (easyhome-backend/)
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# Buscar .env en múltiples ubicaciones
+def find_env_file():
+    """Busca el archivo .env en el directorio actual y directorios padre"""
+    possible_locations = [
+        BASE_DIR / ".env",  # /opt/easyhome/easyhome-backend/.env
+        BASE_DIR.parent / ".env",  # /opt/easyhome/.env
+        Path(".env"),  # ./env en el directorio actual
+    ]
+    
+    for env_path in possible_locations:
+        if env_path.exists():
+            print(f"📄 Archivo .env encontrado en: {env_path}")
+            return str(env_path)
+    
+    print(f"⚠️  No se encontró archivo .env. Buscado en: {[str(p) for p in possible_locations]}")
+    return str(BASE_DIR / ".env")  # Fallback
+
+ENV_FILE = find_env_file()
 
 
 class Settings(BaseSettings):
@@ -50,16 +69,18 @@ class Settings(BaseSettings):
     S3_REGION: str
     
     class Config:
-        env_file = os.path.join(BASE_DIR, ".env")
+        env_file = ENV_FILE
         case_sensitive = True
     
     @property
     def database_url(self) -> str:
         """
-        Construct database URL from components or use provided DATABASE_URL
+        Construct synchronous database URL from components or use provided DATABASE_URL
+        Always returns URL compatible with psycopg2 (without +asyncpg)
         """
         if self.DATABASE_URL:
-            return self.DATABASE_URL
+            # Remove +asyncpg if present to ensure sync compatibility
+            return self.DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
         
         return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
     
@@ -68,7 +89,8 @@ class Settings(BaseSettings):
         """
         Async database URL for async database operations
         """
-        return self.database_url.replace("postgresql://", "postgresql+asyncpg://")
+        base_url = self.database_url
+        return base_url.replace("postgresql://", "postgresql+asyncpg://")
 
 
 # Global settings instance
