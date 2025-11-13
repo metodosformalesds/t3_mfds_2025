@@ -7,16 +7,16 @@ import Unauthorized from '../../pages/auth/Unauthorized';
 import Subscriptions from '../../pages/Subscriptions';
 import Advertise from '../../pages/Advertise';
 import Postulate from '../../pages/Postulate';
+import Perfil from '../../pages/Perfil';
+import PublicarServicio from '../../pages/Service_publication_form';
 
 // Páginas de Cliente
 import ClienteDashboard from '../../pages/cliente/Dashboard';
 import ClienteServicios from '../../pages/cliente/Servicios';
-import ClientePerfil from '../../pages/cliente/Perfil';
 
 // Páginas de Trabajador
 import TrabajadorDashboard from '../../pages/trabajador/Dashboard';
 import TrabajadorServicios from '../../pages/trabajador/Servicios';
-import TrabajadorPerfil from '../../pages/trabajador/Perfil';
 
 // Páginas de Admin
 import AdminDashboard from '../../pages/admin/AdminDashboard';
@@ -24,6 +24,7 @@ import AdminCategories from '../../pages/admin/AdminCategories';
 import AdminUsuarios from '../../pages/admin/AdminUsuarios';
 import AdminReportes from '../../pages/admin/AdminReportes';
 import AdminSolicitudes from '../../pages/admin/AdminSolicitudes';
+
 
 const AppRoutes = () => {
   return (
@@ -35,6 +36,7 @@ const AppRoutes = () => {
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/subscriptions" element={<Subscriptions />} />
       <Route path="/advertise" element={<Advertise />} />
+      <Route path="/publicarservicio" element={<PublicarServicio />} />
       
       {/* Ruta de postulación - Solo para clientes autenticados */}
       <Route 
@@ -42,6 +44,16 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['Clientes']}>
             <Postulate />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Perfil unificado - Todos los autenticados */}
+      <Route 
+        path="/perfil" 
+        element={
+          <ProtectedRoute allowedRoles={['Clientes', 'Trabajadores', 'Admin']}>
+            <Perfil />
           </ProtectedRoute>
         } 
       />
@@ -63,14 +75,6 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } 
       />
-      <Route 
-        path="/cliente/perfil" 
-        element={
-          <ProtectedRoute allowedRoles={['Clientes']}>
-            <ClientePerfil />
-          </ProtectedRoute>
-        } 
-      />
 
       {/* Rutas de Trabajador (prioridad 2) */}
       <Route 
@@ -86,14 +90,6 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['Trabajadores']}>
             <TrabajadorServicios />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/trabajador/perfil" 
-        element={
-          <ProtectedRoute allowedRoles={['Trabajadores']}>
-            <TrabajadorPerfil />
           </ProtectedRoute>
         } 
       />

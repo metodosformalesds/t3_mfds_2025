@@ -97,6 +97,68 @@ class CognitoService:
             logger.error(f"Error inesperado al obtener grupos: {e}")
             return []
     
+    def get_user_attributes(self, username: str) -> dict:
+        """
+        Obtiene los atributos del usuario desde Cognito
+        (por ejemplo: name, given_name, family_name, email, etc.)
+        """
+        if not self.client or not self.user_pool_id:
+            logger.warning("Cliente de Cognito no configurado")
+            return {}
+        
+        try:
+            response = self.client.admin_get_user(
+                UserPoolId=self.user_pool_id,
+                Username=username
+            )
+            attributes = {attr['Name']: attr['Value'] for attr in response.get('UserAttributes', [])}
+            logger.info(f"Atributos obtenidos para {username}: {attributes}")
+            return attributes
+        except ClientError as e:
+            logger.error(f"Error al obtener atributos del usuario {username}: {e}")
+            return {}
+        except Exception as e:
+            logger.error(f"Error inesperado al obtener atributos del usuario {username}: {e}")
+            return {}
+
+    def get_user_by_email(self, email: str) -> dict:
+        """
+        Busca un usuario en Cognito por su correo electrónico
+        y devuelve sus atributos si existe.
+        """
+        if not self.client or not self.user_pool_id:
+            logger.warning("Cliente de Cognito no configurado")
+            return {}
+
+        try:
+            # Busca al usuario por correo (case-insensitive)
+            response = self.client.list_users(
+                UserPoolId=self.user_pool_id,
+                Filter=f'email = "{email}"',
+                Limit=1
+            )
+
+            # 🔍 DEBUG: mostrar la respuesta cruda de Cognito
+            print("DEBUG RESPONSE:", response)
+
+            users = response.get("Users", [])
+            if not users:
+                logger.warning(f"No se encontró usuario con el correo {email}")
+                return {}
+
+            username = users[0]["Username"]
+            logger.info(f"Usuario encontrado: {username} para {email}")
+
+            # Obtén atributos reales con admin_get_user
+            return self.get_user_attributes(username)
+
+        except ClientError as e:
+            logger.error(f"Error al buscar usuario por correo {email}: {e}")
+            return {}
+        except Exception as e:
+            logger.error(f"Error inesperado al buscar usuario por correo {email}: {e}")
+            return {}
+    
     def ensure_user_has_default_group(self, username: str, current_groups: list[str] = None) -> bool:
         """
         Asegura que un usuario tenga al menos el grupo por defecto (Clientes)
