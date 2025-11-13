@@ -152,6 +152,12 @@ def listar_publicaciones(
         
         resultado = []
         for pub in publicaciones:
+            # Obtener la imagen de portada (la de menor orden)
+            url_imagen_portada = None
+            if pub.imagen_publicacion and len(pub.imagen_publicacion) > 0:
+                portada = sorted(pub.imagen_publicacion, key=lambda x: x.orden)[0]
+                url_imagen_portada = s3_service.get_presigned_url(portada.url_imagen)
+
             resultado.append({
                 "id_publicacion": pub.id_publicacion,
                 "titulo": pub.titulo,
@@ -164,7 +170,7 @@ def listar_publicaciones(
                 "categoria": "Test",
                 "rango_precio_min": pub.rango_precio_min,
                 "rango_precio_max": pub.rango_precio_max,
-                "url_imagen_portada": None,
+                "url_imagen_portada": url_imagen_portada,
                 "id_plan_suscripcion": None,
             })
         
