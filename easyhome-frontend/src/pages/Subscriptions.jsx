@@ -151,54 +151,85 @@ function Subscriptions() {
     <div className="subscriptions-page">
 
       {/* Seccion planes de suscripción */}
-      <br /><br />
+      <br />
       <h1>Encuentra el Plan Perfecto para Ti</h1>
       <p>Selecciona uno y obtén sus beneficios</p>
-      <br /><br />
-      <div className="pricing-cards-container">
+      
+      <div className="plans-container">
+        
         {/* Plan Básico */}
-        <div className="pricing-card">
-            <div className="card-header">Básico</div>
-            <div className="card-separator"></div>
-            <div className="card-price">Gratis</div>
-            <ul className="card-features">
-                <li><CheckIcon /> 1 publicación semanal</li>
-                <li><CheckIcon /> Acceso a la comunidad</li>
-                <li><CircleXIcon /> Publicaciones ilimitadas</li>
-                <li><CircleXIcon /> Mayor visualización en búsquedas</li>
-                <li><CircleXIcon /> Acceso a reportes de demanda</li>
-            </ul>
-            <button className="card-button">Comenzar Ahora</button>
+        <div className="plan-card">
+          <div className="plan-header">
+            <h2>Básico</h2>
+          </div>
+          <div className="price">Gratis</div>
+          <ul className="features">
+            <li>
+              <CheckIcon /> 
+              1 publicación semanal</li>
+            <li>
+              <CheckIcon />
+              Acceso a la comunidad</li>
+            <li>
+              <CircleXIcon />
+              Publicaciones ilimitadas</li>
+            <li>
+              <CircleXIcon />
+              Mayor visualización en búsquedas</li>
+            <li>
+              <CircleXIcon />
+              Acceso a reportes de demanda</li>
+          </ul>
+          <button className="plan-button">Comenzar Ahora</button>
         </div>
 
         {/* Plan Esencial */}
-        <div className="pricing-card">
-            <div className="card-header">Esencial</div>
-            <div className="card-separator"></div>
-            <div className="card-price">$7.50 USD/mes</div>
-            <ul className="card-features">
-                <li><CheckIcon /> Publicaciones ilimitadas</li>
-                <li><CheckIcon /> Acceso a la comunidad</li>
-                <li><CircleXIcon /> Mayor visualización en búsquedas</li>
-                <li><CircleXIcon /> Acceso a reportes de demanda</li>
-            </ul>
-            <button className="card-button">Comenzar Ahora</button>
+        <div className="plan-card">
+          <div className="plan-header">
+            <h2>Esencial</h2>
+          </div>
+          <div className="price">$7.50 USD/mes</div>
+          <ul className="features">
+            <li>
+              <CheckIcon />
+              Publicaciones ilimitadas</li>
+            <li>
+              <CheckIcon />
+              Acceso a la comunidad</li>
+            <li>
+              <CircleXIcon />
+              Mayor visualización en búsquedas</li>
+            <li>
+              <CircleXIcon />
+              Acceso a reportes de demanda</li>
+          </ul>
+          <button className="plan-button">Comenzar Ahora</button>
         </div>
 
         {/* Plan Premium */}
-        <div className="pricing-card">
-            <div className="card-header">Premium</div>
-            <div className="card-separator"></div>
-            <div className="card-price">$15.00 USD/mes</div>
-            <ul className="card-features">
-                <li><CheckIcon /> Publicaciones ilimitadas</li>
-                <li><CheckIcon /> Acceso a la comunidad</li>
-                <li><CheckIcon /> Mayor visualización en búsquedas</li>
-                <li><CheckIcon /> Acceso a reportes de demanda</li>
-            </ul>
-            <button className="card-button">Comenzar Ahora</button>
-        </div> 
-      </div>
+        <div className="plan-card">
+          <div className="plan-header">
+            <h2>Premium</h2>
+          </div>
+          <div className="price">$15.00 USD/mes</div>
+          <ul className="features">
+            <li>
+              <CheckIcon />
+              Publicaciones ilimitadas</li>
+            <li>
+              <CheckIcon />
+              Acceso a la comunidad</li>
+            <li>
+              <CheckIcon />
+              Mayor visualización en búsquedas</li>
+            <li>
+              <CheckIcon />
+              Acceso a reportes de demanda</li>
+          </ul>
+          <button className="plan-button">Comenzar Ahora</button>
+        </div>
+
+      </div> 
   
       <br />
       <h1 className="comparison-title">Compara todos los planes</h1>
