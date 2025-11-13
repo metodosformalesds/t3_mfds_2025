@@ -2,104 +2,133 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
 /* Seccion: planes */
-
-.subscriptions-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-  text-align: center;
+.pricing-section {
+    padding: 60px 20px;
+    text-align: center;
+    font-family: 'Nunito Sans', sans-serif;
+    background-color: white; 
 }
 
-.subscriptions-page h1 {
-  color: #000000;
-  margin-bottom: 10px;
-  font-family: Poppins, sans-serif;
-  font-size: 40px; 
+.pricing-title {
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 15px;
+    color: #333;
 }
 
-.subscriptions-page p {
-  color: #000000;
-  margin-bottom: 40px;
-  font-family: Poppins, sans-serif;
-  font-size: 15px; 
+.pricing-subtitle {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 40px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
 }
 
-.plans-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 40px; 
-  flex-wrap: wrap;
+/* --- Contenedor de Tarjetas --- */
+.pricing-cards-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: stretch; 
+    flex-wrap: wrap; /* Para responsividad */
 }
 
-.plan-card {
-  border: 2px solid #16394F;
-  border-radius: 20px;
-  padding: 20px 15px;
-  width: 250px;
-  background: white;
+/* --- Estilos Base de Cada Tarjeta --- */
+.pricing-card {
+    flex: 1 1 300px; 
+    border-radius: 15px; 
+    background-color: white; 
+    border: 2px solid #0d2644; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); 
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; 
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; 
 }
 
-.plan-header {
-  border-bottom: 2px solid #16394F; 
-  padding-bottom: 10px; 
-  margin-bottom: 10px;
+/* --- Nuevos estilos para la estructura interna --- */
+.card-header {
+    font-size: 24px;
+    font-weight: 800;
+    padding: 30px 30px 10px 30px;
+    text-align: left;
+    color: #333;
 }
 
-.plan-card h2 {
-  color: #000000;
-  margin-bottom: 0px;
-  font-family: Poppins, sans-serif;
-  text-align: left;
-  font-size: 20px; 
+.card-separator {
+    width: calc(100% - 60px); 
+    height: 2px;
+    background-color: #0d2644; 
+    margin: 0 30px 15px 30px; 
 }
 
-.price {
-  font-size: 20px; 
-  font-weight: bold;
-  color: #000000;
-  margin-bottom: 15px; 
+.card-price {
+    font-size: 30px;
+    font-weight: 700;
+    color: #333;
+    padding: 10px 30px 30px 30px;
+    text-align: center;
 }
 
-.features {
-  list-style: none;
-  padding: 0;
-  margin-bottom: 20px; 
-  text-align: left;
+.card-features {
+    list-style: none; 
+    padding: 0 30px;
+    margin: 0;
+    flex-grow: 1;
 }
 
-.features li {
-  display: flex;
-  align-items: center;
-  gap: 8px; 
-  padding: 6px 0; 
-  font-size: 14px; 
-  color: #000000;
+/* Estilos aplicados al <li>  */
+.card-features li {
+    display: flex; 
+    align-items: center;
+    font-size: 16px;
+    margin-bottom: 15px;
+    text-align: left;
+    line-height: 1.4;
+    color: #555;
 }
 
-.features li svg {
-  color: #28a745;
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
+/* Estilos aplicados al <svg> */
+.card-features li svg {
+    margin-right: 10px;
+    flex-shrink: 0;
 }
 
-/* botones */
-.plan-button {
-  background-color: #16394F;
-  color: #ffffff;
-  padding: 10px 20px; 
-  border-radius: 5px;
-  border: none;
-  font-size: 14px; 
-  width: 100%;
+/* --- Nuevos estilos para el Botón --- */
+.card-button {
+    display: block;
+    width: calc(100% - 60px); 
+    padding: 15px 20px;
+    margin: 30px 30px 30px 30px; 
+    background-color: #0d2644; 
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    border-radius: 5px; 
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-.plan-card:hover {
-    background-color: #ccd7de; 
-    border-color: #ccd7de;
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+.card-button:hover {
+    background-color: #1a3a5e; 
 }
+
+
+
+/* --- HOVER  --- */
+.pricing-card:hover {
+    background-color: #E1E8ED; 
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    transform: translateY(-5px);
+}
+
 
 /* Seccion: tabla de comparacion */
 
