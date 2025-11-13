@@ -1,21 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import Publicaciones from '../../components/features/Publicaciones'
 import Filtros from '../../components/features/filters'
-// import PremiumMembers from '../../components/features/PremiumMembers'
+import PremiumMembers from '../../components/features/PremiumMembers'
 
-import usePublicaciones from '../../hooks/usePublicaciones';
+import api from '../../config/api';
+const API_BASE_URL = api.BASE_URL;
 
 function Feed() {
-  // Filtros activos
+  //Para datos obtenidos
+  const [publicaciones, setPublicaciones] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [filtrosActivos, setFiltrosActivos] = useState({
     categorias: [],
     suscriptores: false,
     ordenar_por: null,
   });
 
-  // Hook para obtener publicaciones
-  const { publicaciones, isLoading, error } = usePublicaciones(filtrosActivos);
+  //Llamada a la API 
+  useEffect(() => {
+    setIsLoading(true);
+    setError(null);
 
+    //Query string basada en el estado 'filtrosActivos'
+    const params=new URLSearchParams();
+
+    //Filtro por categorias
+    if (filtrosActivos.categorias && filtrosActivos.categorias.length > 0) {
+      filtrosActivos.categorias.forEach(catID => params.append('categorias', catID));
+    }
+    
+    //Filtro por suscriptores premium
+    if (filtrosActivos.suscriptores) {
+        params.append('suscriptores', 'true');
+    }
+
+    //ordenamiento
+    if (filtrosActivos.ordenar_por) {
+        params.append('ordenar_por', filtrosActivos.ordenar_por);
+    }
+
+    const endpoint = `${API_BASE_URL}/publicaciones/?${params.toString()}`;
+
+    // 2. Ejecutar la llamada
+    fetch(endpoint)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al cargar las publicaciones: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            setPublicaciones(data);
+        })
+        .catch(err => {
+            console.error("Fetch error:", err);
+            setError(err.message);
+        })
+        .finally(() => {
+            setIsLoading(false);
+        });
+
+    }, [filtrosActivos]); // <--- La dependencia hace que se recargue cuando cambian los filtros
 
     // Función que pasamos a <Filtros /> para actualizar el estado
     const aplicarFiltros = (nuevosFiltros) => {
@@ -60,6 +107,7 @@ function Feed() {
 
       {/* 3. CONTENEDOR FLEX PRINCIPAL: Muestra Filtros y Publicaciones */}
       <div style={feedContainerStyle}> 
+
           {/* SIDEBAR DE FILTROS */}
           <Filtros
               onApplyFilters={aplicarFiltros}
@@ -71,7 +119,7 @@ function Feed() {
             <h1 className="section-title"> Servicios disponibles </h1>
             {renderPublicaciones()}
           </div>
-          {/* PremiumMembers removido */}
+          <PremiumMembers/>
       </div>
     </div>
   );
