@@ -36,7 +36,7 @@ function Header() {
           </Link>
         </div>
         <ul className="nav-right">
-          <li><a href="#">Publicaciones</a></li>
+          <li><a href="/cliente/feed">Publicaciones</a></li>
           
           {auth.isAuthenticated ? (
             <>
