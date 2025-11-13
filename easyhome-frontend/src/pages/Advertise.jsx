@@ -45,42 +45,43 @@ function Advertise() {
 
                 {/* Plan Básico */}
                 <div className="pricing-card">
-                    <div className="card-header">Rotatorio</div>
+                    <div className="card-header">Básico</div>
                     <div className="card-separator"></div>
-                    <div className="card-price">$29.99 USD</div>
+                    <div className="card-price">Gratis</div>
                     <ul className="card-features">
-                        <li><CheckIcon /> Banner rotatorio</li>
-                        <li><CheckIcon /> Posicionado en el centro del sitio</li>
-                        <li><CircleXIcon /> Compartido con otros anunciantes</li>
-                        
+                        <li><CheckIcon /> 1 publicación semanal</li>
+                        <li><CheckIcon /> Acceso a la comunidad</li>
+                        <li><CircleXIcon /> Publicaciones ilimitadas</li>
+                        <li><CircleXIcon /> Mayor visualización en búsquedas</li>
+                        <li><CircleXIcon /> Acceso a reportes de demanda</li>
                     </ul>
                     <button className="card-button">Comenzar Ahora</button>
                 </div>
 
                 {/* Plan Esencial */}
                 <div className="pricing-card">
-                    <div className="card-header">Lateral</div>
+                    <div className="card-header">Esencial</div>
                     <div className="card-separator"></div>
-                    <div className="card-price">$39.99 USD/mes</div>
+                    <div className="card-price">$7.50 USD/mes</div>
                     <ul className="card-features">
-                        <li><CheckIcon /> Banner lateral</li>
-                        <li><CheckIcon /> Los clientes no dejarán de ver su marca</li>
-                        <li><CheckIcon /> Espacio exclusivo para usted</li>
+                        <li><CheckIcon /> Publicaciones ilimitadas</li>
+                        <li><CheckIcon /> Acceso a la comunidad</li>
+                        <li><CircleXIcon /> Mayor visualización en búsquedas</li>
+                        <li><CircleXIcon /> Acceso a reportes de demanda</li>
                     </ul>
                     <button className="card-button">Comenzar Ahora</button>
                 </div>
 
                 {/* Plan Premium */}
                 <div className="pricing-card">
-                    <div className="card-header">Superior</div>
+                    <div className="card-header">Premium</div>
                     <div className="card-separator"></div>
-                    <div className="card-price">$49.99 USD/mes</div>
+                    <div className="card-price">$15.00 USD/mes</div>
                     <ul className="card-features">
-                        <li><CheckIcon /> Banner superior</li>
-                        <li><CheckIcon /> Los clientes no dejarán de ver su marca</li>
-                        <li><CheckIcon /> Espacio exclusivo para usted</li>
-                        <li><CheckIcon /> Nivel más alto de visibilidad en el sitio</li>
-                        <li><CheckIcon /> El banner más grande de la plataforma</li>
+                        <li><CheckIcon /> Publicaciones ilimitadas</li>
+                        <li><CheckIcon /> Acceso a la comunidad</li>
+                        <li><CheckIcon /> Mayor visualización en búsquedas</li>
+                        <li><CheckIcon /> Acceso a reportes de demanda</li>
                     </ul>
                     <button className="card-button">Comenzar Ahora</button>
                 </div> 
