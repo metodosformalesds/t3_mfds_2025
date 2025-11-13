@@ -2,128 +2,133 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
 /* Seccion: planes */
-
-.subscriptions-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-  text-align: center;
+.pricing-section {
+    padding: 60px 20px;
+    text-align: center;
+    font-family: 'Nunito Sans', sans-serif;
+    background-color: white; 
 }
 
-.subscriptions-page h1 {
-  color: #000000;
-  margin-bottom: 10px;
-  font-family: Poppins, sans-serif;
-  font-size: 40px; 
+.pricing-title {
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 15px;
+    color: #333;
 }
 
-.subscriptions-page p {
-  color: #000000;
-  margin-bottom: 40px;
-  font-family: Poppins, sans-serif;
-  font-size: 20px; 
+.pricing-subtitle {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 40px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
 }
 
-.plans-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 40px; 
-  flex-wrap: wrap;
+/* --- Contenedor de Tarjetas --- */
+.pricing-cards-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: stretch; 
+    flex-wrap: wrap; /* Para responsividad */
 }
 
-.plan-card {
-  border: 2px solid #16394F;
-  border-radius: 20px;
-  padding: 20px 15px;
-  width: 250px;
-  background: white;
+/* --- Estilos Base de Cada Tarjeta --- */
+.pricing-card {
+    flex: 1 1 300px; 
+    border-radius: 15px; 
+    background-color: white; 
+    border: 2px solid #0d2644; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); 
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; 
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; 
 }
 
-.plan-header {
-  border-bottom: 2px solid #16394F; 
-  padding-bottom: 10px; 
-  margin-bottom: 10px;
+/* --- Nuevos estilos para la estructura interna --- */
+.card-header {
+    font-size: 24px;
+    font-weight: 800;
+    padding: 30px 30px 10px 30px;
+    text-align: left;
+    color: #333;
 }
 
-.plan-card h2 {
-  color: #000000;
-  margin-bottom: 0px;
-  font-family: Poppins, sans-serif;
-  text-align: left;
-  font-size: 20px; 
+.card-separator {
+    width: calc(100% - 60px); 
+    height: 2px;
+    background-color: #0d2644; 
+    margin: 0 30px 15px 30px; 
 }
 
-.price {
-  font-size: 20px; 
-  font-weight: bold;
-  color: #000000;
-  margin-bottom: 15px; 
+.card-price {
+    font-size: 30px;
+    font-weight: 700;
+    color: #333;
+    padding: 10px 30px 30px 30px;
+    text-align: center;
 }
 
-.features {
-  list-style: none;
-  padding: 0;
-  margin-bottom: 20px; 
-  text-align: left;
+.card-features {
+    list-style: none; 
+    padding: 0 30px;
+    margin: 0;
+    flex-grow: 1;
 }
 
-.features li {
-  display: flex;
-  align-items: center;
-  gap: 8px; 
-  padding: 6px 0; 
-  font-size: 14px; 
-  color: #000000;
+/* Estilos aplicados al <li>  */
+.card-features li {
+    display: flex; 
+    align-items: center;
+    font-size: 16px;
+    margin-bottom: 15px;
+    text-align: left;
+    line-height: 1.4;
+    color: #555;
 }
 
-.features li svg {
-  color: #28a745;
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
+/* Estilos aplicados al <svg> */
+.card-features li svg {
+    margin-right: 10px;
+    flex-shrink: 0;
 }
 
-/* botones */
-.plan-button {
-  background-color: #ffffff;
-  color: #000000;
-  border: 2px solid #16394F;
-  padding: 10px 20px; 
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px; 
-  width: 100%;
+/* --- Nuevos estilos para el Botón --- */
+.card-button {
+    display: block;
+    width: calc(100% - 60px); 
+    padding: 15px 20px;
+    margin: 30px 30px 30px 30px; 
+    background-color: #0d2644; 
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    border-radius: 5px; 
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-.plan-button:hover {
-  background-color: #16394f70;
+.card-button:hover {
+    background-color: #1a3a5e; 
 }
 
-.plan-card-featured {
-  margin-top: -180px;
 
+
+/* --- HOVER  --- */
+.pricing-card:hover {
+    background-color: #E1E8ED; 
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    transform: translateY(-5px);
 }
 
-.plan-card-featured .plan-card {
-  background-color: #385d745b;
-
-}
-
-.plan-card-featured .plan-button {
-  background: #385d745b;
-
-}
-
-.plan-card-featured .plan-button:hover {
-  background-color: #385d7483;
-
-}
-
-.plan-card:nth-child(1),
-.plan-card:nth-child(3) {
-  transform: translateY(60px); 
-}
 
 /* Seccion: tabla de comparacion */
 
@@ -286,85 +291,100 @@
 
 
 /* Seccion: preguntas frecuentes */
-.faq-section-container {
+/* --- ESTILOS GENERALES --- */
+.faq-section {
     padding: 60px 20px;
-    max-width: 750px;
+    text-align: center;
+    font-family: 'Nunito Sans', sans-serif;
+    background-color: white; 
+}
+
+.faq-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 40px;
+    color: #333;
+}
+
+.faq-accordion {
+    max-width: 800px;
     margin: 0 auto;
+}
+
+/* --- ESTILOS DEL ITEM INDIVIDUAL --- */
+.faq-item {
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.3s ease;
+    overflow: hidden; /* Oculta el contenido antes del despliegue */
+}
+
+.faq-item:hover {
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* --- ESTILOS DE LA CABECERA (BOTÓN) --- */
+.faq-question-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    background: white;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    transition: background-color 0.3s;
+}
+
+/* Estilo para el borde del item activo (color morado) */
+.faq-item.active {
+    border-color: #0b2f4a; /* Morado */
+    box-shadow: 0 0 0 2px #0b2f4a; 
+}
+
+/* --- ICONOS Y FLECHA --- */
+.faq-icon {
+    font-size: 18px;
+    margin-right: 15px;
+    color: #555;
+    width: 25px; /* Ancho fijo para alinear los iconos */
     text-align: center;
 }
 
-.faq-list {
-    text-align: left;
-}
-
-/* Contenedor de la Pregunta */
-.faq-item {
-    border-left: 1px solid #e0e0e0;
-    border-right: 1px solid #e0e0e0;
-    margin-bottom: 0; 
-    overflow: hidden;
-}
-
-.faq-item:first-child {
-    border-top: 1px solid #e0e0e0;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-}
-
-.faq-item:last-child {
-    border-bottom: 1px solid #e0e0e0;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-}
-
-/* Botón de la Pregunta */
-.faq-question-button {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: 18px 20px; 
-    background-color: #ffffff; 
-    border: none;
-    cursor: pointer;
-    text-align: left;
-    font-size: 18px;
-    font-weight: 400; 
-    color: #000000;
-}
-
-.faq-question-button:hover {
-    background-color: #f7f7f7;
-}
-
-/* Pregunta */
-.faq-question-content {
-    display: flex;
-    align-items: center;
-    gap: 15px; 
-}
-
-/* Icono de flecha */
-.faq-chevron {
+.faq-arrow {
+    margin-left: auto; /* Empuja la flecha a la derecha */
     transition: transform 0.3s ease;
-    color: #000000;
-    stroke-width: 2.5;
 }
 
-.faq-chevron.rotate {
+/* Gira la flecha cuando el ítem está activo */
+.faq-item.active .faq-arrow {
     transform: rotate(180deg);
 }
 
-/* Panel de respuesta */
-.faq-answer {
-    padding: 10px 20px 20px 60px; 
-    color: #000000;
-    line-height: 1.6;
-    border-top: 1px solid #f0f0f0; 
+/* --- ESTILOS DE LA RESPUESTA (CONTENIDO DESPLEGABLE) --- */
+.faq-answer-content {
+    /* Clave para la animación de altura en React/JS */
+    max-height: 0; 
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+    background-color: #f9f9f9;
+    padding: 0 20px; /* Relleno inicial de 0 */
 }
 
-.faq-answer p {
+/* Estilo para mostrar la respuesta (manejar la altura con JS) */
+.faq-item.active .faq-answer-content {
+    max-height: 200px; /* Suficientemente grande para el contenido */
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+}
+
+.faq-answer-content p {
     margin: 0;
-    font-family: Nunito Sans, sans-serif;
-    font-size: 16px;
+    font-size: 15px;
+    color: #555;
+    line-height: 1.5;
 }

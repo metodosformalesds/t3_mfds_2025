@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "react-oidc-context";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { useUserCapabilities } from "../hooks/useUserCapabilities";
@@ -21,13 +21,36 @@ import EditarFotoModal from '../components/common/EditarFotoModal';
 
 function Perfil() {
   const auth = useAuth();
-  const { userData, loading, error, calculateAge, splitName } = useUserProfile();
+  const { 
+    userData, 
+    loading, 
+    error, 
+    calculateAge, 
+    splitName,
+    uploadProfilePhoto,
+    getProfilePhotoUrl 
+  } = useUserProfile();
   const { isWorker, isClient } = useUserCapabilities();
   
   // Por defecto, si es trabajador muestra "Acerca de", si no "Cambiar datos"
   const [activeTab, setActiveTab] = useState(isWorker ? 'acercaDe' : 'cambiarDatos');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [profilePhoto, setProfilePhoto] = useState(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+
+  // Cargar foto de perfil cuando el usuario esté disponible
+  useEffect(() => {
+    const loadProfilePhoto = async () => {
+      if (userData?.id_usuario) {
+        const result = await getProfilePhotoUrl();
+        if (result.success) {
+          setProfilePhoto(result.url);
+        }
+      }
+    };
+    
+    loadProfilePhoto();
+  }, [userData?.id_usuario]);
 
   if (loading) {
     return (
@@ -77,10 +100,25 @@ function Perfil() {
   // Combinar tabs según el rol
   const tabs = isWorker ? [...clientTabs, ...workerTabs] : clientTabs;
 
-  const handleSavePhoto = (file, preview) => {
-    setProfilePhoto(preview);
-    console.log('Foto guardada:', file);
-    // Aquí iría la lógica para subir al backend
+  const handleSavePhoto = async (file) => {
+    setUploadingPhoto(true);
+    
+    try {
+      const result = await uploadProfilePhoto(file);
+      
+      if (result.success) {
+        setProfilePhoto(result.url);
+        return result;
+      } else {
+        console.error('Error al subir foto:', result.error);
+        return result;
+      }
+    } catch (error) {
+      console.error('Error inesperado al subir foto:', error);
+      return { success: false, error: 'Error inesperado al subir la foto' };
+    } finally {
+      setUploadingPhoto(false);
+    }
   };
 
   // Renderizar el contenido según la tab activa
