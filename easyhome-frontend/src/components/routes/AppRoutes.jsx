@@ -8,6 +8,7 @@ import Subscriptions from '../../pages/Subscriptions';
 import Advertise from '../../pages/Advertise';
 import Postulate from '../../pages/Postulate';
 import Perfil from '../../pages/Perfil';
+import PublicarServicio from '../../pages/Service_publication_form';
 
 // Páginas de Cliente
 import ClienteDashboard from '../../pages/cliente/Dashboard';
@@ -24,6 +25,7 @@ import AdminUsuarios from '../../pages/admin/AdminUsuarios';
 import AdminReportes from '../../pages/admin/AdminReportes';
 import AdminSolicitudes from '../../pages/admin/AdminSolicitudes';
 
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -34,6 +36,7 @@ const AppRoutes = () => {
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/subscriptions" element={<Subscriptions />} />
       <Route path="/advertise" element={<Advertise />} />
+      <Route path="/publicarservicio" element={<PublicarServicio />} />
       
       {/* Ruta de postulación - Solo para clientes autenticados */}
       <Route 
