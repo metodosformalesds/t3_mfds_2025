@@ -1,36 +1,27 @@
-import React, { useState, useEffect } from 'react'; 
+import React from 'react';
 import '../../assets/styles/PremiumMembers.css';
+// NOTA: Se eliminó la lógica de fetch y useState/useEffect de aquí,
+// ya que Feed.jsx se encarga de llamar a la API y pasar la data.
 
-import api from '../../config/api';
-const API_BASE_URL = api.BASE_URL;
-
-export default function MiembrosPremium() {
-    const [miembros, setMiembros] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchMiembros = async () => {
-            try {
-                const response = await fetch(`${API_BASE_URL}/publicaciones/miembros-premium?limit=3`); //`${API_BASE_URL}/publicaciones/?${params.toString()}`;
-                if (!response.ok) {
-                    throw new Error('Error al cargar miembros premium');
-                }
-                const data = await response.json();
-                setMiembros(data);
-            } catch (err) {
-                console.error("Error al obtener miembros premium:", err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchMiembros();
-    }, []);
-
-    // ... (Estilos y lógica de renderizado del componente MiembrosPremium) ...
+export default function PremiumMembers({ miembros, isLoading }) {
     
+    // Si la carga aún no termina, muestra el estado de carga
     if (isLoading) {
-        return <div className="premium-sidebar">Cargando...</div>;
+        return (
+            <div className="premium-sidebar">
+                <h2 className="premium-sidebar-title">Miembros Premium</h2>
+                <p>Cargando miembros...</p>
+            </div>
+        );
+    }
+
+    if (!miembros || miembros.length === 0) {
+        return (
+            <div className="premium-sidebar">
+                <h2 className="premium-sidebar-title">Miembros Premium</h2>
+                <p>No se encontraron miembros premium.</p>
+            </div>
+        );
     }
     
     return (
@@ -39,21 +30,34 @@ export default function MiembrosPremium() {
 
             <div className="premium-list">
                 {miembros.map(miembro => (
-                    // Mapeamos los datos del endpoint Miembros Premium
+                    // Mapeamos los datos del endpoint /publicaciones/miembros-premium
                     <div key={miembro.id_proveedor} className="miembro-card">
                         
+                        {/* Avatar */}
                         <img 
+                            // Usamos el campo foto_perfil_url del endpoint
                             src={miembro.foto_perfil_url || 'ruta/a/default_avatar.jpg'} 
                             alt={`Avatar de ${miembro.nombre_completo}`} 
                             className="miembro-avatar" 
                         />
                         
+                        {/* Info del miembro (alineado a la derecha en el CSS) */}
                         <div className="miembro-info">
+                            {/* Nombre del Proveedor */}
                             <span className="miembro-name">{miembro.nombre_completo}</span>
+                            
+                            {/* Membresía fija */}
                             <span className="miembro-membership">Miembro premium de EayHome</span>
+                            
+                            {/* Rating y Conteo */}
                             <div className="miembro-rating">
+                                
+                                {/* El endpoint no devuelve el conteo de reseñas, solo el promedio */}
                                 <span className="rating-star">★</span>
-                                <span>{miembro.calificacion_promedio?.toFixed(1) || 0}({/* No tenemos conteo de opiniones */})</span>
+                                <span>
+                                    {miembro.calificacion_promedio?.toFixed(1) || 0}
+                                    ({/* Conteo de reseñas no disponible en el endpoint */})
+                                </span>
                             </div>
                         </div>
 

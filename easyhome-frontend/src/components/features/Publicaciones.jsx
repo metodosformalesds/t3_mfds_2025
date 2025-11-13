@@ -6,7 +6,8 @@ export default function Publicaciones({ publicacionData }) {
     // Usamos la estructura de la respuesta del endpoint 'listar_publicaciones'
     const {
         id_publicacion,
-        descripcion_corta: descripcion, // Renombrado para usar 'descripcion' en el JSX
+        id_proveedor,
+        descripcion_corta: descripcion, 
         rango_precio_min,
         rango_precio_max,
         url_imagen_portada, 
@@ -15,21 +16,14 @@ export default function Publicaciones({ publicacionData }) {
         nombre_proveedor,
         calificacion_proveedor,
         
-        // El endpoint NO devuelve 'total_reseñas_proveedor' ni 'esPremium' explícitamente,
-        // por lo que debemos obtener la data necesaria.
-        // Simulamos la carga del conteo si no se optimizó el endpoint:
         total_reseñas_proveedor = publicacionData.total_reseñas_proveedor || 127, 
-        
-        // Asumiendo que el campo 'etiquetas' se agregará o es un array vacío por defecto
         etiquetas = publicacionData.etiquetas || ["Confiabilidad", "Mantenimiento", "Alta experiencia"]
         
-    } = publicacionData || {}; // Usar un objeto vacío por defecto para evitar errores
+    } = publicacionData || {}; 
 
     // 2. Determinar si es Premium
-    // El backend ordena por plan, pero no devuelve la bandera booleana.
-    // Usamos el id_plan_suscripcion para simular el check (debe ser pasado por el backend)
-    const esPremium = publicacionData.proveedor_servicio && 
-                      publicacionData.proveedor_servicio.id_plan_suscripcion !== null; 
+    const esPremium = publicacionData.id_plan_suscripcion !== null && publicacionData.id_plan_suscripcion !== undefined;
+
 
     // 3. Helper para formatear el rango de precios
     const rangoPrecioFormateado = `$${rango_precio_min?.toFixed(0) || '?'}-$${rango_precio_max?.toFixed(0) || '?'}`;
@@ -86,8 +80,6 @@ export default function Publicaciones({ publicacionData }) {
 
                 {/* Imágenes (Galería) - Mapeamos la URL de portada (solo la portada está disponible en el endpoint) */}
                 <div className="imagenes-contenedor">
-                    {/* El backend debería devolver un array de URLs secundarias. 
-                       Por ahora, duplicamos la portada o usamos un placeholder si es null. */}
                     {url_imagen_portada ? (
                         <>
                             <img src={url_imagen_portada} alt={`Muestra de ${nombre_proveedor}`} className="imagen-muestra" />
@@ -106,7 +98,9 @@ export default function Publicaciones({ publicacionData }) {
                     </p>
 
                     {/* Botón Ir al perfil: Asumiendo que usas el id_proveedor para la ruta */}
-                    <a href={`/proveedor/${id_proveedor}`} className="boton-perfil">Ir al perfil</a>
+                    <a href={`/proveedor/${id_proveedor}`} className="boton-perfil">
+                        Ir al perfil
+                    </a> 
                 </div>
 
             </div>
