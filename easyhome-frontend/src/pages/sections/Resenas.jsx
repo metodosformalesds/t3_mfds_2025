@@ -1,11 +1,22 @@
-function Resenas() {
+// src/components/Resenas/Resenas.jsx
+import React, { useState, useEffect } from 'react';
+import reviewsService from '../../services/resenas_perfil';
+
+function Resenas({ idProveedor }) {
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+  
+    }, [idProveedor]);
+
+       
+
   return (
-    <div className="resenas-container">
+    <div className="reviews-container">
       <h2>Reseñas</h2>
-      <p>Esta sección mostrará las reseñas que has recibido de clientes.</p>
-      <div className="placeholder">
-        <i>🚧 En desarrollo...</i>
-      </div>
+      
     </div>
   );
 }
