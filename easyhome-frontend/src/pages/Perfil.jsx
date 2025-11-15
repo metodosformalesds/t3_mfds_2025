@@ -137,7 +137,7 @@ function Perfil() {
       case 'portafolio':
         return <Portafolio idProveedor={userData.id_proveedor} />;
       case 'resenas':
-        return <Resenas />;
+        return <Resenas idProveedor={userData.id_proveedor} />;
       case 'servicios':
         return <Servicios />;
       default:
