@@ -96,6 +96,7 @@ def get_perfil_servicios(id_proveedor: int, db: Session = Depends(get_db)):
 # -----------------------------------------------------------------
 # --- Endpoint 3: Pestaña "Portafolio" ---
 # -----------------------------------------------------------------
+
 @router.get(
     "/{id_proveedor}/portafolio",
     response_model=List[ImagenPublicacionSchema]
@@ -103,7 +104,7 @@ def get_perfil_servicios(id_proveedor: int, db: Session = Depends(get_db)):
 def get_perfil_portafolio(id_proveedor: int, db: Session = Depends(get_db)):
     """
     Obtiene una galería de todas las imágenes de todas las
-    publicaciones activas de un proveedor.
+    publicaciones activas de un proveedor, devolviendo URL firmadas.
     """
     
     fotos = (
@@ -114,8 +115,21 @@ def get_perfil_portafolio(id_proveedor: int, db: Session = Depends(get_db)):
         .order_by(Imagen_Publicacion.fecha_subida.desc())
         .all()
     )
-    
-    return fotos
+
+    # 🚀 Convertir key → presigned URL
+    from app.services.s3_service import s3_service
+    fotos_con_url = []
+
+    for foto in fotos:
+        presigned_url = s3_service.get_presigned_url(foto.url_imagen)
+        
+        fotos_con_url.append({
+            "id_imagen": foto.id_imagen,
+            "url_imagen": presigned_url,   # ⬅️ YA ES URL REAL
+            "orden": foto.orden
+        })
+
+    return fotos_con_url
 
 # -----------------------------------------------------------------
 # --- Endpoint 4: Pestaña "Reseñas" ---
