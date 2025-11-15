@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import reviewsService from '../../services/resenas_perfil';
+import "../../assets/styles/sections/Resenas.css";
 
 function Resenas({ idProveedor }) {
   const [reviews, setReviews] = useState([]);
@@ -79,7 +80,7 @@ function Resenas({ idProveedor }) {
                 <div className="review-avatar-container">
                   <img
                     src={review.usuario?.foto_perfil || '/default-avatar.png'}
-                    alt={`${review.usuario?.nombre || 'Usuario'} ${review.usuario?.apellido || ''}`}
+                    alt={review.usuario?.nombre || 'Usuario'}
                     className="review-avatar"
                     onError={(e) => {
                       e.target.src = '/default-avatar.png';
@@ -101,9 +102,7 @@ function Resenas({ idProveedor }) {
                 </div>
 
                 <div className="review-user-details">
-                  <h3>
-                    {review.usuario?.nombre || 'Usuario'} {review.usuario?.apellido || ''}
-                  </h3>
+                  <h3 className="user-name">{review.usuario?.nombre || 'Usuario'}</h3>
                   <p className="review-date">
                     {review.id_cliente && `Cliente ID: ${review.id_cliente} | `}
                     Servicio terminado el {formatDate(review.servicio_contratado?.fecha_finalizacion || review.fecha_reseña)}
