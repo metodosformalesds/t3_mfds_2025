@@ -12,6 +12,7 @@ import Perfil from '../../pages/Perfil';
 // Páginas de Cliente
 import ClienteDashboard from '../../pages/cliente/Dashboard';
 import ClienteServicios from '../../pages/cliente/Servicios';
+import ClienteFeed from '../../pages/cliente/feed';
 
 // Páginas de Trabajador
 import TrabajadorDashboard from '../../pages/trabajador/Dashboard';
@@ -23,6 +24,7 @@ import AdminCategories from '../../pages/admin/AdminCategories';
 import AdminUsuarios from '../../pages/admin/AdminUsuarios';
 import AdminReportes from '../../pages/admin/AdminReportes';
 import AdminSolicitudes from '../../pages/admin/AdminSolicitudes';
+import PublicarServicio from '../../pages/Service_publication_form';
 
 const AppRoutes = () => {
   return (
@@ -34,6 +36,7 @@ const AppRoutes = () => {
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/subscriptions" element={<Subscriptions />} />
       <Route path="/advertise" element={<Advertise />} />
+      <Route path="/publicarservicio" element={<PublicarServicio />} />
       
       {/* Ruta de postulación - Solo para clientes autenticados */}
       <Route 
@@ -56,6 +59,14 @@ const AppRoutes = () => {
       />
 
       {/* Rutas de Cliente (prioridad 1 - incluye Google) */}
+        <Route 
+          path="/cliente/feed"
+          element={
+            <ProtectedRoute allowedRoles={['Clientes']}>
+              <ClienteFeed />
+            </ProtectedRoute>
+          }
+        />
       <Route 
         path="/cliente/dashboard" 
         element={

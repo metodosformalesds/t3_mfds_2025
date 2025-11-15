@@ -100,6 +100,110 @@ export const useUserProfile = () => {
     }
   };
 
+  /**
+   * Sube una nueva foto de perfil
+   */
+  const uploadProfilePhoto = async (file) => {
+    if (!userData?.id_usuario) {
+      return { success: false, error: 'Usuario no identificado' };
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await api.put(
+        `/api/v1/usuarios/${userData.id_usuario}/foto-perfil`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      // Actualizar estado local con la nueva URL
+      setUserData(prev => ({
+        ...prev,
+        foto_perfil_url: response.data.foto_perfil_url
+      }));
+
+      return { 
+        success: true, 
+        url: response.data.foto_perfil_url,
+        message: response.data.message 
+      };
+    } catch (err) {
+      console.error('Error al subir foto de perfil:', err);
+      return {
+        success: false,
+        error: err.response?.data?.detail || 'Error al subir la foto de perfil'
+      };
+    }
+  };
+
+  /**
+   * Obtiene la URL de la foto de perfil
+   */
+  const getProfilePhotoUrl = async () => {
+    if (!userData?.id_usuario) {
+      return { success: false, error: 'Usuario no identificado' };
+    }
+
+    try {
+      const response = await api.get(
+        `/api/v1/usuarios/${userData.id_usuario}/foto-perfil`
+      );
+
+      return {
+        success: true,
+        url: response.data.foto_perfil_url
+      };
+    } catch (err) {
+      // Si no hay foto, no es un error crítico
+      if (err.response?.status === 404) {
+        return { success: false, error: 'No hay foto de perfil' };
+      }
+      console.error('Error al obtener foto de perfil:', err);
+      return {
+        success: false,
+        error: err.response?.data?.detail || 'Error al obtener la foto de perfil'
+      };
+    }
+  };
+
+  /**
+   * Elimina la foto de perfil
+   */
+  const deleteProfilePhoto = async () => {
+    if (!userData?.id_usuario) {
+      return { success: false, error: 'Usuario no identificado' };
+    }
+
+    try {
+      const response = await api.delete(
+        `/api/v1/usuarios/${userData.id_usuario}/foto-perfil`
+      );
+
+      // Actualizar estado local
+      setUserData(prev => ({
+        ...prev,
+        foto_perfil_url: null
+      }));
+
+      return {
+        success: true,
+        message: response.data.message
+      };
+    } catch (err) {
+      console.error('Error al eliminar foto de perfil:', err);
+      return {
+        success: false,
+        error: err.response?.data?.detail || 'Error al eliminar la foto de perfil'
+      };
+    }
+  };
+
   return {
     userData,
     loading,
@@ -107,6 +211,9 @@ export const useUserProfile = () => {
     calculateAge,
     splitName,
     updateUserData,
+    uploadProfilePhoto,
+    getProfilePhotoUrl,
+    deleteProfilePhoto,
     refetch: () => {
       setLoading(true);
       // Trigger re-fetch
