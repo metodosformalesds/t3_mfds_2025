@@ -136,6 +136,9 @@ async def crear_publicacion(
 # 2️⃣ MOSTRAR TODAS LAS PUBLICACIONES (Feed / Tarjetas)
 # (Esta es la "Feed Page" para Clientes CON FILTROS)
 # =========================================================
+# =========================================================
+# 2️⃣ MOSTRAR TODAS LAS PUBLICACIONES (Feed / Tarjetas)
+# =========================================================
 @router.get("/", response_model=None) 
 def listar_publicaciones(
     db: Session = Depends(get_db),
@@ -143,42 +146,79 @@ def listar_publicaciones(
     suscriptores: Optional[bool] = Query(False),
     ordenar_por: Optional[str] = Query(None)
 ):
-    """Lista publicaciones - Versión de debugging"""
-    try:
-        query = db.query(Publicacion_Servicio)\
-            .filter(Publicacion_Servicio.estado == 'activo')
-        
-        publicaciones = query.limit(5).all()  # ← Solo 5 para probar
-        
-        resultado = []
-        for pub in publicaciones:
-            # Obtener la imagen de portada (la de menor orden)
-            url_imagen_portada = None
-            if pub.imagen_publicacion and len(pub.imagen_publicacion) > 0:
-                portada = sorted(pub.imagen_publicacion, key=lambda x: x.orden)[0]
-                url_imagen_portada = s3_service.get_presigned_url(portada.url_imagen)
+    """
+    Devuelve publicaciones con:
+    - Nombre del proveedor
+    - Fotografía del proveedor (URL prefirmada)
+    - Imagen de portada (URL prefirmada)
+    """
 
+    try:
+        publicaciones = (
+            db.query(Publicacion_Servicio)
+            .options(joinedload(Publicacion_Servicio.proveedor_servicio))
+            .options(joinedload(Publicacion_Servicio.imagen_publicacion))
+            .filter(Publicacion_Servicio.estado == "activo")
+            .limit(20)
+            .all()
+        )
+
+        resultado = []
+
+        for pub in publicaciones:
+
+            prov = pub.proveedor_servicio
+
+            # ===========================
+            # FOTO DE PERFIL DEL PROVEEDOR
+            # ===========================
+            foto_perfil_url = None
+            if prov and prov.foto_perfil:
+                try:
+                    foto_perfil_url = s3_service.get_presigned_url(prov.foto_perfil)
+                except Exception as e:
+                    logger.error(f"Error URL foto perfil proveedor {prov.id_proveedor}: {e}")
+                    foto_perfil_url = None
+
+            # ===========================
+            # IMAGEN DE PORTADA
+            # ===========================
+            url_imagen_portada = None
+            if pub.imagen_publicacion:
+                portada = sorted(pub.imagen_publicacion, key=lambda x: x.orden)[0]
+                try:
+                    url_imagen_portada = s3_service.get_presigned_url(portada.url_imagen)
+                except Exception as e:
+                    logger.error(f"Error URL imagen portada pub {pub.id_publicacion}: {e}")
+                    url_imagen_portada = None
+
+            # ===========================
+            # AGREGAR PUBLICACIÓN AL RESULTADO
+            # ===========================
             resultado.append({
                 "id_publicacion": pub.id_publicacion,
                 "titulo": pub.titulo,
                 "descripcion_corta": pub.descripcion[:100] if pub.descripcion else "Sin descripción",
+
+                # DATOS DEL PROVEEDOR (CORRECTOS)
                 "id_proveedor": pub.id_proveedor,
-                "nombre_proveedor": "Proveedor Test",  # ← Hardcodeado
-                "foto_perfil_proveedor": None,
-                "calificacion_proveedor": 4.5,
-                "total_reseñas_proveedor": 10,
-                "categoria": "Test",
+                "nombre_proveedor": prov.nombre_completo if prov else "Proveedor desconocido",
+                "foto_perfil_proveedor": foto_perfil_url,
+                "calificacion_proveedor": prov.calificacion_promedio if prov else None,
+
+                # INFORMACIÓN DE LA PUBLICACIÓN
                 "rango_precio_min": pub.rango_precio_min,
                 "rango_precio_max": pub.rango_precio_max,
                 "url_imagen_portada": url_imagen_portada,
-                "id_plan_suscripcion": None,
+                "id_plan_suscripcion": prov.id_plan_suscripcion if prov else None,
             })
-        
+
         return resultado
-        
+
     except Exception as e:
-        logger.error(f"Error: {e}")
+        logger.error(f"Error al listar publicaciones: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 # =========================================================
 # 3️⃣ (NUEVO) OBTENER MIEMBROS PREMIUM
 # (Para la barra lateral)
