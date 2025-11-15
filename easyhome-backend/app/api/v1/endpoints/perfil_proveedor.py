@@ -34,33 +34,18 @@ router = APIRouter(
 # -----------------------------------------------------------------
 @router.get("/{id_proveedor}/perfil-about", response_model=ProveedorPerfilAboutSchema)
 def get_perfil_about(id_proveedor: int, db: Session = Depends(get_db)):
-    """
-    Obtiene la información principal del perfil de un proveedor
-    para la pestaña "Acerca de".
-    """
-    
+
     proveedor = db.query(Proveedor_Servicio)\
-                  .options(joinedload(Proveedor_Servicio.usuario))\
-                  .filter(Proveedor_Servicio.id_proveedor == id_proveedor)\
-                  .first()
+        .options(joinedload(Proveedor_Servicio.usuario))\
+        .filter(Proveedor_Servicio.id_proveedor == id_proveedor)\
+        .first()
 
     if not proveedor:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Proveedor con id {id_proveedor} no encontrado"
-        )
+        raise HTTPException(status_code=404, detail="Proveedor no encontrado")
 
-    total_reseñas = db.query(func.count(Reseña_Servicio.id_reseña))\
-                       .filter(Reseña_Servicio.id_proveedor == id_proveedor)\
-                       .scalar() or 0
-    
-    años_activo = 0
-    if proveedor.tiempo_activo_desde:
-        delta = datetime.now(timezone.utc) - proveedor.tiempo_activo_desde
-        años_activo = int(delta.days / 365.25)
-
-    proveedor.total_reseñas = total_reseñas
-    proveedor.años_activo = años_activo
+    # Si la biografía está vacía, usamos experiencia_profesional
+    if not proveedor.biografia or proveedor.biografia.strip() == "":
+        proveedor.biografia = proveedor.experiencia_profesional or "Información no disponible."
 
     return proveedor
 
