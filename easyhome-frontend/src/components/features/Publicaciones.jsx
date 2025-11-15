@@ -80,10 +80,7 @@ export default function Publicaciones({ publicacionData }) {
                 {/* Imágenes (Galería) - Mapeamos la URL de portada (solo la portada está disponible en el endpoint) */}
                 <div className="imagenes-contenedor">
                     {url_imagen_portada ? (
-                        <>
-                            <img src={url_imagen_portada} alt={`Muestra de ${nombre_proveedor}`} className="imagen-muestra" />
-                            <img src={url_imagen_portada} alt={`Muestra de ${nombre_proveedor}`} className="imagen-muestra" />
-                        </>
+                        <img src={url_imagen_portada} alt={`Muestra de ${nombre_proveedor}`} className="imagen-muestra" />
                     ) : (
                         <p>No hay imágenes disponibles.</p>
                     )}
