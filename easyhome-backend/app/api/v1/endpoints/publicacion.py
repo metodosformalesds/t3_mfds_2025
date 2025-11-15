@@ -163,7 +163,9 @@ def listar_publicaciones(
     try:
         publicaciones = (
             db.query(Publicacion_Servicio)
-            .options(joinedload(Publicacion_Servicio.proveedor_servicio))
+            # Cargamos el proveedor y su usuario asociado para acceder a campos
+            # como `foto_perfil` que pueden estar en `Proveedor_Servicio` o en `Usuario`.
+            .options(joinedload(Publicacion_Servicio.proveedor_servicio).joinedload(Proveedor_Servicio.usuario))
             .options(joinedload(Publicacion_Servicio.imagen_publicacion))
             .filter(Publicacion_Servicio.estado == "activo")
             .limit(20)
@@ -180,11 +182,16 @@ def listar_publicaciones(
             # FOTO DE PERFIL DEL PROVEEDOR
             # ===========================
             foto_perfil_url = None
-            if prov and prov.foto_perfil:
+            # El campo foto de perfil puede almacenarse en Proveedor_Servicio.foto_perfil
+            # o en Usuario.foto_perfil. Usamos el primero disponible como key a S3.
+            foto_key = None
+            if prov:
+                foto_key = prov.foto_perfil or (prov.usuario.foto_perfil if getattr(prov, 'usuario', None) else None)
+            if foto_key:
                 try:
-                    foto_perfil_url = s3_service.get_presigned_url(prov.foto_perfil)
+                    foto_perfil_url = s3_service.get_presigned_url(foto_key)
                 except Exception as e:
-                    logger.error(f"Error URL foto perfil proveedor {prov.id_proveedor}: {e}")
+                    logger.error(f"Error URL foto perfil proveedor {prov.id_proveedor if prov else 'unknown'}: {e}")
                     foto_perfil_url = None
 
             # ===========================
@@ -267,13 +274,13 @@ def listar_miembros_premium(
         resultado = []
         for prov in proveedores_premium:
             url_foto = None
-            # Generar URL pre-firmada para la foto de perfil
-            if prov.foto_perfil:
+            # Generar URL pre-firmada para la foto de perfil (fallback a Usuario.foto_perfil)
+            foto_key = prov.foto_perfil or (prov.usuario.foto_perfil if getattr(prov, 'usuario', None) else None)
+            if foto_key:
                 try:
-                    # Asumimos que foto_perfil es una S3 key
-                    url_foto = s3_service.get_presigned_url(prov.foto_perfil)
+                    url_foto = s3_service.get_presigned_url(foto_key)
                 except Exception as e:
-                    logger.error(f"Error S3 URL para foto de perfil {prov.foto_perfil}: {e}")
+                    logger.error(f"Error S3 URL para foto de perfil {foto_key}: {e}")
             
             resultado.append({
                 "id_proveedor": prov.id_proveedor,
