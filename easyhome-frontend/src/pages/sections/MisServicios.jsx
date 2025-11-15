@@ -4,6 +4,7 @@ import api from '../../config/api';
 
 function MisServicios({ idProveedor }) {
   const [servicios, setServicios] = useState([]);
+  const [nombreProveedor, setNombreProveedor] = useState("Proveedor");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -17,35 +18,50 @@ function MisServicios({ idProveedor }) {
       try {
         setLoading(true);
 
-        // 1. Cargar publicaciones del proveedor
-        const response = await api.get(`/api/v1/proveedores/${idProveedor}/servicios`);
+        // 1️⃣ Obtener información del proveedor (solo para el nombre)
+        try {
+          const resPerfil = await api.get(
+            `/api/v1/proveedores/${idProveedor}/perfil-about`
+          );
+
+          const p = resPerfil.data;
+
+          // Detectar el nombre correctamente
+          const nombreDetectado =
+            p.nombre_completo ||
+            p.nombre ||
+            p.usuario?.nombre_completo ||
+            p.usuario?.nombre ||
+            "Proveedor";
+
+          setNombreProveedor(nombreDetectado);
+
+        } catch (e) {
+          console.warn("⚠️ No se pudo obtener el nombre del proveedor.");
+        }
+
+        // 2️⃣ Obtener servicios del proveedor
+        const response = await api.get(
+          `/api/v1/proveedores/${idProveedor}/servicios`
+        );
         const serviciosBase = response.data;
 
-        // 2. Para cada servicio, obtener la foto de perfil del proveedor
+        // 3️⃣ Obtener foto de perfil firmada
         const serviciosConFoto = await Promise.all(
           serviciosBase.map(async (servicio) => {
             try {
-              // OJO: en tu modelo el proveedor es usuario.id_usuario
               const fotoRes = await api.get(
                 `/api/v1/usuarios/${servicio.id_proveedor}/foto-perfil`
               );
 
               return {
                 ...servicio,
-                proveedor: {
-                  ...servicio.proveedor,
-                  foto_perfil_url: fotoRes.data.foto_perfil_url
-                }
+                foto_perfil_url: fotoRes.data.foto_perfil_url  // ← sin objeto proveedor
               };
-            } catch (errorFoto) {
-              console.warn("⚠️ No se pudo obtener foto de perfil:", errorFoto);
-
+            } catch {
               return {
                 ...servicio,
-                proveedor: {
-                  ...servicio.proveedor,
-                  foto_perfil_url: null
-                }
+                foto_perfil_url: null
               };
             }
           })
@@ -74,16 +90,14 @@ function MisServicios({ idProveedor }) {
       <h2 className="section-title">Mis Servicios</h2>
 
       {servicios.map((servicio) => {
-        const proveedor = servicio.proveedor || {};
-        
         const fotoPerfil =
-          proveedor.foto_perfil_url ||
+          servicio.foto_perfil_url ||
           "https://i.imgur.com/placeholder.png";
 
         return (
           <div key={servicio.id_publicacion} className="publicacion-card">
 
-            {/* HEADER DEL PROVEEDOR */}
+            {/* HEADER */}
             <div className="publicacion-header">
               <div className="publicacion-perfil">
                 <img
@@ -94,7 +108,7 @@ function MisServicios({ idProveedor }) {
 
                 <div>
                   <p className="perfil-nombre">
-                    {proveedor.nombre_completo || "Proveedor"}
+                    {nombreProveedor}
                   </p>
 
                   <div className="perfil-rating">
@@ -108,7 +122,7 @@ function MisServicios({ idProveedor }) {
               </div>
             </div>
 
-            {/* TÍTULO */}
+            {/* TITULO */}
             <h3 className="publicacion-titulo">{servicio.titulo}</h3>
 
             {/* DESCRIPCIÓN */}
