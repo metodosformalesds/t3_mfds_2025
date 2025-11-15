@@ -78,7 +78,7 @@ function Resenas({ idProveedor }) {
               <div className="review-user-info">
                 <div className="review-avatar-container">
                   <img
-                    src={review.usuario?.foto_perfil}
+                    src={review.usuario?.foto_perfil || '/default-avatar.png'}
                     alt={`${review.usuario?.nombre || 'Usuario'} ${review.usuario?.apellido || ''}`}
                     className="review-avatar"
                     onError={(e) => {
