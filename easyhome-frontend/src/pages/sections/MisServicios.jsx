@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import api from '../../config/api';
 
-function MisServicios({ idProveedor }) {
+function MisServicios({idProveedor, publicView = false}) {
   const [servicios, setServicios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -58,14 +58,23 @@ function MisServicios({ idProveedor }) {
   return (
     <div className="mis-servicios-container">
       <div className="header-section">
-        <h2>Mis Servicios</h2>
-        <button className="btn-nuevo-servicio">+ Nuevo Servicio</button>
+        <h2>
+          {publicView ? "Servicios del proveedor" : "Mis Servicios"}
+        </h2>
+        {!publicView && (
+          <button className="btn-nuevo-servicio">+ Nuevo Servicio</button>
+        )}
       </div>
 
       {servicios.length === 0 ? (
         <div className="no-servicios">
-          <p>No tienes servicios publicados aún.</p>
-          <button className="btn-crear-primero">Crear mi primer servicio</button>
+          {publicView
+              ? "Este proveedor aún no tiene servicios publicados."
+              : "No tienes servicios publicados aún."
+          }
+          {!publicView && (
+            <button className="btn-crear-primero">Crear mi primer servicio</button>
+          )}
         </div>
       ) : (
         <div className="servicios-grid">
@@ -111,11 +120,12 @@ function MisServicios({ idProveedor }) {
                     👁️ {servicio.vistas} vistas
                   </span>
                 </div>
-
-                <div className="servicio-acciones">
-                  <button className="btn-editar">Editar</button>
-                  <button className="btn-ver">Ver publicación</button>
-                </div>
+                {!publicView && (
+                  <div className="servicio-acciones">
+                    <button className="btn-editar">Editar</button>
+                    <button className="btn-ver">Ver publicación</button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

@@ -142,7 +142,7 @@ function ProveedorPublicProfile() {
               providerName={provider.nombreCompleto}
             />
           )}
-          {activeTab === "servicios" && <MisServicios idProveedor={provider.id} />}
+          {activeTab === "servicios" && <MisServicios idProveedor={provider.id} publicView={true} />}
           {activeTab === "portafolio" && <Portafolio idProveedor={provider.id} />}
           {activeTab === "resenas" && <Resenas idProveedor={provider.id} />}
         </div>
