@@ -71,15 +71,22 @@ async def crear_publicacion(
         raise HTTPException(status_code=404, detail="La categoría seleccionada no existe.")
 
     try:
+        proveedor = current_user.proveedor_servicio
+
+        if not proveedor:
+            raise HTTPException(
+                status_code=403,
+                detail="Tu cuenta debe estar registrada como proveedor para crear publicaciones."
+            )
         # 🔹 4. Crear la publicación en la BD
         nueva_publicacion = Publicacion_Servicio(
-            id_proveedor=current_user.id_usuario, # ID del proveedor autenticado
+            id_proveedor=proveedor.id_proveedor,
             id_categoria=id_categoria,
             titulo=titulo,
             descripcion=descripcion,
             rango_precio_min=rango_precio_min,
             rango_precio_max=rango_precio_max,
-            estado="activo", # Estado por defecto
+            estado="activo",
             fecha_publicacion=datetime.utcnow()
         )
         
@@ -201,7 +208,7 @@ def listar_publicaciones(
                 "descripcion_corta": pub.descripcion[:100] if pub.descripcion else "Sin descripción",
 
                 "id_proveedor": pub.id_proveedor,
-                "nombre_proveedor": prov.nombre_completo if prov else "Proveedor desconocido",
+                "nombre_proveedor": prov.nombre_completo if prov and prov.nombre_completo else "Sin nombre",
                 "foto_perfil_proveedor": foto_perfil_url,
                 "calificacion_proveedor": round(prov.calificacion_promedio, 1) if prov and prov.calificacion_promedio else 0,
 
