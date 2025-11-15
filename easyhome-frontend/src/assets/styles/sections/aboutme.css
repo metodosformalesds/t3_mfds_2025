@@ -55,3 +55,35 @@
   gap: 0.75rem; /* 12px */
 }
 
+/* Estilo para cada etiqueta (badge) de especialidad
+  Equivale a: inline-block bg-gray-100 text-blue-800 text-sm font-medium px-4 py-2 rounded-full border border-gray-300
+*/
+.specialty-badge {
+  display: inline-block;
+  background-color: #f3f4f6;
+  color: #1e40af; /* Un azul oscuro, similar a text-blue-800 */
+  font-size: 0.875rem; /* 14px */
+  font-weight: 500;
+  padding: 0.5rem 1rem; /* 8px 16px */
+  border-radius: 9999px;
+  border: 1px solid #d1d5db;
+}
+
+/* Estilos para el contenedor de la aplicación de ejemplo 
+  (para que se vea centrado y con fondo)
+*/
+.app-container {
+  background-color: #f9fafb;
+  min-height: 100vh;
+  padding: 2rem;
+  font-family: 'Inter', sans-serif; /* Usando una fuente genérica */
+}
+
+.app-wrapper {
+  max-width: 56rem; /* 896px */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Importar la fuente Inter de Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
