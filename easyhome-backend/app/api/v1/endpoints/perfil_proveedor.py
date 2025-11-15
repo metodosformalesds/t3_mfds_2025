@@ -1,6 +1,6 @@
 # app/api/v1/endpoints/perfil_proveedor.py
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session, joinedload, aliased
 from sqlalchemy import func, cast, DECIMAL
 from datetime import datetime, timezone
@@ -68,20 +68,19 @@ def get_perfil_about(id_proveedor: int, db: Session = Depends(get_db)):
 # --- Endpoint 2: Pestaña "Mis servicios" ---
 # -----------------------------------------------------------------
 @router.get(
-    "/{id_proveedor}/servicios", 
+    "/{id_proveedor}/servicios",
     response_model=List[PublicacionServicioSchema]
 )
 def get_perfil_servicios(id_proveedor: int, db: Session = Depends(get_db)):
     """
     Obtiene la lista de servicios publicados por un proveedor,
-    calculando la calificación promedio y el total de reseñas
-    para CADA publicación.
+    incluyendo URLs de imágenes desde S3 (presigned URLs)
     """
 
     subquery_agregados = db.query(
         Servicio_Contratado.id_publicacion,
         cast(
-            func.avg(Reseña_Servicio.calificacion_general), 
+            func.avg(Reseña_Servicio.calificacion_general),
             DECIMAL(3, 2)
         ).label("calificacion_promedio_publicacion"),
         func.count(Reseña_Servicio.id_reseña).label("total_reseñas_publicacion")
@@ -107,15 +106,26 @@ def get_perfil_servicios(id_proveedor: int, db: Session = Depends(get_db)):
         .all()
     )
 
+    from app.services.s3_service import s3_service  # IMPORTA TU SERVICIO S3
+
     lista_publicaciones = []
+
     for publicacion, avg_rating, count_reviews in query_results:
-        
+
         publicacion.calificacion_promedio_publicacion = avg_rating
         publicacion.total_reseñas_publicacion = count_reviews or 0
-        
+
+        # 🔥 Convertir cada key S3 a URL válido
+        for imagen in publicacion.imagen_publicacion:
+            try:
+                imagen.url_imagen = s3_service.get_presigned_url(imagen.url_imagen)
+            except:
+                imagen.url_imagen = None  # fallback
+
         lista_publicaciones.append(publicacion)
 
     return lista_publicaciones
+
 
 # -----------------------------------------------------------------
 # --- Endpoint 3: Pestaña "Portafolio" ---
