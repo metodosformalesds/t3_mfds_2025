@@ -55,7 +55,10 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # CORS
-    BACKEND_CORS_ORIGINS: List[str] = []
+    BACKEND_CORS_ORIGINS: List[str] = [
+        "https://main.d30cfshgj52c8r.amplifyapp.com",
+        "https://d84l1y8p4kdic.cloudfront.net"
+    ]
     
     # AWS Cognito Configuration
     AWS_REGION: str = "us-east-1"
