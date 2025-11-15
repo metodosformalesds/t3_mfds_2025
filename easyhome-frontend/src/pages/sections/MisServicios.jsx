@@ -35,7 +35,7 @@ function MisServicios({ idProveedor }) {
 
   return (
     <div className="mis-servicios-contenedor">
-
+      
       <h2 className="section-title">Mis Servicios</h2>
 
       {servicios.map((servicio) => (
@@ -68,20 +68,9 @@ function MisServicios({ idProveedor }) {
           {/* DESCRIPCIÓN */}
           <p className="publicacion-descripcion">{servicio.descripcion}</p>
 
-          {/* ETIQUETAS */}
-          {servicio.etiquetas?.length > 0 && (
-            <div className="etiquetas-contenedor">
-              {servicio.etiquetas.map((tag) => (
-                <span key={tag.id_etiqueta} className="etiqueta-item">
-                  {tag.nombre_etiqueta}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* IMÁGENES */}
+          {/* IMÁGENES MULTIPLES */}
           <div className="imagenes-contenedor">
-            {servicio.imagen_publicacion?.slice(0, 2).map((img) => (
+            {servicio.imagen_publicacion?.map((img) => (
               <img
                 key={img.id_imagen}
                 src={img.url_imagen}
@@ -97,111 +86,101 @@ function MisServicios({ idProveedor }) {
               Rango de precio: <strong>${servicio.rango_precio_min} – ${servicio.rango_precio_max}</strong>
             </p>
 
-            {/* 🔥 CAMBIO REALIZADO AQUÍ */}
             <button className="boton-perfil">Editar</button>
           </div>
 
         </div>
       ))}
 
-      {/* =================== ESTILOS =================== */}
+      {/* ======== ESTILOS ======== */}
       <style>{`
+        .mis-servicios-contenedor {
+          max-width: 900px;
+          margin: 0 auto;
+          padding: 20px;
+        }
+
+        .section-title {
+          font-size: 2.5em;
+          font-weight: 800;
+          margin-bottom: 25px;
+          color: #16394F;
+          text-align: left;
+        }
+
         .publicacion-card {
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             padding: 20px;
-            margin-bottom: 30px;
-            max-width: 780px;
+            margin-bottom: 40px;
             background-color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); 
-            font-family: Arial, sans-serif;
-            margin-left: auto;
-            margin-right: auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         }
 
         .publicacion-header {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 5px;
+            margin-bottom: 15px;
         }
 
         .publicacion-perfil {
             display: flex;
             align-items: center;
+            gap: 15px;
         }
 
         .perfil-avatar {
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
             border-radius: 50%;
-            margin-right: 15px;
             object-fit: cover;
-            border: 1px solid #e0e0e0;
+            border: 2px solid #e0e0e0;
         }
 
         .perfil-nombre {
             font-size: 1.2em;
             font-weight: bold;
-            color: #333333;
             margin: 0;
+            color: #333;
         }
 
         .perfil-rating {
-            display: flex;
-            align-items: center;
-            font-size: 0.9em;
-            color: #666666;
-            margin-top: 2px;
+            font-size: 0.85em;
+            color: #555;
         }
 
         .rating-estrella {
             color: #ffc107;
-            margin-right: 5px;
+            margin-right: 4px;
         }
 
         .publicacion-titulo {
-            font-size: 1.6em;
-            font-weight: 800;
+            font-size: 1.8em;
+            font-weight: 700;
             color: #16394F;
-            margin: 8px 0 5px 0;
+            margin: 10px 0;
             text-align: left;
         }
 
         .publicacion-descripcion {
+            color: #444;
             line-height: 1.5;
-            color: #333333;
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        .etiquetas-contenedor {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
             margin-bottom: 20px;
-        }
-
-        .etiqueta-item {
-            border: 1px solid #cccccc;
-            border-radius: 15px;
-            padding: 4px 12px;
-            font-size: 0.8em;
-            color: #666666;
+            text-align: left;
         }
 
         .imagenes-contenedor {
             display: flex;
-            gap: 10px;
-            border-top: 1.5px solid #16394F;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            border-top: 2px solid #16394F;
             padding-top: 20px;
-            margin-bottom: 20px;
         }
 
         .imagen-muestra {
-            width: 50%;
-            height: auto;
-            border-radius: 6px;
+            width: calc(50% - 10px);
+            border-radius: 8px;
             object-fit: cover;
         }
 
@@ -209,6 +188,7 @@ function MisServicios({ idProveedor }) {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-top: 10px;
         }
 
         .rango-precio {
@@ -218,20 +198,15 @@ function MisServicios({ idProveedor }) {
 
         .boton-perfil {
             background-color: #16394F;
-            color: #ffffff;
-            padding: 8px 15px;
+            color: #fff;
+            padding: 8px 16px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
         }
 
-        .section-title {
-            font-size: 2.5em;
-            font-weight: 800;
-            margin-bottom: 25px;
-            color: #333;
-        }
       `}</style>
+
     </div>
   );
 }
