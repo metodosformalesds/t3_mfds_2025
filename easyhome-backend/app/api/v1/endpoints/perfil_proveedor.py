@@ -68,63 +68,38 @@ def get_perfil_about(id_proveedor: int, db: Session = Depends(get_db)):
 # --- Endpoint 2: Pestaña "Mis servicios" ---
 # -----------------------------------------------------------------
 @router.get(
-    "/{id_proveedor}/servicios",
-    response_model=List[PublicacionServicioSchema]
+    "/{id_proveedor}/portafolio",
+    response_model=List[ImagenPublicacionSchema]
 )
-def get_perfil_servicios(id_proveedor: int, db: Session = Depends(get_db)):
+def get_perfil_portafolio(id_proveedor: int, db: Session = Depends(get_db)):
     """
-    Obtiene la lista de servicios publicados por un proveedor,
-    incluyendo URLs de imágenes desde S3 (presigned URLs)
+    Obtiene una galería de todas las imágenes de todas las
+    publicaciones activas de un proveedor, devolviendo URL firmadas.
     """
-
-    subquery_agregados = db.query(
-        Servicio_Contratado.id_publicacion,
-        cast(
-            func.avg(Reseña_Servicio.calificacion_general),
-            DECIMAL(3, 2)
-        ).label("calificacion_promedio_publicacion"),
-        func.count(Reseña_Servicio.id_reseña).label("total_reseñas_publicacion")
-    )\
-    .join(Reseña_Servicio, Reseña_Servicio.id_servicio_contratado == Servicio_Contratado.id_servicio_contratado)\
-    .filter(Servicio_Contratado.id_publicacion.isnot(None))\
-    .group_by(Servicio_Contratado.id_publicacion)\
-    .subquery()
-
-    agregados = aliased(subquery_agregados, name="agregados")
-
-    query_results = (
-        db.query(
-            Publicacion_Servicio,
-            agregados.c.calificacion_promedio_publicacion,
-            agregados.c.total_reseñas_publicacion
-        )
-        .outerjoin(agregados, Publicacion_Servicio.id_publicacion == agregados.c.id_publicacion)
-        .options(joinedload(Publicacion_Servicio.imagen_publicacion))
+    
+    fotos = (
+        db.query(Imagen_Publicacion)
+        .join(Publicacion_Servicio, Publicacion_Servicio.id_publicacion == Imagen_Publicacion.id_publicacion)
         .filter(Publicacion_Servicio.id_proveedor == id_proveedor)
         .filter(Publicacion_Servicio.estado == "activo")
-        .order_by(Publicacion_Servicio.fecha_publicacion.desc())
+        .order_by(Imagen_Publicacion.fecha_subida.desc())
         .all()
     )
 
-    from app.services.s3_service import s3_service  # IMPORTA TU SERVICIO S3
+    # 🚀 Convertir key → presigned URL
+    from app.services.s3_service import s3_service
+    fotos_con_url = []
 
-    lista_publicaciones = []
+    for foto in fotos:
+        presigned_url = s3_service.get_presigned_url(foto.url_imagen)
+        
+        fotos_con_url.append({
+            "id_imagen": foto.id_imagen,
+            "url_imagen": presigned_url,   # ⬅️ YA ES URL REAL
+            "orden": foto.orden
+        })
 
-    for publicacion, avg_rating, count_reviews in query_results:
-
-        publicacion.calificacion_promedio_publicacion = avg_rating
-        publicacion.total_reseñas_publicacion = count_reviews or 0
-
-        # 🔥 Convertir cada key S3 a URL válido
-        for imagen in publicacion.imagen_publicacion:
-            try:
-                imagen.url_imagen = s3_service.get_presigned_url(imagen.url_imagen)
-            except:
-                imagen.url_imagen = None  # fallback
-
-        lista_publicaciones.append(publicacion)
-
-    return lista_publicaciones
+    return fotos_con_url
 
 
 # -----------------------------------------------------------------
