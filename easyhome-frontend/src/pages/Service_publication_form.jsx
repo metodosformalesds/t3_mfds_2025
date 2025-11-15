@@ -79,21 +79,21 @@ function PublicarServicio() {
     };
  
     // Manejo de envío del formulario
-    const handleSubmit = async (e) => {
+   const handleSubmit = async (e) => {
         e.preventDefault();
- 
+
         if (!auth?.user?.profile?.email) {
             alert("Error: El usuario no está autenticado o el email no se pudo extraer.");
             return;
         }
- 
+
         if (selectedCategory === '' || fotos.length === 0) {
             alert("Por favor, selecciona una categoría y al menos una foto.");
             return;
         }
- 
-        setLoading(true); // Inicia el estado de carga
- 
+
+        setLoading(true);
+
         try {
             // Crear el FormData
             const formData = new FormData();
@@ -103,18 +103,27 @@ function PublicarServicio() {
             formData.append("descripcion", descripcion);
             formData.append("rango_precio_min", String(minPrice));
             formData.append("rango_precio_max", String(maxPrice));
- 
+
             // Adjuntar fotos
             fotos.forEach((file) => {
-            formData.append("fotos", file);
+                formData.append("fotos", file);
             });
- 
+
+            // 🔍 DEBUG: Ver qué hay en el FormData
+            console.log('=== FormData Debug ===');
+            for (let pair of formData.entries()) {
+                console.log(pair[0], ':', pair[1]);
+            }
+            console.log('=====================');
+
             // Llamada al servicio
             const response = await servicePublicationService.createPublication(formData);
- 
+
+            console.log('Respuesta exitosa:', response);
+
             // Mostrar mensaje inmediato
             alert(`Servicio "${response.titulo}" publicado con éxito.`);
- 
+
             // Resetear campos
             setTitulo("");
             setDescripcion("");
@@ -122,20 +131,24 @@ function PublicarServicio() {
             setMinPrice("");
             setMaxPrice("");
             setFotos([]);
- 
+
         } catch (error) {
-            console.error("Error al crear la publicación:", error);
- 
+            console.error("Error completo:", error);
+            console.error("Response:", error.response);
+            console.error("Request:", error.request);
+
             let errorMessage = "Error desconocido.";
             if (error.response?.data?.detail && Array.isArray(error.response.data.detail)) {
-            const validationErrors = error.response.data.detail
-                .map((err) => `${err.loc.join('.')}: ${err.msg}`)
-                .join('\n');
-            errorMessage = "Error de Validación (422):\n" + validationErrors;
+                const validationErrors = error.response.data.detail
+                    .map((err) => `${err.loc.join('.')}: ${err.msg}`)
+                    .join('\n');
+                errorMessage = "Error de Validación (422):\n" + validationErrors;
+            } else if (error.response?.data?.detail) {
+                errorMessage = error.response.data.detail;
             } else if (error.message) {
-            errorMessage = error.message;
+                errorMessage = error.message;
             }
- 
+
             alert(`Fallo de envío:\n${errorMessage}`);
         } finally {
             setLoading(false);
@@ -287,7 +300,9 @@ function PublicarServicio() {
             </div>
            
             {/* Publicar */}
-            <button onClick={handleSubmit} className="submit-button" type="button"> {loading ? "Publicando..." : "Publicar"}</button>
+            <button className="submit-button" type="submit" disabled={loading}>
+                {loading ? "Publicando..." : "Publicar"}
+            </button>
         </form>
     </div>
     );

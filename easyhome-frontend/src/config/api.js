@@ -7,7 +7,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 // Crear instancia de axios con configuración base
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000, // 10 segundos
+  timeout: 60000, // 60 segundos - AUMENTADO para uploads
 });
  
 apiClient.interceptors.request.use(
@@ -15,10 +15,28 @@ apiClient.interceptors.request.use(
     const user = await userManager.getUser();
  
     if (user && !user.expired && user.access_token) {
-      // Nos aseguramos de no pisar otros headers
       config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${user.access_token}`;
     }
+
+    // 🔍 DEBUG temporal - quitar después
+    console.log('=== AXIOS REQUEST DEBUG ===');
+    console.log('URL:', config.baseURL + config.url);
+    console.log('Method:', config.method?.toUpperCase());
+    console.log('Headers:', config.headers);
+    console.log('Data type:', config.data?.constructor.name);
+    
+    if (config.data instanceof FormData) {
+      console.log('✓ Es FormData - Contenido:');
+      for (let pair of config.data.entries()) {
+        if (pair[1] instanceof File) {
+          console.log(`  ${pair[0]}: [File] ${pair[1].name} (${pair[1].size} bytes)`);
+        } else {
+          console.log(`  ${pair[0]}: ${pair[1]}`);
+        }
+      }
+    }
+    console.log('===========================');
  
     return config;
   },
@@ -30,9 +48,20 @@ apiClient.interceptors.request.use(
 // Interceptor para responses
 apiClient.interceptors.response.use(
   (response) => {
+    console.log('=== AXIOS RESPONSE DEBUG ===');
+    console.log('Status:', response.status);
+    console.log('Data:', response.data);
+    console.log('============================');
     return response;
   },
   (error) => {
+    console.log('=== AXIOS ERROR DEBUG ===');
+    console.log('Error completo:', error);
+    console.log('Response:', error.response);
+    console.log('Request:', error.request);
+    console.log('Config:', error.config);
+    console.log('=========================');
+    
     if (error.response) {
       switch (error.response.status) {
         case 401:
@@ -41,11 +70,15 @@ apiClient.interceptors.response.use(
         case 403:
           console.error('Acceso prohibido.');
           break;
+        case 422:
+          console.error('Error de validación:', error.response.data);
+          break;
         default:
           console.error('Error en la petición:', error.response.data);
       }
     } else if (error.request) {
       console.error('No se recibió respuesta del servidor.');
+      console.error('Request que falló:', error.request);
     } else {
       console.error('Error al configurar la petición:', error.message);
     }
