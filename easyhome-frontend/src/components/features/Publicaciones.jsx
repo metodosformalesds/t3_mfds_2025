@@ -96,8 +96,8 @@ export default function Publicaciones({ publicacionData }) {
                         Rango de precio: <strong>{rangoPrecioFormateado}</strong>
                     </p>
 
-                    {/* Botón Ir al perfil: Asumiendo que usas el id_proveedor para la ruta */}
-                        <a href={`/proveedor/${publicacionData.id_proveedor}`} className="boton-perfil">
+                    {/* Botón Ir al perfil */}
+                        <a href={`/perfil`} className="boton-perfil">
                         Ir al perfil
                     </a> 
                 </div>
