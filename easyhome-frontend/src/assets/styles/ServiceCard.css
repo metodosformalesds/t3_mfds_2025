@@ -1,178 +1,184 @@
+/* ----------------------------------------------------------------- */
+/* CLASE PRINCIPAL: service-card (Anteriormente service-card-container) */
+/* ----------------------------------------------------------------- */
+.service-card {
+    display: flex; /* CRUCIAL: Mantiene los elementos en línea */
+    align-items: center;
+    justify-content: space-between; /* Agregado para mejor espaciado */
+    padding: 1rem;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease-in-out;
+    margin-bottom: 1rem; 
+}
 
-.service-card-container {
+.service-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+/* Base para todas las secciones dentro de la tarjeta */
+.card-section {
+    /* flex-shrink: 0; */
+    padding: 0 0.5rem; /* Pequeño padding horizontal */
+}
+
+/* ----------------------------------------------------------------- */
+/* SECCIÓN 1: PROVEEDOR (provider-section) */
+/* ----------------------------------------------------------------- */
+
+.provider-section {
     display: flex;
     align-items: center;
-    padding: 1rem; /* p-4 */
-    background-color: white; /* bg-white */
-    border: 1px solid #e5e7eb; /* border border-gray-200 */
-    border-radius: 0.75rem; /* rounded-xl */
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); /* shadow-md */
-    transition: all 0.2s ease-in-out; /* transition duration-200 */
-    margin-bottom: 1rem; /* Para separación si se usa fuera de un contenedor de espaciado */
+    column-gap: 1rem;
+    flex-grow: 1; /* Permite que tome el espacio disponible */
+    min-width: 0; /* Asegura el truncate en móviles */
 }
 
-.service-card-container:hover {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); /* hover:shadow-lg */
+.provider-avatar {
+    width: 3rem;
+    height: 3rem;
+    color: #9ca3af;
+    flex-shrink: 0; /* Evita que la imagen se reduzca */
 }
 
-/* --- Sección Izquierda: Info del Proveedor --- */
-
-.provider-info-section {
-    display: flex;
-    align-items: center;
-    column-gap: 1rem; /* space-x-4 */
-    flex-grow: 1; /* flex-grow */
-}
-
-.avatar-placeholder {
-    width: 3rem; /* w-12 */
-    height: 3rem; /* h-12 */
-    color: #9ca3af; /* text-gray-400 */
-    flex-shrink: 0;
-}
-
-.provider-details p {
+.provider-info p {
     margin: 0;
 }
 
 .provider-name {
-    color: #111827; /* text-gray-900 */
-    font-weight: 600; /* font-semibold */
+    color: #111827;
+    font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.premium-tag {
-    color: #2563eb; /* text-blue-600 */
-    font-weight: 500; /* font-medium */
-    margin-right: 0.25rem; /* mr-1 */
-    font-size: 0.75rem; /* text-xs */
+.premium-badge {
+    color: #111827;
+    font-weight: 500;
+    font-size: 0.75rem;
+    margin-right: 0.25rem;
 }
 
-.rating-details {
+.rating-info {
     display: flex;
     align-items: center;
-    font-size: 0.75rem; /* text-xs */
-    color: #6b7280; /* text-gray-500 */
-    margin-top: 0.125rem; /* mt-0.5 */
+    font-size: 0.75rem;
+    color: #16394F; 
+    margin-top: 0.125rem;
 }
 
-.rating-star {
-    color: #f59e0b; /* text-yellow-400 */
-    margin-right: 0.25rem; /* mr-1 */
+.star-icon {
+    color: #f59e0b;
+    margin-right: 0.25rem;
 }
 
-.rating-review-count {
-    margin-left: 0.25rem; /* ml-1 */
+.review-count {
+    margin-left: 0.25rem;
 }
 
-/* --- Sección Central: Fecha de Servicio --- */
+/* ----------------------------------------------------------------- */
+/* SECCIÓN 2: FECHA (date-section) */
+/* ----------------------------------------------------------------- */
 
 .date-section {
-    /* Ocultar en móvil y mostrar en pantallas pequeñas (sm:block) */
+    /* Ocultar en móvil y mostrar en pantallas medianas */
     display: none; 
     text-align: right;
-    margin-left: 1.5rem; /* mx-6 */
-    margin-right: 1.5rem;
+    margin: 0 1.5rem; /* Margen horizontal */
 }
 
 @media (min-width: 640px) {
     .date-section {
-        display: block;
+        display: block; /* Muestra en desktop/tablet */
     }
 }
 
-.date-section p {
-    margin: 0;
-}
-
 .date-label {
-    font-size: 0.875rem; /* text-sm */
-    font-weight: 500; /* font-medium */
-    color: #4b5563; /* text-gray-600 */
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #4b5563;
 }
 
 .date-value {
-    font-size: 1rem; /* text-base */
-    color: #111827; /* text-gray-900 */
-    font-weight: 500; /* font-medium */
+    font-size: 1rem;
+    color: #111827;
+    font-weight: 500;
 }
 
-/* --- Sección Derecha: Estatus y Reseña --- */
+/* ----------------------------------------------------------------- */
+/* SECCIÓN 3: ACCIONES (actions-section) */
+/* ----------------------------------------------------------------- */
 
-.status-review-section {
+.actions-section {
     display: flex;
     flex-direction: column;
-    align-items: flex-end; /* items-end */
-    row-gap: 0.5rem; /* space-y-2 */
-    margin-left: 1rem; /* ml-4 */
-    min-width: 120px; /* min-w-[120px] */
+    align-items: flex-end;
+    row-gap: 0.5rem;
+    margin-left: 1rem;
+    min-width: 120px; /* Ancho mínimo para mantener el estatus y botón */
 }
 
-/* Base para el estatus */
-.status-tag {
-    padding: 0.25rem 0.75rem; /* px-3 py-1 */
-    font-size: 0.75rem; /* text-xs */
-    font-weight: 600; /* font-semibold */
-    border-radius: 9999px; /* rounded-full */
+/* Base para el estatus (status-badge) */
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 9999px;
     white-space: nowrap;
 }
 
 /* Clases dinámicas de estatus */
-.status-tag-finished {
-    background-color: #10b981; /* bg-green-500 */
+
+.status-in-progress {
+    background-color: #d97706; /* Amarillo */
     color: white;
 }
 
-.status-tag-reviewed {
-    /* Estado Terminado (Reseña enviada) - Usamos una clase más clara para distinguirlo */
-    background-color: #d1fae5; /* bg-green-100 */
-    color: #065f46; /* text-green-700 */
-}
-
-.status-tag-inprogress {
-    background-color: #d97706; /* bg-yellow-600 */
+.status-finished-review-pending {
+    background-color: #22BB33; /* Verde fuerte */
     color: white;
 }
 
-.status-tag-default {
-    background-color: #9ca3af; /* bg-gray-400 */
-    color: white;
+.status-finished-reviewed {
+    background-color: #385D7466; /* Verde claro */
+    color: #385D7466;
 }
 
-/* Botón de Reseña */
-.review-button {
-    font-size: 0.875rem; /* text-sm */
-    font-weight: 500; /* font-medium */
+/* Botón de Reseña Pendiente */
+.review-button-pending {
+    font-size: 0.875rem;
+    font-weight: 500;
     color: white;
-    background-color: #0d9488; /* bg-teal-600 */
-    padding: 0.25rem 0.75rem; /* px-3 py-1 */
-    border-radius: 9999px; /* rounded-full */
-    transition: background-color 0.15s ease-in-out; /* transition duration-150 */
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); /* shadow-md */
+    background-color: #16394F; /* Teal */
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    transition: background-color 0.15s ease-in-out;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
     border: none;
     cursor: pointer;
 }
 
-.review-button:hover {
-    background-color: #0f766e; /* hover:bg-teal-700 */
+.review-button-pending:hover {
+    background-color: #385D7466;
 }
 
 /* Mensaje de Reseña Enviada */
-.review-sent-message {
-    font-size: 0.75rem; /* text-xs */
-    color: #065f46; /* text-green-700 */
-    font-weight: 500; /* font-medium */
-    background-color: #d1fae5; /* bg-green-100 */
-    padding: 0.25rem 0.5rem; /* px-2 py-1 */
-    border-radius: 9999px; /* rounded-full */
+.review-message-sent {
+    font-size: 0.75rem;
+    color: #065f46;
+    font-weight: 500;
+    background-color: #d1fae5;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
 }
 
-/* Mensaje de Servicio Activo (En proceso/Otro) */
-.inactive-service-message {
-    font-size: 0.75rem; /* text-xs */
-    color: #6b7280; /* text-gray-500 */
-    font-weight: 500; /* font-medium */
-    padding: 0.25rem 0.5rem; /* px-2 py-1 */
+/* Mensaje de Servicio Activo */
+.service-message-active {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
 }

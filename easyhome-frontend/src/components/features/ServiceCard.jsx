@@ -1,5 +1,29 @@
 import React from 'react';
+// Eliminamos: import { FaUserCircle } from 'react-icons/fa'; 
 import '../../assets/styles/ServiceCard.css';
+
+// Componente para renderizar el icono de la estrella
+const StarIcon = (props) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    // Mantenemos stroke y strokeWidth para el contorno
+    fill="none" 
+    stroke="black" 
+    strokeWidth="1.5" // Reducido para un borde más fino y estético
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className="star-icon"
+    {...props} 
+  >
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+    {/* Ajustado el path: fill="white" para que el interior sea blanco */}
+    <path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z" fill="white" />
+  </svg>
+);
+
 
 const ServiceCard = ({ service }) => {
   const { 
@@ -12,11 +36,14 @@ const ServiceCard = ({ service }) => {
     canReview 
   } = service;
 
-  // Función de ayuda para determinar la clase de estatus
+  /**
+   * Determina la clase CSS específica para el color de fondo del estatus.
+   * La clase base 'status-badge' se aplica en el render.
+   */
   const getStatusClasses = (status) => {
     switch (status) {
       case 'Terminado':
-        // Usa una clase para indicar si ya tiene reseña o aún puede reseñar
+        // Usa una clase para indicar si aún puede reseñar o si ya la envió
         return canReview ? 'status-finished-review-pending' : 'status-finished-reviewed'; 
       case 'En proceso':
         return 'status-in-progress';
@@ -26,6 +53,7 @@ const ServiceCard = ({ service }) => {
   };
 
   const handleReviewClick = () => {
+    // Lógica para abrir un modal de reseña
     console.log(`Abriendo modal de reseña para ${providerName}`);
   };
 
@@ -36,8 +64,10 @@ const ServiceCard = ({ service }) => {
       {/* Sección Izquierda: Perfil y Datos del Proveedor de Servicio */}
       <div className="card-section provider-section">
         
-        {/* Avatar Placeholder */}
-        {/*<FaUserCircle className="provider-avatar" />*/}
+        {/* Avatar Placeholder: Reemplazado FaUserCircle por un div simple que usa los estilos de provider-avatar */}
+        <div className="provider-avatar">
+            {/* Si tienes una URL de imagen, iría aquí: <img src="..." alt="Avatar" /> */}
+        </div>
 
         {/* Info del Proveedor */}
         <div className="provider-info">
@@ -48,14 +78,15 @@ const ServiceCard = ({ service }) => {
           </p>
           
           <div className="rating-info">
-             {/*<FaStar className="star-icon"/>*/}
+             {/* Integración del componente SVG de la Estrella */}
+             <StarIcon /> 
              <span>{providerRating}</span>
              <span className="review-count">({providerReviews})</span>
           </div>
         </div>
       </div>
 
-      {/* Sección Central: Fecha de Servicio - Oculta en pantallas pequeñas con CSS */}
+      {/* Sección Central: Fecha de Servicio - La visibilidad se maneja con @media en CSS */}
       <div className="card-section date-section">
         <p className="date-label">Fecha de Servicio</p>
         <p className="date-value">{date}</p>
