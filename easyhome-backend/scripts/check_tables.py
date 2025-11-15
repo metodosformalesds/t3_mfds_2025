@@ -1,6 +1,9 @@
 """
 Script para verificar las tablas en la base de datos
 Ejecutar con: python scripts/check_tables.py
+Uso:
+  - python scripts/check_tables.py              # Ver todas las tablas
+  - python scripts/check_tables.py solicitudes  # Ver solo tabla proveedor_servicio con datos
 """
 import sys
 import os
@@ -11,34 +14,125 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT_DIR))
 os.chdir(ROOT_DIR)
 
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine, inspect, text
 from app.core.config import settings
+
+
+def check_proveedor_servicio_data(engine):
+    """Verifica y muestra los datos de la tabla proveedor_servicio"""
+    print("\n" + "=" * 80)
+    print("📋 DATOS DE TABLA: proveedor_servicio")
+    print("=" * 80)
+
+    with engine.connect() as conn:
+        # Contar total de registros
+        result = conn.execute(text("SELECT COUNT(*) FROM proveedor_servicio"))
+        total = result.scalar()
+
+        print(f"\n📊 Total de solicitudes: {total}")
+
+        if total == 0:
+            print("\n⚠️  La tabla está VACÍA - No hay solicitudes registradas")
+            return
+
+        # Contar por estado
+        print("\n📈 Solicitudes por estado:")
+        result = conn.execute(text("""
+            SELECT estado_solicitud, COUNT(*) as cantidad
+            FROM proveedor_servicio
+            GROUP BY estado_solicitud
+        """))
+        for row in result:
+            print(f"   - {row.estado_solicitud}: {row.cantidad}")
+
+        # Mostrar últimas 5 solicitudes
+        print("\n📋 Últimas 5 solicitudes:")
+        result = conn.execute(text("""
+            SELECT
+                id_proveedor,
+                nombre_completo,
+                estado_solicitud,
+                especializaciones,
+                años_experiencia,
+                fecha_solicitud
+            FROM proveedor_servicio
+            ORDER BY fecha_solicitud DESC
+            LIMIT 5
+        """))
+
+        rows = result.fetchall()
+        if rows:
+            print("\n   ID  | Nombre                    | Estado      | Especialización       | Años | Fecha")
+            print("   " + "-" * 95)
+            for row in rows:
+                fecha = row.fecha_solicitud.strftime("%Y-%m-%d %H:%M") if row.fecha_solicitud else "N/A"
+                especialidades = (row.especializaciones[:20] + "...") if row.especializaciones and len(row.especializaciones) > 20 else (row.especializaciones or "N/A")
+                print(f"   {row.id_proveedor:3d} | {row.nombre_completo[:25]:25s} | {row.estado_solicitud:11s} | {especialidades:21s} | {row.años_experiencia:4d} | {fecha}")
+
+        # Contar fotos asociadas
+        print("\n📷 Fotos de trabajo:")
+        result = conn.execute(text("""
+            SELECT COUNT(*) as total_fotos
+            FROM foto_trabajo_anterior
+        """))
+        total_fotos = result.scalar()
+        print(f"   Total de fotos guardadas: {total_fotos}")
+
+        if total_fotos > 0:
+            result = conn.execute(text("""
+                SELECT
+                    ps.nombre_completo,
+                    COUNT(ft.id_foto) as num_fotos
+                FROM proveedor_servicio ps
+                LEFT JOIN foto_trabajo_anterior ft ON ps.id_proveedor = ft.id_proveedor
+                GROUP BY ps.id_proveedor, ps.nombre_completo
+                HAVING COUNT(ft.id_foto) > 0
+                ORDER BY COUNT(ft.id_foto) DESC
+                LIMIT 5
+            """))
+
+            print("\n   Proveedores con más fotos:")
+            for row in result:
+                print(f"      - {row.nombre_completo}: {row.num_fotos} foto(s)")
 
 
 def main():
     """Verificar las tablas en la base de datos"""
+    # Verificar si se pasó argumento 'solicitudes'
+    check_solicitudes_only = len(sys.argv) > 1 and sys.argv[1] == 'solicitudes'
+
     print("=" * 80)
-    print("VERIFICANDO TABLAS EN LA BASE DE DATOS")
+    if check_solicitudes_only:
+        print("VERIFICANDO TABLA proveedor_servicio")
+    else:
+        print("VERIFICANDO TABLAS EN LA BASE DE DATOS")
     print("=" * 80)
-    
+
     # Construir URL síncrona
     sync_url = f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
-    
+
     print(f"\n📋 Conectando a:")
     print(f"   - Base de datos: {settings.DB_NAME}")
     print(f"   - Host: {settings.DB_HOST}")
-    
+
     try:
         # Crear engine
         engine = create_engine(sync_url, pool_pre_ping=True)
-        
+
+        print(f"\n✅ Conexión exitosa!")
+
+        # Si solo queremos ver solicitudes
+        if check_solicitudes_only:
+            check_proveedor_servicio_data(engine)
+            print("\n" + "=" * 80)
+            return
+
         # Crear inspector
         inspector = inspect(engine)
-        
+
         # Obtener nombres de tablas
         table_names = inspector.get_table_names()
-        
-        print(f"\n✅ Conexión exitosa!")
+
         print(f"\n📊 Total de tablas encontradas: {len(table_names)}\n")
         
         if table_names:
@@ -79,9 +173,13 @@ def main():
         else:
             print("⚠️  No se encontraron tablas en la base de datos.")
             print("   Ejecuta: python scripts/init_db_sync.py")
-        
+
+        # Mostrar datos de proveedor_servicio si existe
+        if 'proveedor_servicio' in table_names:
+            check_proveedor_servicio_data(engine)
+
         print("\n" + "=" * 80)
-        
+
     except Exception as e:
         print(f"\n❌ Error al verificar las tablas: {e}")
         import traceback
