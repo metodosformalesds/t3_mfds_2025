@@ -47,13 +47,14 @@ export default function Publicaciones({ publicacionData }) {
                         
                         <div>
                             {/* Nombre del Proveedor */}
-                            <h3 className="perfil-nombre">{nombre_proveedor}</h3>
+                            <h3 className="perfil-nombre">
+                                {nombre_proveedor || "Proveedor sin nombre"}
+                            </h3>
                             
                             {/* Rating y opiniones */}
                             <div className="perfil-rating">
                                 <span className="rating-estrella">★</span>
                                 <span>{calificacion_proveedor || 0}</span>
-
                             </div>
                         </div>
                     </div>
