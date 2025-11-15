@@ -68,39 +68,30 @@ def get_perfil_about(id_proveedor: int, db: Session = Depends(get_db)):
 # --- Endpoint 2: Pestaña "Mis servicios" ---
 # -----------------------------------------------------------------
 @router.get(
-    "/{id_proveedor}/portafolio",
-    response_model=List[ImagenPublicacionSchema]
+    "/{id_proveedor}/servicios",
+    response_model=List[PublicacionServicioSchema]
 )
-def get_perfil_portafolio(id_proveedor: int, db: Session = Depends(get_db)):
+def get_perfil_servicios(id_proveedor: int, db: Session = Depends(get_db)):
     """
-    Obtiene una galería de todas las imágenes de todas las
-    publicaciones activas de un proveedor, devolviendo URL firmadas.
+    Devuelve las publicaciones del proveedor, incluyendo todas sus imágenes,
+    y genera URLs firmadas de S3.
     """
-    
-    fotos = (
-        db.query(Imagen_Publicacion)
-        .join(Publicacion_Servicio, Publicacion_Servicio.id_publicacion == Imagen_Publicacion.id_publicacion)
+    publicaciones = (
+        db.query(Publicacion_Servicio)
         .filter(Publicacion_Servicio.id_proveedor == id_proveedor)
         .filter(Publicacion_Servicio.estado == "activo")
-        .order_by(Imagen_Publicacion.fecha_subida.desc())
+        .options(joinedload(Publicacion_Servicio.imagen_publicacion))
+        .order_by(Publicacion_Servicio.fecha_publicacion.desc())
         .all()
     )
 
-    # 🚀 Convertir key → presigned URL
     from app.services.s3_service import s3_service
-    fotos_con_url = []
 
-    for foto in fotos:
-        presigned_url = s3_service.get_presigned_url(foto.url_imagen)
-        
-        fotos_con_url.append({
-            "id_imagen": foto.id_imagen,
-            "url_imagen": presigned_url,   # ⬅️ YA ES URL REAL
-            "orden": foto.orden
-        })
+    for pub in publicaciones:
+        for img in pub.imagen_publicacion:
+            img.url_imagen = s3_service.get_presigned_url(img.url_imagen)
 
-    return fotos_con_url
-
+    return publicaciones
 
 # -----------------------------------------------------------------
 # --- Endpoint 3: Pestaña "Portafolio" ---
