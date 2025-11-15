@@ -1,4 +1,6 @@
 import axios from 'axios';
+// 1. Importamos el MISMO userManager que usan AuthProvider y main.jsx
+import { userManager } from './authService';
 
 // Configuración base de la API
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -11,15 +13,21 @@ const apiClient = axios.create({
   },
   timeout: 10000, // 10 segundos
 });
-
 // Interceptor para requests - agregar token de autenticación si existe
 apiClient.interceptors.request.use(
-  (config) => {
-    // Aquí puedes agregar el token de autenticación
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+  
+  // 2. Convertimos la función en async
+  async (config) => {
+    
+    // 3. Ya no buscamos en localStorage. Le pedimos el usuario al userManager.
+    const user = await userManager.getUser();
+
+    // 4. Si el usuario existe, no ha expirado y tiene un token...
+    if (user && !user.expired && user.access_token) {
+      // 5. ...lo adjuntamos a la cabecera.
+      config.headers.Authorization = `Bearer ${user.access_token}`;
     }
+    
     return config;
   },
   (error) => {
@@ -33,38 +41,27 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Manejo de errores comunes
     if (error.response) {
-      // El servidor respondió con un código de estado fuera del rango 2xx
       switch (error.response.status) {
         case 401:
-          // No autorizado - redirigir a login
           console.error('No autorizado. Por favor inicia sesión.');
-          // Aquí puedes agregar lógica para redirigir al login
+          // Podrías llamar a userManager.signinRedirect() aquí si quisieras
           break;
         case 403:
           console.error('Acceso prohibido.');
           break;
-        case 404:
-          console.error('Recurso no encontrado.');
-          break;
-        case 500:
-          console.error('Error interno del servidor.');
-          break;
+        // ...otros casos
         default:
           console.error('Error en la petición:', error.response.data);
       }
     } else if (error.request) {
-      // La petición se hizo pero no hubo respuesta
       console.error('No se recibió respuesta del servidor.');
     } else {
-      // Algo pasó al configurar la petición
       console.error('Error al configurar la petición:', error.message);
     }
     return Promise.reject(error);
   }
 );
-
 
 export default apiClient;
 export { API_BASE_URL };

@@ -5,17 +5,15 @@ import './assets/styles/index.css'
 import './assets/styles/App.css'
 import { AuthProvider } from "react-oidc-context";
 
-const cognitoAuthConfig = {
-  authority: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_GBsGBTRls",
-  client_id: "478qnp7vk39jamq13sl8k4sp7t",
-  redirect_uri: "https://main.d30cfshgj52c8r.amplifyapp.com",
-  response_type: "code",
-  scope: "email openid phone",
-};
+// 1. Importamos el userManager que acabamos de crear
+import { userManager } from './authService';
+
+// 2. Ya no definimos la configuración aquí.
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <AuthProvider {...cognitoAuthConfig}>
+    {/* 3. Le pasamos el userManager directamente al AuthProvider */}
+    <AuthProvider userManager={userManager}>
       <App />
     </AuthProvider>
   </React.StrictMode>,
