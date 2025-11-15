@@ -19,7 +19,6 @@ apiClient.interceptors.request.use(
     const user = await userManager.getUser();
 
     if (user && !user.expired && user.access_token) {
-      // 5. ...lo adjuntamos a la cabecera.
       config.headers.Authorization = `Bearer ${user.id_token}`;
     }
     
