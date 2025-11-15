@@ -21,6 +21,9 @@ function AboutMe({ profileData }) {
       {/* TÍTULO */}
       <h2 className="about-me-title">Acerca de mí</h2>
 
+      {/* BIOGRAFÍA */}
+      <p className="about-me-summary">{summary}</p>
+
 
     </div>
   );
