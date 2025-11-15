@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session, joinedload, aliased
 from sqlalchemy import func, cast, DECIMAL
 from datetime import datetime, timezone
 from typing import List
+from app.services.s3_service import s3_service
 
 # --- Imports de Esquemas ---
 from app.schemas.proveedor import (
@@ -150,9 +151,8 @@ def get_perfil_portafolio(id_proveedor: int, db: Session = Depends(get_db)):
 )
 def get_perfil_reseñas(id_proveedor: int, db: Session = Depends(get_db)):
     """
-    Obtiene la lista de todas las reseñas que ha recibido
-    un proveedor, incluyendo las imágenes adjuntas y el
-    nombre del cliente.
+    Obtiene la lista de todas las reseñas que ha recibido un proveedor,
+    incluyendo imágenes y foto de perfil del cliente con URL prefirmada.
     """
     reseñas = (
         db.query(Reseña_Servicio)
@@ -166,7 +166,21 @@ def get_perfil_reseñas(id_proveedor: int, db: Session = Depends(get_db)):
         .order_by(Reseña_Servicio.fecha_reseña.desc())
         .all()
     )
+
+    #Agregar pre-signed URLs a las fotos de perfil de los clientes
+    for r in reseñas:
+        if r.usuario and r.usuario.foto_perfil:
+            try:
+                r.usuario.foto_perfil = s3_service.get_presigned_url(
+                    r.usuario.foto_perfil,
+                    expiration=3600  
+                )
+            except Exception as e:
+                print("ERROR generating presigned URL:", e)
+                r.usuario.foto_perfil = None
+
     return reseñas
+
 
 # -----------------------------------------------------------------
 # --- Endpoint 5 y 6: COMENTADOS - Requieren ServicioHistorialSchema ---

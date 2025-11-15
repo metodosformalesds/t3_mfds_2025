@@ -86,6 +86,7 @@ class ImagenReseñaSchema(BaseModel):
 class ClienteReseñaSchema(BaseModel):
     id_usuario: int
     nombre: str
+    foto_perfil: Optional[str] = None 
     
     class Config:
         from_attributes = True
