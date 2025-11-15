@@ -24,7 +24,22 @@ function AboutMe({ profileData }) {
       {/* BIOGRAFÍA */}
       <p className="about-me-summary">{summary}</p>
 
+      {/* ESPECIALIDADES */}
+      <h3 className="specialties-title">Especialidades</h3>
 
+      <div className="specialties-container">
+        {specialties.length > 0 ? (
+          specialties.map((specialty, index) => (
+            <span key={index} className="specialty-badge">
+              {specialty}
+            </span>
+          ))
+        ) : (
+          <span className="about-me-summary">
+            Sin especialidades registradas.
+          </span>
+        )}
+      </div>
     </div>
   );
 }
