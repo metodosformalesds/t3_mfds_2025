@@ -1,9 +1,6 @@
 import axios from 'axios';
-// 1. Importamos el userManager.
-// La ruta './authService' ahora es correcta porque ambos archivos están en 'src/config/'
 import { userManager } from './authService';
 
-// Configuración base de la API
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 // Crear instancia de axios con configuración base
@@ -15,19 +12,15 @@ const apiClient = axios.create({
   timeout: 10000, // 10 segundos
 });
 
-// Interceptor para requests - ¡AQUÍ ESTÁ LA MAGIA!
 apiClient.interceptors.request.use(
   
-  // 2. Convertimos la función en async
   async (config) => {
     
-    // 3. Ya no buscamos en localStorage. Le pedimos el usuario al userManager.
     const user = await userManager.getUser();
 
-    // 4. Si el usuario existe, no ha expirado y tiene un token...
     if (user && !user.expired && user.access_token) {
       // 5. ...lo adjuntamos a la cabecera.
-      config.headers.Authorization = `Bearer ${user.access_token}`;
+      config.headers.Authorization = `Bearer ${user.id_token}`;
     }
     
     return config;
