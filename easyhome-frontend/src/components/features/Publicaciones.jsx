@@ -17,8 +17,8 @@ export default function Publicaciones({ publicacionData }) {
         calificacion_proveedor,
         
         total_reseñas_proveedor = publicacionData.total_reseñas_proveedor || 127, 
-        etiquetas = publicacionData.etiquetas || ["Confiabilidad", "Mantenimiento", "Alta experiencia"]
-        
+        etiquetas = publicacionData.etiquetas || ["Confiabilidad", "Mantenimiento", "Alta experiencia"],
+        proveedor = {}
     } = publicacionData || {}; 
 
     // 2. Determinar si es Premium
@@ -52,10 +52,8 @@ export default function Publicaciones({ publicacionData }) {
                             {/* Rating y opiniones */}
                             <div className="perfil-rating">
                                 <span className="rating-estrella">★</span>
-                                <span>
-                                    {calificacion_proveedor?.toFixed(1) || 0}
-                                    ({total_reseñas_proveedor})
-                                </span>
+                                <span>{calificacion_proveedor || 0}</span>
+
                             </div>
                         </div>
                     </div>

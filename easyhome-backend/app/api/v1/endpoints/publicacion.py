@@ -200,17 +200,14 @@ def listar_publicaciones(
                 "titulo": pub.titulo,
                 "descripcion_corta": pub.descripcion[:100] if pub.descripcion else "Sin descripción",
 
-                # DATOS DEL PROVEEDOR (CORRECTOS)
                 "id_proveedor": pub.id_proveedor,
                 "nombre_proveedor": prov.nombre_completo if prov else "Proveedor desconocido",
                 "foto_perfil_proveedor": foto_perfil_url,
-                "calificacion_proveedor": prov.calificacion_promedio if prov else None,
+                "calificacion_proveedor": round(prov.calificacion_promedio, 1) if prov and prov.calificacion_promedio else 0,
 
-                # INFORMACIÓN DE LA PUBLICACIÓN
                 "rango_precio_min": pub.rango_precio_min,
                 "rango_precio_max": pub.rango_precio_max,
                 "url_imagen_portada": url_imagen_portada,
-                "id_plan_suscripcion": prov.id_plan_suscripcion if prov else None,
             })
 
         return resultado
