@@ -113,3 +113,5 @@ export const useClientServices = (clientId) => {
 
   return { services, isLoading, error };
 };
+
+export default useClientServices;

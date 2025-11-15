@@ -1,6 +1,5 @@
 import React from 'react';
-import { FaStar, FaUserCircle } from 'react-icons/fa'; 
-import '../assets/styles/ServiceCard.css';
+import '../../assets/styles/ServiceCard.css';
 
 const ServiceCard = ({ service }) => {
   const { 
@@ -38,7 +37,7 @@ const ServiceCard = ({ service }) => {
       <div className="card-section provider-section">
         
         {/* Avatar Placeholder */}
-        <FaUserCircle className="provider-avatar" />
+        {/*<FaUserCircle className="provider-avatar" />*/}
 
         {/* Info del Proveedor */}
         <div className="provider-info">
@@ -49,7 +48,7 @@ const ServiceCard = ({ service }) => {
           </p>
           
           <div className="rating-info">
-             <FaStar className="star-icon"/>
+             {/*<FaStar className="star-icon"/>*/}
              <span>{providerRating}</span>
              <span className="review-count">({providerReviews})</span>
           </div>

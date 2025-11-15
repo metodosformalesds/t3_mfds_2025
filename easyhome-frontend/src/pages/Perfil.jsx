@@ -16,7 +16,7 @@ import AcercaDe from './sections/AcercaDe';
 import MisServicios from './sections/MisServicios';
 import Portafolio from './sections/Portafolio';
 import Resenas from './sections/Resenas';
-import Servicios from './sections/Servicios';
+import Servicios from './cliente/Servicios';
 import EditarFotoModal from '../components/common/EditarFotoModal';
 
 function Perfil() {

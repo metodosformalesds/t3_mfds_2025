@@ -1,4 +1,6 @@
 import React from 'react';
+import useClientServices from '../../hooks/useClientServices';
+import ServiceCard from '../../components/features/ServiceCard';
 
 
 // Componente para la pantalla completa 
