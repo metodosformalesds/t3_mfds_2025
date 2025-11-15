@@ -10,11 +10,7 @@ const servicePublicationService = {
      */
     createPublication: async (formData) => {
     try {
-        const response = await apiClient.post('/api/v1/publicaciones/', formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
-        });
+        const response = await apiClient.post('/api/v1/publicaciones/', formData);
         return response.data;
     } catch (error) {
         if (error.response) {
