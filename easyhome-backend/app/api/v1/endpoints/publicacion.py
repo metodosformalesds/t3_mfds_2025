@@ -208,7 +208,12 @@ def listar_publicaciones(
                 "descripcion_corta": pub.descripcion[:100] if pub.descripcion else "Sin descripción",
 
                 "id_proveedor": pub.id_proveedor,
-                "nombre_proveedor": prov.nombre_completo if prov and prov.nombre_completo else "Sin nombre",
+                "nombre_proveedor": (
+                    # Preferimos el nombre almacenado en Proveedor_Servicio (nombre_completo).
+                    # Si no existe, intentamos usar el nombre en la entidad Usuario (campo `nombre`).
+                    prov.nombre_completo if prov and getattr(prov, "nombre_completo", None)
+                    else (prov.usuario.nombre if prov and prov.usuario and getattr(prov.usuario, "nombre", None) else "Sin nombre")
+                ),
                 "foto_perfil_proveedor": foto_perfil_url,
                 "calificacion_proveedor": round(prov.calificacion_promedio, 1) if prov and prov.calificacion_promedio else 0,
 
