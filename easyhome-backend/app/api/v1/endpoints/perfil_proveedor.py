@@ -1,6 +1,6 @@
 # app/api/v1/endpoints/perfil_proveedor.py
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session, joinedload, aliased
 from sqlalchemy import func, cast, DECIMAL
 from datetime import datetime, timezone
@@ -68,58 +68,35 @@ def get_perfil_about(id_proveedor: int, db: Session = Depends(get_db)):
 # --- Endpoint 2: Pestaña "Mis servicios" ---
 # -----------------------------------------------------------------
 @router.get(
-    "/{id_proveedor}/servicios", 
+    "/{id_proveedor}/servicios",
     response_model=List[PublicacionServicioSchema]
 )
 def get_perfil_servicios(id_proveedor: int, db: Session = Depends(get_db)):
     """
-    Obtiene la lista de servicios publicados por un proveedor,
-    calculando la calificación promedio y el total de reseñas
-    para CADA publicación.
+    Devuelve las publicaciones del proveedor, incluyendo todas sus imágenes,
+    y genera URLs firmadas de S3.
     """
-
-    subquery_agregados = db.query(
-        Servicio_Contratado.id_publicacion,
-        cast(
-            func.avg(Reseña_Servicio.calificacion_general), 
-            DECIMAL(3, 2)
-        ).label("calificacion_promedio_publicacion"),
-        func.count(Reseña_Servicio.id_reseña).label("total_reseñas_publicacion")
-    )\
-    .join(Reseña_Servicio, Reseña_Servicio.id_servicio_contratado == Servicio_Contratado.id_servicio_contratado)\
-    .filter(Servicio_Contratado.id_publicacion.isnot(None))\
-    .group_by(Servicio_Contratado.id_publicacion)\
-    .subquery()
-
-    agregados = aliased(subquery_agregados, name="agregados")
-
-    query_results = (
-        db.query(
-            Publicacion_Servicio,
-            agregados.c.calificacion_promedio_publicacion,
-            agregados.c.total_reseñas_publicacion
-        )
-        .outerjoin(agregados, Publicacion_Servicio.id_publicacion == agregados.c.id_publicacion)
-        .options(joinedload(Publicacion_Servicio.imagen_publicacion))
+    publicaciones = (
+        db.query(Publicacion_Servicio)
         .filter(Publicacion_Servicio.id_proveedor == id_proveedor)
         .filter(Publicacion_Servicio.estado == "activo")
+        .options(joinedload(Publicacion_Servicio.imagen_publicacion))
         .order_by(Publicacion_Servicio.fecha_publicacion.desc())
         .all()
     )
 
-    lista_publicaciones = []
-    for publicacion, avg_rating, count_reviews in query_results:
-        
-        publicacion.calificacion_promedio_publicacion = avg_rating
-        publicacion.total_reseñas_publicacion = count_reviews or 0
-        
-        lista_publicaciones.append(publicacion)
+    from app.services.s3_service import s3_service
 
-    return lista_publicaciones
+    for pub in publicaciones:
+        for img in pub.imagen_publicacion:
+            img.url_imagen = s3_service.get_presigned_url(img.url_imagen)
+
+    return publicaciones
 
 # -----------------------------------------------------------------
 # --- Endpoint 3: Pestaña "Portafolio" ---
 # -----------------------------------------------------------------
+
 @router.get(
     "/{id_proveedor}/portafolio",
     response_model=List[ImagenPublicacionSchema]
@@ -127,7 +104,7 @@ def get_perfil_servicios(id_proveedor: int, db: Session = Depends(get_db)):
 def get_perfil_portafolio(id_proveedor: int, db: Session = Depends(get_db)):
     """
     Obtiene una galería de todas las imágenes de todas las
-    publicaciones activas de un proveedor.
+    publicaciones activas de un proveedor, devolviendo URL firmadas.
     """
     
     fotos = (
@@ -138,8 +115,21 @@ def get_perfil_portafolio(id_proveedor: int, db: Session = Depends(get_db)):
         .order_by(Imagen_Publicacion.fecha_subida.desc())
         .all()
     )
-    
-    return fotos
+
+    # 🚀 Convertir key → presigned URL
+    from app.services.s3_service import s3_service
+    fotos_con_url = []
+
+    for foto in fotos:
+        presigned_url = s3_service.get_presigned_url(foto.url_imagen)
+        
+        fotos_con_url.append({
+            "id_imagen": foto.id_imagen,
+            "url_imagen": presigned_url,   # ⬅️ YA ES URL REAL
+            "orden": foto.orden
+        })
+
+    return fotos_con_url
 
 # -----------------------------------------------------------------
 # --- Endpoint 4: Pestaña "Reseñas" ---
