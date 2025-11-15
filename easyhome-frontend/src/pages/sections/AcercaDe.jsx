@@ -57,7 +57,25 @@ function AcercaDe({ idProveedor }) {
     );
   }
 
-  
+  // 🔗 Mapeo directo de backend → AboutMe
+  const profileData = {
+    summary:
+      proveedorData.biografia && proveedorData.biografia.trim() !== ''
+        ? proveedorData.biografia
+        : 'Información no disponible.',
+    specialties: proveedorData.especializaciones
+      ? proveedorData.especializaciones
+          .split(',')
+          .map((e) => e.trim())
+          .filter((e) => e !== '')
+      : [],
+  };
+
+  return (
+    <div className="acerca-de-container">
+      <AboutMe profileData={profileData} />
+    </div>
+  );
 }
 
 AcercaDe.propTypes = {
