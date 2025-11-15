@@ -1,5 +1,6 @@
 import axios from 'axios';
-// 1. Importamos el MISMO userManager que usan AuthProvider y main.jsx
+// 1. Importamos el userManager.
+// La ruta './authService' ahora es correcta porque ambos archivos están en 'src/config/'
 import { userManager } from './authService';
 
 // Configuración base de la API
@@ -13,7 +14,8 @@ const apiClient = axios.create({
   },
   timeout: 10000, // 10 segundos
 });
-// Interceptor para requests - agregar token de autenticación si existe
+
+// Interceptor para requests - ¡AQUÍ ESTÁ LA MAGIA!
 apiClient.interceptors.request.use(
   
   // 2. Convertimos la función en async
@@ -35,7 +37,7 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Interceptor para responses - manejo centralizado de errores
+// Interceptor para responses - (Este se queda igual, ya estaba bien)
 apiClient.interceptors.response.use(
   (response) => {
     return response;
@@ -62,6 +64,7 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 
 export default apiClient;
 export { API_BASE_URL };
