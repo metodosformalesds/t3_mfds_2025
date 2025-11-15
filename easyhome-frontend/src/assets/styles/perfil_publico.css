@@ -1,4 +1,4 @@
-/* --- CONTENEDOR GENERAL --- */
+/* --- contenedor general --- */
 .public-profile-container {
   max-width: 1050px;
   margin: 0 auto;
@@ -6,7 +6,6 @@
   font-family: var(--font-text);
 }
 
-/* --- HEADER (volver) --- */
 .public-profile-header {
   display: flex;
   justify-content: flex-start;
@@ -22,7 +21,7 @@
   cursor: pointer;
 }
 
-/* --- INFORMACIÓN PRINCIPAL DEL PROVEEDOR --- */
+/* informacion principal del proveedor --- */
 .public-profile-info {
   text-align: center;
   margin-bottom: 2rem;
@@ -64,7 +63,7 @@
   margin-top: 0.5rem;
 }
 
-/* --- TABS --- */
+/* tabs */
 .public-profile-tabs {
   display: flex;
   justify-content: center;
@@ -72,7 +71,7 @@
   margin-bottom: 1.5rem;
   padding: 0.25rem;
   overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none; 
 }
 
 .public-profile-tabs::-webkit-scrollbar {
@@ -103,7 +102,16 @@
   color: var(--color-white);
 }
 
-/* --- CONTENIDO RENDERIZADO --- */
+.contact-item span {
+  color: #000 !important;
+}
+
+.perfil-section .contact-item span,
+.perfil-section .plan-item span {
+  color: #000000 !important;
+}
+
+
 .public-profile-content {
   background: var(--color-white);
   border-radius: 16px;
@@ -111,7 +119,7 @@
   padding: 2rem;
 }
 
-/* Para evitar que el contenido se pegue a los bordes */
+
 .public-profile-content > * {
   margin-bottom: 2rem;
 }
