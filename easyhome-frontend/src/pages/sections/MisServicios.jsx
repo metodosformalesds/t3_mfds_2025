@@ -16,9 +16,44 @@ function MisServicios({ idProveedor }) {
 
       try {
         setLoading(true);
+
+        // 1. Cargar publicaciones del proveedor
         const response = await api.get(`/api/v1/proveedores/${idProveedor}/servicios`);
-        setServicios(response.data);
+        const serviciosBase = response.data;
+
+        // 2. Para cada servicio, obtener la foto de perfil del proveedor
+        const serviciosConFoto = await Promise.all(
+          serviciosBase.map(async (servicio) => {
+            try {
+              // OJO: en tu modelo el proveedor es usuario.id_usuario
+              const fotoRes = await api.get(
+                `/api/v1/usuarios/${servicio.id_proveedor}/foto-perfil`
+              );
+
+              return {
+                ...servicio,
+                proveedor: {
+                  ...servicio.proveedor,
+                  foto_perfil_url: fotoRes.data.foto_perfil_url
+                }
+              };
+            } catch (errorFoto) {
+              console.warn("⚠️ No se pudo obtener foto de perfil:", errorFoto);
+
+              return {
+                ...servicio,
+                proveedor: {
+                  ...servicio.proveedor,
+                  foto_perfil_url: null
+                }
+              };
+            }
+          })
+        );
+
+        setServicios(serviciosConFoto);
         setError(null);
+
       } catch (err) {
         console.error("❌ Error al obtener servicios:", err);
         setError("No se pudieron cargar los servicios");
@@ -40,10 +75,10 @@ function MisServicios({ idProveedor }) {
 
       {servicios.map((servicio) => {
         const proveedor = servicio.proveedor || {};
+        
         const fotoPerfil =
-          proveedor.foto_perfil_url || // ← FOTO DE PERFIL REAL (URL firmada del backend)
-          proveedor.foto_perfil ||     // ← En caso de que venga como key o url normal
-          "https://i.imgur.com/placeholder.png"; // fallback
+          proveedor.foto_perfil_url ||
+          "https://i.imgur.com/placeholder.png";
 
         return (
           <div key={servicio.id_publicacion} className="publicacion-card">
@@ -79,7 +114,7 @@ function MisServicios({ idProveedor }) {
             {/* DESCRIPCIÓN */}
             <p className="publicacion-descripcion">{servicio.descripcion}</p>
 
-            {/* IMÁGENES (TODAS) */}
+            {/* IMÁGENES */}
             <div className="imagenes-contenedor">
               {servicio.imagen_publicacion?.map((img) => (
                 <img
