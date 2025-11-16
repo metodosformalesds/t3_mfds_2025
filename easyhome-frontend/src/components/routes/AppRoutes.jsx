@@ -13,6 +13,8 @@ import Perfil from '../../pages/Perfil';
 import ClienteDashboard from '../../pages/cliente/Dashboard';
 import ClienteServicios from '../../pages/cliente/Servicios';
 import ClienteFeed from '../../pages/cliente/feed';
+import ProviderProfile from '../../pages/cliente/alerta_contratacion';
+import ProveedorPublicProfile from '../../pages/trabajador/perfil_publico';
 
 // Páginas de Trabajador
 import TrabajadorDashboard from '../../pages/trabajador/Dashboard';
@@ -82,6 +84,15 @@ const AppRoutes = () => {
             <ClienteServicios />
           </ProtectedRoute>
         } 
+      />
+
+      <Route 
+        path="/cliente/proveedor"
+        element={
+          <ProtectedRoute allowedRoles={['Clientes']}>
+            <ProveedorPublicProfile />
+          </ProtectedRoute>
+        }
       />
 
       {/* Rutas de Trabajador (prioridad 2) */}

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import api from '../../config/api';
 
-function MisServicios({ idProveedor }) {
+function MisServicios({idProveedor, publicView = false}) {
   const [servicios, setServicios] = useState([]);
   const [nombreProveedor, setNombreProveedor] = useState("Proveedor");
   const [loading, setLoading] = useState(true);
@@ -85,74 +85,71 @@ function MisServicios({ idProveedor }) {
   if (error) return <div>{error}</div>;
 
   return (
-    <div className="mis-servicios-contenedor">
-      
-      <h2 className="section-title">Mis Servicios</h2>
+    <div className="mis-servicios-container">
+      <div className="header-section">
+        <h2>Mis Servicios</h2>
+        <button className="btn-nuevo-servicio">+ Nuevo Servicio</button>
+      </div>
 
-      {servicios.map((servicio) => {
-        const fotoPerfil =
-          servicio.foto_perfil_url ||
-          "https://i.imgur.com/placeholder.png";
+      {servicios.length === 0 ? (
+        <div className="no-servicios">
+          <p>No tienes servicios publicados aún.</p>
+          <button className="btn-crear-primero">Crear mi primer servicio</button>
+        </div>
+      ) : (
+        <div className="servicios-grid">
+          {servicios.map((servicio) => (
+            <div key={servicio.id_publicacion} className="servicio-card">
+              {/* Imagen principal */}
+              <div className="servicio-imagen">
+                {servicio.imagen_publicacion && servicio.imagen_publicacion.length > 0 ? (
+                  <img 
+                    src={servicio.imagen_publicacion[0].url_imagen} 
+                    alt={servicio.titulo}
+                  />
+                ) : (
+                  <div className="no-imagen">Sin imagen</div>
+                )}
+                <span className={`estado-badge ${servicio.estado}`}>
+                  {servicio.estado}
+                </span>
+              </div>
 
-        return (
-          <div key={servicio.id_publicacion} className="publicacion-card">
+              {/* Información del servicio */}
+              <div className="servicio-info">
+                <h3>{servicio.titulo}</h3>
+                <p className="descripcion">{servicio.descripcion}</p>
+                
+                <div className="precio-rango">
+                  <span className="precio">
+                    ${Number(servicio.rango_precio_min).toFixed(2)} - 
+                    ${Number(servicio.rango_precio_max).toFixed(2)}
+                  </span>
+                </div>
 
-            {/* HEADER */}
-            <div className="publicacion-header">
-              <div className="publicacion-perfil">
-                <img
-                  src={fotoPerfil}
-                  className="perfil-avatar"
-                  alt="proveedor"
-                />
+                <div className="stats">
+                  <span className="stat">
+                    ⭐ {servicio.calificacion_promedio_publicacion ? 
+                      Number(servicio.calificacion_promedio_publicacion).toFixed(1) : 
+                      'Sin calificación'}
+                  </span>
+                  <span className="stat">
+                    💬 {servicio.total_reseñas_publicacion || 0} reseñas
+                  </span>
+                  <span className="stat">
+                    👁️ {servicio.vistas} vistas
+                  </span>
+                </div>
 
-                <div>
-                  <p className="perfil-nombre">
-                    {nombreProveedor}
-                  </p>
-
-                  <div className="perfil-rating">
-                    <span className="rating-estrella">★</span>
-                    <span>{servicio.calificacion_promedio_publicacion || "4.5"}</span>
-                    <span className="rating-count">
-                      ({servicio.total_reseñas_publicacion || 10})
-                    </span>
-                  </div>
+                <div className="servicio-acciones">
+                  <button className="btn-editar">Editar</button>
+                  <button className="btn-ver">Ver publicación</button>
                 </div>
               </div>
             </div>
-
-            {/* TITULO */}
-            <h3 className="publicacion-titulo">{servicio.titulo}</h3>
-
-            {/* DESCRIPCIÓN */}
-            <p className="publicacion-descripcion">{servicio.descripcion}</p>
-
-            {/* IMÁGENES */}
-            <div className="imagenes-contenedor">
-              {servicio.imagen_publicacion?.map((img) => (
-                <img
-                  key={img.id_imagen}
-                  src={img.url_imagen}
-                  className="imagen-muestra"
-                  alt="foto"
-                />
-              ))}
-            </div>
-
-            {/* FOOTER */}
-            <div className="publicacion-footer">
-              <p className="rango-precio">
-                Rango de precio:
-                <strong> ${servicio.rango_precio_min} – ${servicio.rango_precio_max}</strong>
-              </p>
-
-              <button className="boton-perfil">Editar</button>
-            </div>
-
-          </div>
-        );
-      })}
+          ))} 
+        </div>
+      )}
 
       {/* ESTILOS */}
       <style>{`
