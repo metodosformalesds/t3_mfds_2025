@@ -10,7 +10,6 @@ const STATUS_LABELS = {
 const FINALIZABLE_STATES = new Set(["confirmado", "en_proceso"]);
 const PLACEHOLDER_PHOTO = "https://via.placeholder.com/80";
 
-/** Mapeo inicial de un servicio */
 const mapService = (service) => ({
   id: service.id_servicio_contratado,
   clientName: service.usuario?.nombre ?? "Cliente sin nombre",
@@ -30,7 +29,6 @@ export const useProviderServices = (providerId) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  /** Cargar servicios activos y finalizados */
   const fetchServices = useCallback(async () => {
     if (!providerId) {
       setActiveServices([]);
@@ -52,7 +50,6 @@ export const useProviderServices = (providerId) => {
       const msg =
         err.response?.data?.detail ||
         "No se pudieron cargar los servicios.";
-
       setError(msg);
       setActiveServices([]);
       setFinishedServices([]);
@@ -60,6 +57,42 @@ export const useProviderServices = (providerId) => {
       setIsLoading(false);
     }
   }, [providerId]);
+
+  /** Finalizar un servicio activo */
+  const finalizarServicio = useCallback(
+    async (serviceId) => {
+      const { data } = await api.put(
+        `/api/v1/status-servicio/servicios/${serviceId}/finalizar`
+      );
+
+      // Buscar el servicio
+      const servicioFinalizado = activeServices.find(
+        (srv) => srv.id === serviceId
+      );
+
+      // Remover de activos
+      setActiveServices((prev) =>
+        prev.filter((srv) => srv.id !== serviceId)
+      );
+
+      // Mover a finalizados
+      if (servicioFinalizado) {
+        setFinishedServices((prev) => [
+          ...prev,
+          {
+            ...servicioFinalizado,
+            status: "finalizado",
+            statusLabel: "Finalizado",
+            canFinish: false,
+            finishedAt: data.fecha_finalizacion,
+          },
+        ]);
+      }
+
+      return data;
+    },
+    [activeServices]
+  );
 
   useEffect(() => {
     fetchServices();
@@ -71,6 +104,7 @@ export const useProviderServices = (providerId) => {
     isLoading,
     error,
     fetchServices,
+    finalizarServicio,
   };
 };
 
