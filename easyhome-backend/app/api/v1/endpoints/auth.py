@@ -68,9 +68,38 @@ def sync_cognito_user(user_data: CognitoUserSync, db: Session = Depends(get_db))
         if user_data.phone:
             existing_user.numero_telefono = user_data.phone
 
+        # NUEVO: actualizar tipo_usuario basado en grupos actuales de Cognito
+        tipo_usuario_anterior = existing_user.tipo_usuario
+        if "Admin" in user_data.cognito_groups:
+            existing_user.tipo_usuario = "administrador"
+        elif "Trabajadores" in user_data.cognito_groups:
+            existing_user.tipo_usuario = "proveedor"
+        elif "Clientes" in user_data.cognito_groups:
+            existing_user.tipo_usuario = "cliente"
+
+        # Log cambio de tipo si hubo
+        if tipo_usuario_anterior != existing_user.tipo_usuario:
+            logger.info(f"Usuario {existing_user.correo_electronico} cambió de '{tipo_usuario_anterior}' a '{existing_user.tipo_usuario}'")
+
+        # NUEVO: Si el usuario es proveedor, crear registro en Proveedor_Servicio si no existe
+        if existing_user.tipo_usuario == "proveedor":
+            proveedor_existente = db.query(Proveedor_Servicio).filter(
+                Proveedor_Servicio.id_proveedor == existing_user.id_usuario
+            ).first()
+
+            if not proveedor_existente:
+                nuevo_proveedor = Proveedor_Servicio(
+                    id_proveedor=existing_user.id_usuario,
+                    nombre_completo=existing_user.nombre,
+                    estado_solicitud="aprobado",  # Auto-aprobar usuarios de Cognito
+                    fecha_solicitud=datetime.now()
+                )
+                db.add(nuevo_proveedor)
+                logger.info(f"Creado registro de Proveedor_Servicio para usuario {existing_user.correo_electronico}")
+
         db.commit()
         db.refresh(existing_user)
-        
+
         return {
             "message": "Usuario actualizado",
             "user_id": existing_user.id_usuario,
@@ -100,11 +129,23 @@ def sync_cognito_user(user_data: CognitoUserSync, db: Session = Depends(get_db))
         fecha_registro=datetime.now(),
         ultima_sesion=datetime.now()
     )
-    
+
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    
+
+    # NUEVO: Si el usuario es proveedor, crear registro en Proveedor_Servicio automáticamente
+    if tipo_usuario == "proveedor":
+        nuevo_proveedor = Proveedor_Servicio(
+            id_proveedor=new_user.id_usuario,
+            nombre_completo=new_user.nombre,
+            estado_solicitud="aprobado",  # Auto-aprobar usuarios de Cognito con grupo Trabajadores
+            fecha_solicitud=datetime.now()
+        )
+        db.add(nuevo_proveedor)
+        db.commit()
+        logger.info(f"Creado registro de Proveedor_Servicio para nuevo usuario {new_user.correo_electronico}")
+
     return {
         "message": "Usuario creado exitosamente",
         "user_id": new_user.id_usuario,
