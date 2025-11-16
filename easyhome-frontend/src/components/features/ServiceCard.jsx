@@ -25,7 +25,7 @@ const StarIcon = (props) => (
 );
 
 
-const ServiceCard = ({ service }) => {
+const ServiceCard = ({ service, onReview }) => {
   const { 
     providerName, 
     providerRating, 
@@ -53,7 +53,10 @@ const ServiceCard = ({ service }) => {
   };
 
   const handleReviewClick = () => {
-    // Lógica para abrir un modal de reseña
+    if (typeof onReview === 'function') {
+      onReview(service.id);
+      return;
+    }
     console.log(`Abriendo modal de reseña para ${providerName}`);
   };
 

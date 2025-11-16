@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import useClientServices from '../../hooks/useClientServices';
 import ServiceCard from '../../components/features/ServiceCard';
 
@@ -7,6 +8,7 @@ import ServiceCard from '../../components/features/ServiceCard';
 const ClienteServicios = () => {
     // Simulamos que el ID del cliente es 1 para la demo
     const clientId = 1; 
+    const navigate = useNavigate();
 
     // 1. Usar el hook personalizado para obtener datos
     const { services, isLoading, error } = useClientServices(clientId);
@@ -40,7 +42,8 @@ const ClienteServicios = () => {
                     services.map(service => (
                         <ServiceCard 
                             key={service.id} 
-                            service={service} 
+                            service={service}
+                            onReview={(id) => navigate(`/cliente/resena?id_servicio_contratado=${id}`)}
                         />
                     ))
                 ) : (
