@@ -5,7 +5,8 @@ from app.api.v1.endpoints import example, auth, categories, solicitud, perfil_pr
 app = FastAPI(
     title="EasyHome Backend API",
     description="API for managing EasyHome smart home devices and services.",
-    version="1.0.0"
+    version="1.0.0",
+    redirect_slashes=False,
 )
 
 # Configurar CORS para permitir peticiones desde el frontend
