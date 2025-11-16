@@ -150,3 +150,47 @@ def finalizar_servicio(
         fecha_finalizacion=servicio.fecha_finalizacion,
     )
 
+@router.get(
+    "/proveedores/{id_proveedor}/servicios-finalizados",
+    summary="Devuelve los servicios finalizados"
+)
+def listar_servicios_finalizados(
+    id_proveedor: int,
+    db: Session = Depends(get_db)
+):
+    servicios_finalizados = (
+        db.query(Servicio_Contratado)
+        .options(joinedload(Servicio_Contratado.usuario))
+        .filter(Servicio_Contratado.id_proveedor == id_proveedor)
+        .filter(Servicio_Contratado.estado_servicio == "finalizado")
+        .order_by(Servicio_Contratado.fecha_finalizacion.desc())
+        .all()
+    )
+
+    response = []
+    for servicio in servicios_finalizados:
+        usuario = servicio.usuario
+        foto_key = getattr(usuario, "foto_perfil", None)
+        foto_url = None
+
+        if usuario and foto_key:
+            try:
+                foto_url = s3_service.get_presigned_url(foto_key)
+            except Exception:
+                foto_url = foto_key
+
+        response.append({
+            "id_servicio_contratado": servicio.id_servicio_contratado,
+            "fecha_contacto": servicio.fecha_contacto,
+            "fecha_confirmacion_acuerdo": servicio.fecha_confirmacion_acuerdo,
+            "estado_servicio": servicio.estado_servicio,
+            "fecha_finalizacion": servicio.fecha_finalizacion,
+            "usuario": {
+                "id_usuario": usuario.id_usuario,
+                "nombre": usuario.nombre,
+                "numero_telefono": usuario.numero_telefono,
+                "foto_perfil": foto_url
+            }
+        })
+
+    return response
