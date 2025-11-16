@@ -23,15 +23,6 @@ function Servicios({ idProveedor }) {
 
   const [tab, setTab] = useState("activos");
 
-  const handleFinalizar = async (idServicio) => {
-    try {
-      const data = await finalizarServicio(idServicio);
-      alert(data?.message || "Servicio finalizado con éxito");
-    } catch (err) {
-      console.error("Error al finalizar servicio:", err);
-      alert("No se pudo finalizar el servicio. Intenta de nuevo.");
-    }
-  };
 
   
   if (!idProveedor) {
@@ -110,7 +101,6 @@ function Servicios({ idProveedor }) {
                 {/* Estado */}
                 <div className="estatus">
                   <span className="pill">{srv.statusLabel}</span>
-
                     
                 </div>
 
