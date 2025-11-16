@@ -71,15 +71,22 @@ async def crear_publicacion(
         raise HTTPException(status_code=404, detail="La categoría seleccionada no existe.")
 
     try:
+        proveedor = current_user.proveedor_servicio
+
+        if not proveedor:
+            raise HTTPException(
+                status_code=403,
+                detail="Tu cuenta debe estar registrada como proveedor para crear publicaciones."
+            )
         # 🔹 4. Crear la publicación en la BD
         nueva_publicacion = Publicacion_Servicio(
-            id_proveedor=current_user.id_usuario, # ID del proveedor autenticado
+            id_proveedor=proveedor.id_proveedor,
             id_categoria=id_categoria,
             titulo=titulo,
             descripcion=descripcion,
             rango_precio_min=rango_precio_min,
             rango_precio_max=rango_precio_max,
-            estado="activo", # Estado por defecto
+            estado="activo",
             fecha_publicacion=datetime.utcnow()
         )
         
@@ -136,6 +143,9 @@ async def crear_publicacion(
 # 2️⃣ MOSTRAR TODAS LAS PUBLICACIONES (Feed / Tarjetas)
 # (Esta es la "Feed Page" para Clientes CON FILTROS)
 # =========================================================
+# =========================================================
+# 2️⃣ MOSTRAR TODAS LAS PUBLICACIONES (Feed / Tarjetas)
+# =========================================================
 @router.get("/", response_model=None) 
 def listar_publicaciones(
     db: Session = Depends(get_db),
@@ -143,42 +153,88 @@ def listar_publicaciones(
     suscriptores: Optional[bool] = Query(False),
     ordenar_por: Optional[str] = Query(None)
 ):
-    """Lista publicaciones - Versión de debugging"""
-    try:
-        query = db.query(Publicacion_Servicio)\
-            .filter(Publicacion_Servicio.estado == 'activo')
-        
-        publicaciones = query.limit(5).all()  # ← Solo 5 para probar
-        
-        resultado = []
-        for pub in publicaciones:
-            # Obtener la imagen de portada (la de menor orden)
-            url_imagen_portada = None
-            if pub.imagen_publicacion and len(pub.imagen_publicacion) > 0:
-                portada = sorted(pub.imagen_publicacion, key=lambda x: x.orden)[0]
-                url_imagen_portada = s3_service.get_presigned_url(portada.url_imagen)
+    """
+    Devuelve publicaciones con:
+    - Nombre del proveedor
+    - Fotografía del proveedor (URL prefirmada)
+    - Imagen de portada (URL prefirmada)
+    """
 
+    try:
+        publicaciones = (
+            db.query(Publicacion_Servicio)
+            # Cargamos el proveedor y su usuario asociado para acceder a campos
+            # como `foto_perfil` que pueden estar en `Proveedor_Servicio` o en `Usuario`.
+            .options(joinedload(Publicacion_Servicio.proveedor_servicio).joinedload(Proveedor_Servicio.usuario))
+            .options(joinedload(Publicacion_Servicio.imagen_publicacion))
+            .filter(Publicacion_Servicio.estado == "activo")
+            .limit(20)
+            .all()
+        )
+
+        resultado = []
+
+        for pub in publicaciones:
+
+            prov = pub.proveedor_servicio
+
+            # ===========================
+            # FOTO DE PERFIL DEL PROVEEDOR
+            # ===========================
+            foto_perfil_url = None
+            # El campo foto de perfil puede almacenarse en Proveedor_Servicio.foto_perfil
+            # o en Usuario.foto_perfil. Usamos el primero disponible como key a S3.
+            foto_key = None
+            if prov:
+                foto_key = prov.foto_perfil or (prov.usuario.foto_perfil if getattr(prov, 'usuario', None) else None)
+            if foto_key:
+                try:
+                    foto_perfil_url = s3_service.get_presigned_url(foto_key)
+                except Exception as e:
+                    logger.error(f"Error URL foto perfil proveedor {prov.id_proveedor if prov else 'unknown'}: {e}")
+                    foto_perfil_url = None
+
+            # ===========================
+            # IMAGEN DE PORTADA
+            # ===========================
+            url_imagen_portada = None
+            if pub.imagen_publicacion:
+                portada = sorted(pub.imagen_publicacion, key=lambda x: x.orden)[0]
+                try:
+                    url_imagen_portada = s3_service.get_presigned_url(portada.url_imagen)
+                except Exception as e:
+                    logger.error(f"Error URL imagen portada pub {pub.id_publicacion}: {e}")
+                    url_imagen_portada = None
+
+            # ===========================
+            # AGREGAR PUBLICACIÓN AL RESULTADO
+            # ===========================
             resultado.append({
                 "id_publicacion": pub.id_publicacion,
                 "titulo": pub.titulo,
                 "descripcion_corta": pub.descripcion[:100] if pub.descripcion else "Sin descripción",
+
                 "id_proveedor": pub.id_proveedor,
-                "nombre_proveedor": "Proveedor Test",  # ← Hardcodeado
-                "foto_perfil_proveedor": None,
-                "calificacion_proveedor": 4.5,
-                "total_reseñas_proveedor": 10,
-                "categoria": "Test",
+                "nombre_proveedor": (
+                    # Preferimos el nombre almacenado en Proveedor_Servicio (nombre_completo).
+                    # Si no existe, intentamos usar el nombre en la entidad Usuario (campo `nombre`).
+                    prov.nombre_completo if prov and getattr(prov, "nombre_completo", None)
+                    else (prov.usuario.nombre if prov and prov.usuario and getattr(prov.usuario, "nombre", None) else "Sin nombre")
+                ),
+                "foto_perfil_proveedor": foto_perfil_url,
+                "calificacion_proveedor": round(prov.calificacion_promedio, 1) if prov and prov.calificacion_promedio else 0,
+
                 "rango_precio_min": pub.rango_precio_min,
                 "rango_precio_max": pub.rango_precio_max,
                 "url_imagen_portada": url_imagen_portada,
-                "id_plan_suscripcion": None,
             })
-        
+
         return resultado
-        
+
     except Exception as e:
-        logger.error(f"Error: {e}")
+        logger.error(f"Error al listar publicaciones: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 # =========================================================
 # 3️⃣ (NUEVO) OBTENER MIEMBROS PREMIUM
 # (Para la barra lateral)
@@ -218,13 +274,13 @@ def listar_miembros_premium(
         resultado = []
         for prov in proveedores_premium:
             url_foto = None
-            # Generar URL pre-firmada para la foto de perfil
-            if prov.foto_perfil:
+            # Generar URL pre-firmada para la foto de perfil (fallback a Usuario.foto_perfil)
+            foto_key = prov.foto_perfil or (prov.usuario.foto_perfil if getattr(prov, 'usuario', None) else None)
+            if foto_key:
                 try:
-                    # Asumimos que foto_perfil es una S3 key
-                    url_foto = s3_service.get_presigned_url(prov.foto_perfil)
+                    url_foto = s3_service.get_presigned_url(foto_key)
                 except Exception as e:
-                    logger.error(f"Error S3 URL para foto de perfil {prov.foto_perfil}: {e}")
+                    logger.error(f"Error S3 URL para foto de perfil {foto_key}: {e}")
             
             resultado.append({
                 "id_proveedor": prov.id_proveedor,
