@@ -14,7 +14,7 @@ router = APIRouter(
 logger = logging.getLogger(__name__)
 
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'webp'}
-MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+MAX_FILE_SIZE = 5 * 1024 * 1024
 
 
 def validate_image_file(file: UploadFile, file_size: int):
@@ -135,7 +135,7 @@ def eliminar_foto_perfil(id_usuario: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Foto de perfil no encontrada")
 
     try:
-        s3_service.delete_file(usuario.foto_fil)
+        s3_service.delete_file(usuario.foto_perfil)
         usuario.foto_perfil = None
         db.commit()
         logger.info(f"Foto de perfil eliminada para usuario {id_usuario}")
