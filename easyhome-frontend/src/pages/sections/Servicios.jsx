@@ -23,6 +23,17 @@ function Servicios({ idProveedor }) {
 
   const [tab, setTab] = useState("activos");
 
+  const handleFinalizar = async (idServicio) => {
+    try {
+      const data = await finalizarServicio(idServicio);
+      alert(data?.message || "Servicio finalizado con éxito");
+    } catch (err) {
+      console.error("Error al finalizar servicio:", err);
+      alert("No se pudo finalizar el servicio. Intenta de nuevo.");
+    }
+  };
+
+  
   if (!idProveedor) {
     return (
       <div className="contenedor-servicios-activos">
@@ -68,6 +79,46 @@ function Servicios({ idProveedor }) {
           Servicios finalizados
         </button>
       </div>
+
+      {tab === "activos" && (
+        <>
+          {activeServices.length === 0 ? (
+            <p>No tienes servicios activos en este momento.</p>
+          ) : (
+            activeServices.map((srv) => (
+              <div key={srv.id} className="card-servicio">
+
+                {/* Imagen */}
+                <img
+                  src={srv.clientPhoto}
+                  className="foto-perfil"
+                  alt={`Foto de ${srv.clientName}`}
+                />
+
+                {/* Datos cliente */}
+                <div className="datos">
+                  <h3>{srv.clientName}</h3>
+                  <p>Contacto: {srv.contactPhone}</p>
+                </div>
+
+                {/* Fecha */}
+                <div className="fecha">
+                  <h4>Fecha del servicio</h4>
+                  <p>{formatDate(srv.date)}</p>
+                </div>
+
+                {/* Estado */}
+                <div className="estatus">
+                  <span className="pill">{srv.statusLabel}</span>
+
+                    
+                </div>
+
+              </div>
+            ))
+          )}
+        </>
+      )}
     </div>
   );
 }
