@@ -18,26 +18,6 @@ function ProveedorPublicProfile() {
   const [showAlert, setShowAlert] = useState(false); 
   const [nextPath, setNextPath] = useState(null);
 
-  if (!provider) {
-    return (
-      <div style={{ padding: "2rem" }}>
-        <h2>No se encontró información del proveedor</h2>
-        <button onClick={() => navigate("/cliente/feed")}>Volver al feed</button>
-      </div>
-    );
-  }
-
-  //Funcion cuando intentar salir del perfil (alarma)
-  const pedirAlertaYSalir = (rutaDestino) => {
-    setNextPath(rutaDestino);
-    setShowAlert(true);
-  };
-
-  //Funcion para redirigir despues de la alerta
-  const handleAlertResult = () => {
-    navigate(nextPath);
-  };
-
   return (
     <div className="public-profile-wrapper">
       <div className="perfil-container">
@@ -123,7 +103,7 @@ function ProveedorPublicProfile() {
             </div>
           </aside>
         </div>
-
+        
         {/* Secciones*/}
         <main className="perfil-main">
 
@@ -172,14 +152,6 @@ function ProveedorPublicProfile() {
             {activeTab === "resenas" && <Resenas idProveedor={provider.id} />}
           </div>
         </main>
-
-        {/*Alerta contratacion */}
-        <AgreementAlert
-          isOpen={showAlert}
-          provider={provider}
-          onClose={() => setShowAlert(false)}
-          onResult={handleAlertResult}
-        />
         
       </div>
     </div>
