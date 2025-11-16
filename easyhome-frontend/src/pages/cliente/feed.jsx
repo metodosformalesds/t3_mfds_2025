@@ -3,8 +3,10 @@ import Publicaciones from '../../components/features/Publicaciones';
 import Filtros from '../../components/features/filters';
 // import PremiumMembers from '../../components/features/PremiumMembers';
 import usePublicaciones from '../../hooks/usePublicaciones';
+import { useNavigate } from 'react-router-dom';
 
 function Feed() {
+  const navigate = useNavigate();
   // Filtros activos
   const [filtrosActivos, setFiltrosActivos] = useState({
     categorias: [],
@@ -26,8 +28,29 @@ function Feed() {
     if (error) return <p style={{ color: 'red' }}>No se pudieron cargar los servicios: {error}</p>;
     if (publicaciones.length === 0) return <p>No se encontraron publicaciones activas con esos criterios.</p>;
     return publicaciones.map(pub => (
-      <Publicaciones key={pub.id_publicacion} publicacionData={pub} />
+      <Publicaciones
+        key={pub.id_publicacion}
+        publicacionData={pub}
+        onVerPerfil={() => handleVerPerfil(pub)}
+      />
     ));
+  };
+
+  const handleVerPerfil = (publicacion) => {
+ 
+    const provider = {
+      id: publicacion.id_proveedor || publicacion.proveedor_id,
+      nombreCompleto: publicacion.nombre_proveedor || publicacion.nombreCompleto || publicacion.nombre,
+      fotoPerfil: publicacion.foto_perfil || publicacion.fotoProveedor || publicacion.fotoPerfil,
+      calificacionPromedio: publicacion.calificacionPromedio || publicacion.calificacion || 4.4,
+      totalResenas: publicacion.totalResenas || publicacion.totalReseñas || 0,
+      esPremium: publicacion.esPremium || publicacion.proveedor_premium || false,
+      oficio: publicacion.oficio || publicacion.categoria || publicacion.titulo,
+      descripcion: publicacion.descripcion || publicacion.detalle || "Proveedor en EasyHome."
+    };
+ 
+    // Navegamos a la ruta del perfil del proveedor y mandamos la info en `state`
+    navigate("/cliente/proveedor", { state: { provider } });
   };
 
   const feedContainerStyle = {

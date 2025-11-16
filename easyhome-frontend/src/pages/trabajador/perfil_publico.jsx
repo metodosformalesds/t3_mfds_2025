@@ -6,6 +6,7 @@ import MisServicios from "../sections/MisServicios";
 import Portafolio from "../sections/Portafolio";
 import Resenas from "../sections/Resenas";
 import AgreementAlert from "../cliente/alerta_contratacion";
+// AgreementAlert will perform the API call; no direct api import needed here
 
 function ProveedorPublicProfile() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ function ProveedorPublicProfile() {
   //Estados de alerta
   const [showAlert, setShowAlert] = useState(false); 
   const [nextPath, setNextPath] = useState(null);
+  
 
   if (!provider) {
     return (
@@ -33,8 +35,9 @@ function ProveedorPublicProfile() {
     setShowAlert(true);
   };
 
-  //Funcion para redirigir despues de la alerta
+  // Funcion para redirigir despues de que AgreementAlert registre el resultado
   const handleAlertResult = () => {
+    setShowAlert(false);
     navigate(nextPath);
   };
 

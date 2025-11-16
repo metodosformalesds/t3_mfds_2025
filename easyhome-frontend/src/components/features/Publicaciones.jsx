@@ -1,8 +1,9 @@
 import '../../assets/styles/Publicaciones.css';
 
+
 // 1. Aceptar 'publicacionData' como prop
-export default function Publicaciones({ publicacionData }) { 
-    
+export default function Publicaciones({ publicacionData, onVerPerfil  }) {
+        
     // Usamos la estructura de la respuesta del endpoint 'listar_publicaciones'
     const {
         id_publicacion,
@@ -93,10 +94,15 @@ export default function Publicaciones({ publicacionData }) {
                         Rango de precio: <strong>{rangoPrecioFormateado}</strong>
                     </p>
 
-                    {/* Botón Ir al perfil */}
-                        <a href={`/perfil`} className="boton-perfil">
+                  <button
+                        type="button"
+                        className="boton-perfil"
+                        onClick={onVerPerfil}
+                    >
                         Ir al perfil
-                    </a> 
+                    </button>
+
+                    
                 </div>
 
             </div>

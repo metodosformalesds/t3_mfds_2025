@@ -1,8 +1,40 @@
-import React from "react";
+import React, { useState } from "react";
 import "../../assets/styles/alerta_contratacion.css";
+import { useUserProfile } from '../../hooks/useUserProfile';
+import api from '../../config/api';
 
 export default function AgreementAlert({ isOpen, provider, onClose, onResult }) {
+  const { userData } = useUserProfile();
+  const [loading, setLoading] = useState(false);
+
   if (!isOpen || !provider) return null;
+
+  const handleAnswer = async (logro) => {
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      // Llamamos al endpoint que acepta proveedor en body y usa current_user desde headers
+      const clienteId = userData?.id_usuario || null;
+      await api.post('/api/v1/proveedores/alerta/resultado',
+        {
+          proveedor_id: provider.id || provider.id_proveedor || provider.idProveedor,
+          logro,
+          id_publicacion: provider.id_publicacion || null
+        },
+        {
+          headers: {
+            'X-User-Id': clienteId
+          }
+        }
+      );
+    } catch (err) {
+      console.error('Error enviando resultado de alerta:', err);
+    } finally {
+      setLoading(false);
+      onResult && onResult();
+    }
+  };
 
   return (
     <div className="agreement-alert-backdrop">
@@ -33,15 +65,17 @@ export default function AgreementAlert({ isOpen, provider, onClose, onResult }) 
         <div className="agreement-alert-actions">
           <button
             className="agreement-alert-btn agreement-alert-btn-success"
-            onClick={() => onResult(true)}
+            onClick={() => handleAnswer(true)}
+            disabled={loading}
           >
-            ✓ Sí logré
+            {loading ? 'Enviando...' : '✓ Sí logré'}
           </button>
           <button
             className="agreement-alert-btn agreement-alert-btn-danger"
-            onClick={() => onResult(false)}
+            onClick={() => handleAnswer(false)}
+            disabled={loading}
           >
-            ✕ No logré
+            {loading ? 'Enviando...' : '✕ No logré'}
           </button>
         </div>
       </div>
