@@ -82,8 +82,25 @@ export default function Publicaciones({ publicacionData }) {
                 <div className="imagenes-contenedor">
                     {url_imagen_portada ? (
                         <>
-                            <img src={url_imagen_portada} alt={`Muestra de ${nombre_proveedor}`} className="imagen-muestra" />
-                            <img src={url_imagen_portada} alt={`Muestra de ${nombre_proveedor}`} className="imagen-muestra" />
+                            <img
+                                src={url_imagen_portada}
+                                alt={`Muestra de ${nombre_proveedor}`}
+                                className="imagen-muestra"
+                                onError={(e) => {
+                                    console.error('Error cargando imagen:', url_imagen_portada);
+                                    e.target.style.display = 'none';
+                                }}
+                                onLoad={() => console.log('Imagen cargada exitosamente:', url_imagen_portada)}
+                            />
+                            <img
+                                src={url_imagen_portada}
+                                alt={`Muestra de ${nombre_proveedor}`}
+                                className="imagen-muestra"
+                                onError={(e) => {
+                                    console.error('Error cargando imagen:', url_imagen_portada);
+                                    e.target.style.display = 'none';
+                                }}
+                            />
                         </>
                     ) : (
                         <p>No hay imágenes disponibles.</p>
