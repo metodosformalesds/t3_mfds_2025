@@ -300,9 +300,10 @@ function PublicarServicio() {
             </div>
            
             {/* Publicar */}
-            <button className="submit-button" type="submit" disabled={loading}>
+            <button  className="submit-button" type="submit">
                 {loading ? "Publicando..." : "Publicar"}
             </button>
+
         </form>
     </div>
     );
