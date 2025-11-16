@@ -19,6 +19,7 @@ const mapService = (service) => ({
   statusLabel: STATUS_LABELS[service.estado_servicio] ?? service.estado_servicio,
   canFinish: FINALIZABLE_STATES.has(service.estado_servicio),
   date: service.fecha_confirmacion_acuerdo ?? service.fecha_contacto,
+
   finishedAt: service.fecha_finalizacion ?? null,
 });
 
@@ -29,6 +30,9 @@ export const useProviderServices = (providerId) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  /**
+   * Carga todos los servicios del proveedor.
+   */
   const fetchServices = useCallback(async () => {
     if (!providerId) {
       setActiveServices([]);
@@ -47,10 +51,11 @@ export const useProviderServices = (providerId) => {
       setActiveServices(data.activos.map(mapService));
       setFinishedServices(data.finalizados.map(mapService));
     } catch (err) {
-      const msg =
+      const detail =
         err.response?.data?.detail ||
         "No se pudieron cargar los servicios.";
-      setError(msg);
+
+      setError(detail);
       setActiveServices([]);
       setFinishedServices([]);
     } finally {
@@ -58,24 +63,26 @@ export const useProviderServices = (providerId) => {
     }
   }, [providerId]);
 
-  /** Finalizar un servicio activo */
+  /**
+   * Finaliza un servicio activo.
+   * Al hacerlo, lo elimina de 'activos' y lo mueve a 'finalizados'.
+   */
   const finalizarServicio = useCallback(
     async (serviceId) => {
       const { data } = await api.put(
         `/api/v1/status-servicio/servicios/${serviceId}/finalizar`
       );
 
-      // Buscar el servicio
+      // Sacar el servicio de la lista activa
       const servicioFinalizado = activeServices.find(
         (srv) => srv.id === serviceId
       );
 
-      // Remover de activos
       setActiveServices((prev) =>
         prev.filter((srv) => srv.id !== serviceId)
       );
 
-      // Mover a finalizados
+      // Agregarlo a finalizados, con estado actualizado
       if (servicioFinalizado) {
         setFinishedServices((prev) => [
           ...prev,
@@ -94,6 +101,7 @@ export const useProviderServices = (providerId) => {
     [activeServices]
   );
 
+  // Cargar servicios al montar o cuando cambie providerId
   useEffect(() => {
     fetchServices();
   }, [fetchServices]);
