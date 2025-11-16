@@ -1,8 +1,8 @@
-// src/pages/Formulario_reseña.jsx
+// src/pages/cliente/Formulario_reseña.jsx
 import "../../assets/styles/reseñaservicio.css";
 import React, { useState, useEffect } from 'react';
 import { useAuth } from 'react-oidc-context';
-import reseñaservicio from '../../services/reseñaservicio.js';
+import reviewService from '../../services/reseñaservicio';
 
 function ReviewPage() {
   const [generalRating, setGeneralRating] = useState(0);
@@ -20,38 +20,74 @@ function ReviewPage() {
   const auth = useAuth();
 
   useEffect(() => {
-    // Obtener ID desde URL params
-    const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get('id_servicio_contratado');
-    if (id) {
-      setIdServicioContratado(parseInt(id));
-    }
+    const cargarInfoServicio = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id_servicio_contratado');
+      
+      if (id) {
+        setIdServicioContratado(parseInt(id));
+        
+        try {
+          // Cargar información del servicio desde el backend
+          const info = await reviewService.getServicioInfo(parseInt(id));
+          setServicioInfo(info);
+        } catch (error) {
+          console.error("Error al cargar información del servicio:", error);
+          alert("No se pudo cargar la información del servicio. Usando datos por defecto.");
+          // Datos por defecto en caso de error
+          setServicioInfo({
+            nombre_proveedor: "Profesional",
+            nombre_servicio: "Servicio",
+            fecha_contratacion: "Recientemente",
+            foto_perfil: null
+          });
+        } finally {
+          setLoadingServicio(false);
+        }
+      } else {
+        // Si no hay ID, usar datos por defecto
+        setServicioInfo({
+          nombre_proveedor: "Profesional",
+          nombre_servicio: "Servicio",
+          fecha_contratacion: "Recientemente",
+          foto_perfil: null
+        });
+        setLoadingServicio(false);
+      }
+    };
+    
+    cargarInfoServicio();
   }, []);
 
-  // Verificar autenticación
-  if (auth.isLoading) {
+  // Verificar autenticación y carga
+  if (auth.isLoading || loadingServicio) {
     return (
-      <div className="review-container">
-        <p className="loading-message">Cargando autenticación...</p>
+      <div className="review-page">
+        <div className="review-card">
+          <p className="loading-message">Cargando...</p>
+        </div>
       </div>
     );
   }
 
   if (!auth.isAuthenticated || !auth.user || !auth.user.profile) {
     return (
-      <div className="review-container">
-        <p className="error-message">No has iniciado sesión. Por favor inicia sesión para dejar una reseña.</p>
+      <div className="review-page">
+        <div className="review-card">
+          <p className="error-message">No has iniciado sesión. Por favor inicia sesión para dejar una reseña.</p>
+        </div>
       </div>
     );
   }
 
   const userEmail = auth.user.profile.email || '';
 
-  // Datos del profesional ()
-  const profesional = {
-    nombre: "María Elena Gonzales",
-    servicio: "Instalación Eléctrica Residencial",
-    fecha: "Contratado el 15 de Octubre, 2045"
+  // Usar datos del servicio cargados
+  const profesional = servicioInfo || {
+    nombre_proveedor: "Profesional",
+    nombre_servicio: "Servicio",
+    fecha_contratacion: "Recientemente",
+    foto_perfil: null
   };
 
   const handleFileChange = (e) => {
@@ -104,16 +140,14 @@ function ReviewPage() {
       return;
     }
 
-    if (!idServicioContratado) {
-      alert("Error: No se ha especificado el servicio contratado.");
-      return;
-    }
+    // Usar ID del servicio contratado o valor por defecto para pruebas
+    const servicioId = idServicioContratado || 1;
     
     setLoading(true);
     
     try {
       const reviewData = {
-        id_servicio_contratado: idServicioContratado,
+        id_servicio_contratado: servicioId,
         user_email: userEmail,
         calificacion_general: generalRating,
         calificacion_puntualidad: puntualidadRating,
@@ -124,7 +158,7 @@ function ReviewPage() {
         imagenes: fotos
       };
 
-      const response = await reseñaservicio.createReview(reviewData);
+      const response = await reviewService.createReview(reviewData);
 
       alert(`¡Reseña publicada con éxito!\nID: ${response.id_reseña}`);
       
@@ -139,7 +173,7 @@ function ReviewPage() {
 
       // Redirigir después de 2 segundos
       setTimeout(() => {
-        window.location.href = '/mis-servicios';
+        window.location.href = '/servicios';
       }, 2000);
       
     } catch (error) {
@@ -209,4 +243,51 @@ function ReviewPage() {
       </div>
     );
   };
-}
+
+  return (
+    <div className="review-page">
+      <div className="review-card">
+        <h2 className="review-title">¿Cómo fue tu experiencia?</h2>
+        <p className="review-subtitle">
+          Tu opinión ayuda a otros usuarios a tomar mejores decisiones y al profesional a mejorar su servicio
+        </p>
+
+        {/* Información del Profesional */}
+        <div className="profesional-info">
+          <div className="profesional-avatar">
+            {profesional.foto_perfil ? (
+              <img 
+                src={profesional.foto_perfil} 
+                alt={profesional.nombre_proveedor}
+                onError={(e) => {
+                  // Si la imagen falla, mostrar iniciales
+                  e.target.style.display = 'none';
+                  if (e.target.nextElementSibling) {
+                    e.target.nextElementSibling.style.display = 'flex';
+                  }
+                }}
+              />
+            ) : null}
+            <div 
+              className="avatar-placeholder" 
+              style={{
+                display: profesional.foto_perfil ? 'none' : 'flex',
+                width: '100%',
+                height: '100%',
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.5rem',
+                fontWeight: 'bold'
+              }}
+            >
+              {profesional.nombre_proveedor?.split(' ').map(n => n[0]).join('').substring(0, 2) || 'PR'}
+            </div>
+          </div>
+          <div className="profesional-details">
+            <h3>{profesional.nombre_proveedor}</h3>
+            <p className="servicio">{profesional.nombre_servicio}</p>
+            <p className="fecha">Contratado el {profesional.fecha_contratacion}</p>
+          </div>
+        </div>
