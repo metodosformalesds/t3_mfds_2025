@@ -291,3 +291,35 @@ function ReviewPage() {
             <p className="fecha">Contratado el {profesional.fecha_contratacion}</p>
           </div>
         </div>
+
+        {/* Calificación General */}
+        <div className="form-section">
+          <h3 className="section-title">
+            Calificación General <span className="required">*</span>
+          </h3>
+          <StarRating rating={generalRating} setRating={setGeneralRating} />
+          <p className="helper-text">Selecciona una calificación</p>
+        </div>
+
+        {/* Aspectos Específicos */}
+        <div className="form-section">
+          <h3 className="section-title">
+            Evalúa Aspectos Específicos <span className="required">*</span>
+          </h3>
+          
+          <div className="ratings-grid">
+            <div className="rating-item">
+              <label>Puntualidad</label>
+              <CircleRating rating={puntualidadRating} setRating={setPuntualidadRating} />
+            </div>
+            <div className="rating-item">
+              <label>Calidad del Servicio</label>
+              <CircleRating rating={calidadServicio} setRating={setCalidadServicio} />
+            </div>
+          </div>
+
+          <div className="rating-item full-width">
+            <label>Relación Calidad-Precio</label>
+            <CircleRating rating={relacionCalidadPrecio} setRating={setRelacionCalidadPrecio} />
+          </div>
+        </div>
