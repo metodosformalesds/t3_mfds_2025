@@ -6,11 +6,10 @@ app = FastAPI(
     title="EasyHome Backend API",
     description="API for managing EasyHome smart home devices and services.",
     version="1.0.0",
-    redirect_slashes=False,
-    root_path="/prod"
+    redirect_slashes=False
 )
 
-# CORS middleware
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,14 +19,16 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-# LOGGING MIDDLEWARE (opcional, para debug)
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    print(f"🔍 Request path: {request.url.path}")
-    response = await call_next(request)
-    return response
+# Routers CON /prod prefix (para API Gateway)
+app.include_router(example.router, prefix="/prod/api/v1")
+app.include_router(auth.router, prefix="/prod/api/v1/auth", tags=["Authentication"])
+app.include_router(categories.router, prefix="/prod/api/v1/categories", tags=["Categories"])
+app.include_router(publicacion.router, prefix="/prod/api/v1", tags=["Publicaciones"])
+app.include_router(solicitud.router, prefix="/prod/api/v1")
+app.include_router(perfil_proveedor.router, prefix="/prod/api/v1")
+app.include_router(perfil_usuario.router, prefix="/prod/api/v1")
 
-# Routers
+# Routers SIN /prod (para localhost/testing)
 app.include_router(example.router, prefix="/api/v1")
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(categories.router, prefix="/api/v1/categories", tags=["Categories"])
@@ -36,6 +37,8 @@ app.include_router(solicitud.router, prefix="/api/v1")
 app.include_router(perfil_proveedor.router, prefix="/api/v1")
 app.include_router(perfil_usuario.router, prefix="/api/v1")
 
+@app.get("/prod/")
+@app.get("/prod")
 @app.get("/")
 def root():
     return {"message": "Welcome to the EasyHome Backend API!"}
