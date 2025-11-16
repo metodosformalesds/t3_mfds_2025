@@ -94,3 +94,59 @@ def listar_servicios_activos(
         respuesta.append(ServicioActivoSchema(**servicio_payload))
 
     return respuesta
+
+class FinalizarServicioResponse(BaseModel):
+    message: str
+    id_servicio_contratado: int
+    estado_servicio: str
+    fecha_finalizacion: datetime
+
+
+@router.put(
+    "/servicios/{id_servicio_contratado}/finalizar",
+    response_model=FinalizarServicioResponse
+)
+def finalizar_servicio(
+    id_servicio_contratado: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Cambia el estado de un servicio contratado activo a ``finalizado``.
+    """
+    servicio = (
+        db.query(Servicio_Contratado)
+        .filter(Servicio_Contratado.id_servicio_contratado == id_servicio_contratado)
+        .first()
+    )
+
+    if not servicio:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Servicio contratado no encontrado."
+        )
+
+    if servicio.estado_servicio == "finalizado":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El servicio ya se encuentra finalizado."
+        )
+
+    if servicio.estado_servicio not in ESTADOS_ACTIVOS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"No se puede finalizar un servicio en estado '{servicio.estado_servicio}'."
+        )
+
+    servicio.estado_servicio = "finalizado"
+    servicio.fecha_finalizacion = datetime.now(timezone.utc)
+
+    db.commit()
+    db.refresh(servicio)
+
+    return FinalizarServicioResponse(
+        message="Servicio finalizado con exito.",
+        id_servicio_contratado=servicio.id_servicio_contratado,
+        estado_servicio=servicio.estado_servicio,
+        fecha_finalizacion=servicio.fecha_finalizacion,
+    )
+
