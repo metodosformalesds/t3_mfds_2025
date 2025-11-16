@@ -300,9 +300,7 @@ function PublicarServicio() {
             </div>
            
             {/* Publicar */}
-            <button  className="submit-button" type="submit">
-                {loading ? "Publicando..." : "Publicar"}
-            </button>
+            <button onClick={handleSubmit} className="submit-button" type="button"> {loading ? "Publicando..." : "Publicar"}</button>
 
         </form>
     </div>
