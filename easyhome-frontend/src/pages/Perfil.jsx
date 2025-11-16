@@ -16,7 +16,7 @@ import AcercaDe from './sections/AcercaDe';
 import MisServicios from './sections/MisServicios';
 import Portafolio from './sections/Portafolio';
 import Resenas from './sections/Resenas';
-import Servicios from './cliente/Servicios';
+import Servicios from './sections/Servicios';
 import EditarFotoModal from '../components/common/EditarFotoModal';
 
 function Perfil() {
@@ -139,7 +139,7 @@ function Perfil() {
       case 'resenas':
         return <Resenas />;
       case 'servicios':
-        return <Servicios />;
+        return <Servicios idProveedor={userData.id_proveedor} />;
       default:
         return <CambiarDatos userData={userData} splitName={splitName} calculateAge={calculateAge} />;
     }
