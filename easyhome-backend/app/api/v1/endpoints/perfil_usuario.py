@@ -1,11 +1,10 @@
-# app/api/v1/endpoints/perfil_usuario.py
-
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.user import Usuario
 from app.services.s3_service import s3_service
 import logging
+import io  ### CAMBIO: Importar 'io' para el buffer en memoria
 
 router = APIRouter(
     prefix="/usuarios",
@@ -19,7 +18,7 @@ ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'webp'}
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
 
-def validate_image_file(file: UploadFile):
+def validate_image_file(file: UploadFile, file_size: int): ### CAMBIO: Recibe file_size
     """
     Valida que el archivo sea una imagen válida
     """
@@ -29,32 +28,28 @@ def validate_image_file(file: UploadFile):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Nombre de archivo inválido"
         )
-    
+
     file_ext = file.filename.split('.')[-1].lower()
     if file_ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Tipo de archivo no permitido. Permitidos: {', '.join(ALLOWED_EXTENSIONS)}"
         )
-    
+
     # Validar content type
     if not file.content_type or not file.content_type.startswith('image/'):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="El archivo debe ser una imagen"
         )
-    
-    # Validar tamaño
-    file.file.seek(0, 2)  # Ir al final del archivo
-    file_size = file.file.tell()
-    file.file.seek(0)  # Volver al inicio
-    
+
+    ### CAMBIO: Se elimina el bloque seek/tell. La validación de tamaño se hace ahora con file_size
     if file_size > MAX_FILE_SIZE:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Archivo muy grande. Tamaño máximo: {MAX_FILE_SIZE // (1024*1024)}MB"
         )
-    
+
     if file_size == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -84,8 +79,19 @@ async def actualizar_foto_perfil(
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    # Validar archivo de imagen
-    validate_image_file(file)
+    ### CAMBIO: Leer el archivo en memoria UNA SOLA VEZ
+    try:
+        file_contents = await file.read()
+        file_size = len(file_contents)
+    except Exception as e:
+        logger.error(f"Error al leer el archivo: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No se pudo leer el archivo"
+        )
+
+    # Validar archivo de imagen (pasando el tamaño)
+    validate_image_file(file, file_size)
 
     try:
         # Si ya tiene una foto, eliminar la anterior de S3
@@ -98,14 +104,21 @@ async def actualizar_foto_perfil(
 
         # Generar la ruta del objeto en S3
         file_extension = file.filename.split('.')[-1].lower()
+        # Genera un nombre de archivo único para evitar colisiones
         s3_key = f"profile-images/{id_usuario}_{file.filename}"
 
-        # Subir archivo a S3
-        uploaded_key = s3_service.upload_file(
-            file_obj=file.file,
-            object_name=s3_key,
-            content_type=file.content_type
-        )
+        ### CAMBIO: Subir el archivo desde el buffer de memoria (BytesIO)
+        try:
+            with io.BytesIO(file_contents) as file_obj:
+                uploaded_key = s3_service.upload_file(
+                    file_obj=file_obj,
+                    object_name=s3_key,
+                    content_type=file.content_type
+                )
+        except Exception as upload_error:
+            logger.error(f"Error en s3_service.upload_file: {upload_error}")
+            raise HTTPException(status_code=500, detail="Error al contactar S3")
+
 
         # Guardar key en la BD
         usuario.foto_perfil = uploaded_key
