@@ -86,7 +86,66 @@
   margin-top: 0.5rem;
 }
 
+/* tabs */
+.public-profile-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none; 
+}
 
+.public-profile-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.public-profile-tabs button {
+  flex: 0 0 auto;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  color: var(--color-tertiary);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.3s ease;
+}
+
+.public-profile-tabs button:hover {
+  background: rgba(22, 57, 79, 0.05);
+  color: var(--color-primary);
+}
+
+.public-profile-tabs .active {
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
+.contact-item span {
+  color: #000 !important;
+}
+
+.perfil-section .contact-item span,
+.perfil-section .plan-item span {
+  color: #000000 !important;
+}
+
+
+.public-profile-content {
+  background: var(--color-white);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(22, 57, 79, 0.1);
+  padding: 2rem;
+}
+
+
+.public-profile-content > * {
+  margin-bottom: 2rem;
+}
 
 /* --- RESPONSIVE --- */
 
