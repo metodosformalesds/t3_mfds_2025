@@ -15,10 +15,12 @@ app.add_middleware(
         "http://localhost:5173",  # Desarrollo local
         "https://d84l1y8p4kdic.cloudfront.net",  # CloudFront
         "https://main.d30cfshgj52c8r.amplifyapp.com",  # Amplify App
+        "*"  # Permitir todos los orígenes (ajustar según sea necesario)
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_origins=["*"],
 )
 
 app.include_router(example.router, prefix="/api/v1")
