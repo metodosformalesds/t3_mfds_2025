@@ -15,7 +15,7 @@ router = APIRouter(
     tags=["Estado de servicios"]
 )
 
-# Estados activos
+# Estados que continuan activos y pueden finalizarse desde el panel.
 ESTADOS_ACTIVOS = {"confirmado", "en_proceso"}
 
 
@@ -40,6 +40,13 @@ class ServicioActivoSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class FinalizarServicioResponse(BaseModel):
+    message: str
+    id_servicio_contratado: int
+    estado_servicio: str
+    fecha_finalizacion: datetime
 
 
 @router.get(
@@ -67,9 +74,8 @@ def listar_servicios_activos(
     for servicio in servicios:
         usuario = getattr(servicio, "usuario", None)
         foto_key = getattr(usuario, "foto_perfil", None)
-
-        # Obtener URL de la foto
         foto_url = None
+
         if usuario and foto_key:
             try:
                 foto_url = s3_service.get_presigned_url(foto_key)
@@ -95,12 +101,6 @@ def listar_servicios_activos(
 
     return respuesta
 
-class FinalizarServicioResponse(BaseModel):
-    message: str
-    id_servicio_contratado: int
-    estado_servicio: str
-    fecha_finalizacion: datetime
-
 
 @router.put(
     "/servicios/{id_servicio_contratado}/finalizar",
@@ -112,7 +112,9 @@ def finalizar_servicio(
 ):
     """
     Cambia el estado de un servicio contratado activo a ``finalizado``.
+    Solo permite finalizar servicios que actualmente estan confirmados o en proceso.
     """
+
     servicio = (
         db.query(Servicio_Contratado)
         .filter(Servicio_Contratado.id_servicio_contratado == id_servicio_contratado)
@@ -150,14 +152,29 @@ def finalizar_servicio(
         fecha_finalizacion=servicio.fecha_finalizacion,
     )
 
+
 @router.get(
-    "/proveedores/{id_proveedor}/servicios-finalizados",
-    summary="Devuelve los servicios finalizados"
+    "/proveedores/{id_proveedor}/servicios",
+    summary="Devuelve servicios activos y finalizados del proveedor"
 )
-def listar_servicios_finalizados(
+def listar_servicios_completos(
     id_proveedor: int,
     db: Session = Depends(get_db)
 ):
+    """
+    Devuelve la lista de los servicios activos y finalizados
+    """
+    # --- Servicios Activos ---
+    servicios_activos = (
+        db.query(Servicio_Contratado)
+        .options(joinedload(Servicio_Contratado.usuario))
+        .filter(Servicio_Contratado.id_proveedor == id_proveedor)
+        .filter(Servicio_Contratado.estado_servicio.in_(ESTADOS_ACTIVOS))
+        .order_by(Servicio_Contratado.fecha_contacto.desc())
+        .all()
+    )
+
+    # --- Servicios Finalizados ---
     servicios_finalizados = (
         db.query(Servicio_Contratado)
         .options(joinedload(Servicio_Contratado.usuario))
@@ -167,30 +184,35 @@ def listar_servicios_finalizados(
         .all()
     )
 
-    response = []
-    for servicio in servicios_finalizados:
-        usuario = servicio.usuario
+    def map_servicio(servicio):
+        usuario = getattr(servicio, "usuario", None)
         foto_key = getattr(usuario, "foto_perfil", None)
-        foto_url = None
 
+        # Generar URL de foto (si existe)
+        foto_url = None
         if usuario and foto_key:
             try:
                 foto_url = s3_service.get_presigned_url(foto_key)
             except Exception:
                 foto_url = foto_key
 
-        response.append({
+        return {
             "id_servicio_contratado": servicio.id_servicio_contratado,
             "fecha_contacto": servicio.fecha_contacto,
             "fecha_confirmacion_acuerdo": servicio.fecha_confirmacion_acuerdo,
             "estado_servicio": servicio.estado_servicio,
-            "fecha_finalizacion": servicio.fecha_finalizacion,
+            "confirmacion_cliente_finalizado": servicio.confirmacion_cliente_finalizado,
+            "acuerdo_confirmado": servicio.acuerdo_confirmado,
+            "fecha_finalizacion": getattr(servicio, "fecha_finalizacion", None),
             "usuario": {
-                "id_usuario": usuario.id_usuario,
-                "nombre": usuario.nombre,
-                "numero_telefono": usuario.numero_telefono,
-                "foto_perfil": foto_url
+                "id_usuario": usuario.id_usuario if usuario else None,
+                "nombre": usuario.nombre if usuario else "Cliente sin nombre",
+                "numero_telefono": usuario.numero_telefono if usuario else None,
+                "foto_perfil": foto_url,
             }
-        })
+        }
 
-    return response
+    return {
+        "activos": [map_servicio(s) for s in servicios_activos],
+        "finalizados": [map_servicio(s) for s in servicios_finalizados]
+    }
