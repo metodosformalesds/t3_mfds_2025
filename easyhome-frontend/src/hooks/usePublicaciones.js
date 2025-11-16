@@ -31,7 +31,7 @@ export default function usePublicaciones(filtrosActivos) {
       params.ordenar_por = filtrosActivos.ordenar_por;
     }
 
-    apiClient.get('/api/v1/publicaciones/', { params })
+    apiClient.get('/api/v1/publicaciones', { params })
       .then(response => {
         setPublicaciones(response.data);
       })

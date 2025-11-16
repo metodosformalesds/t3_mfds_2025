@@ -17,8 +17,8 @@ export default function Publicaciones({ publicacionData }) {
         calificacion_proveedor,
         
         total_reseñas_proveedor = publicacionData.total_reseñas_proveedor || 127, 
-        etiquetas = publicacionData.etiquetas || ["Confiabilidad", "Mantenimiento", "Alta experiencia"]
-        
+        etiquetas = publicacionData.etiquetas || ["Confiabilidad", "Mantenimiento", "Alta experiencia"],
+        proveedor = {}
     } = publicacionData || {}; 
 
     // 2. Determinar si es Premium
@@ -47,15 +47,14 @@ export default function Publicaciones({ publicacionData }) {
                         
                         <div>
                             {/* Nombre del Proveedor */}
-                            <h3 className="perfil-nombre">{nombre_proveedor}</h3>
+                            <h3 className="perfil-nombre">
+                                {nombre_proveedor || "Proveedor sin nombre"}
+                            </h3>
                             
                             {/* Rating y opiniones */}
                             <div className="perfil-rating">
                                 <span className="rating-estrella">★</span>
-                                <span>
-                                    {calificacion_proveedor?.toFixed(1) || 0}
-                                    ({total_reseñas_proveedor})
-                                </span>
+                                <span>{calificacion_proveedor || 0}</span>
                             </div>
                         </div>
                     </div>
@@ -81,10 +80,7 @@ export default function Publicaciones({ publicacionData }) {
                 {/* Imágenes (Galería) - Mapeamos la URL de portada (solo la portada está disponible en el endpoint) */}
                 <div className="imagenes-contenedor">
                     {url_imagen_portada ? (
-                        <>
-                            <img src={url_imagen_portada} alt={`Muestra de ${nombre_proveedor}`} className="imagen-muestra" />
-                            <img src={url_imagen_portada} alt={`Muestra de ${nombre_proveedor}`} className="imagen-muestra" />
-                        </>
+                        <img src={url_imagen_portada} alt={`Muestra de ${nombre_proveedor}`} className="imagen-muestra" />
                     ) : (
                         <p>No hay imágenes disponibles.</p>
                     )}
@@ -97,8 +93,8 @@ export default function Publicaciones({ publicacionData }) {
                         Rango de precio: <strong>{rangoPrecioFormateado}</strong>
                     </p>
 
-                    {/* Botón Ir al perfil: Asumiendo que usas el id_proveedor para la ruta */}
-                        <a href={`/proveedor/${publicacionData.id_proveedor}`} className="boton-perfil">
+                    {/* Botón Ir al perfil */}
+                        <a href={`/perfil`} className="boton-perfil">
                         Ir al perfil
                     </a> 
                 </div>

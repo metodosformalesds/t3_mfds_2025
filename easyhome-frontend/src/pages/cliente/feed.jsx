@@ -32,7 +32,7 @@ function Feed() {
 
   const feedContainerStyle = {
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     gap: '30px',
     maxWidth: '1200px',
     margin: '30px auto',
@@ -43,18 +43,20 @@ function Feed() {
     <div style={{ padding: '20px' }}>
       <div style={{ textAlign: 'center', marginBottom: '30px' }}>
         <h1 style={{ color: '#000000', fontSize: '2.5em' }}>Publicaciones</h1>
-        <p style={{ color: '#333333' }}>Ponte al día con las actualizaciones más recientes de los profesionales de EayHome..</p>
+        <p style={{ color: '#333333' }}>Ponte al día con las actualizaciones más recientes de los profesionales de EasyHome..</p>
       </div>
       <div style={feedContainerStyle}>
-        <Filtros
-          onApplyFilters={aplicarFiltros}
-          currentFilters={filtrosActivos}
-        />
-        <div style={{ width: '600px', flexShrink: 0 }}>
+        <div style={{ width: '280px', flexShrink: 0 }}>
+          <Filtros
+            onApplyFilters={aplicarFiltros}
+            currentFilters={filtrosActivos}
+          />
+        </div>
+
+        <main style={{ flex: 1, maxWidth: '760px' }}>
           <h1 className="section-title"> Servicios disponibles </h1>
           {renderPublicaciones()}
-        </div>
-        {/* PremiumMembers removido */}
+        </main>
       </div>
     </div>
   );
