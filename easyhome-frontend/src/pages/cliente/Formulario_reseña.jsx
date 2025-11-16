@@ -323,3 +323,73 @@ function ReviewPage() {
             <CircleRating rating={relacionCalidadPrecio} setRating={setRelacionCalidadPrecio} />
           </div>
         </div>
+
+        {/* Comentario */}
+        <div className="form-section">
+          <label className="section-title">Cuéntanos sobre tu Experiencia</label>
+          <textarea
+            value={comentario}
+            onChange={(e) => setComentario(e.target.value)}
+            placeholder="Describe en detalle tu experiencia: ¿Qué te gustó más? ¿Qué podría mejorar? ¿Recomendarías este servicio?"
+            className="comentario-textarea"
+            rows="5"
+          />
+        </div>
+
+        {/* Fotos */}
+        <div className="form-section">
+          <label className="section-title">
+            Agregar Fotos (Opcional)
+            {fotos.length > 0 && (
+              <span className="photo-count"> ({fotos.length} seleccionada{fotos.length > 1 ? 's' : ''})</span>
+            )}
+          </label>
+          
+          <div className="file-upload-area">
+            <input
+              type="file"
+              id="fotos-review"
+              multiple
+              accept="image/jpeg, image/png, image/jpg"
+              onChange={handleFileChange}
+              disabled={fotos.length >= 5}
+              className="file-input-hidden"
+            />
+            <label
+              htmlFor="fotos-review"
+              className={`file-upload-label ${fotos.length >= 5 ? 'disabled' : ''}`}
+            >
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+              <p className="upload-text">Haz click para subir fotos</p>
+              <p className="upload-info">
+                {fotos.length >= 5 
+                  ? 'Límite alcanzado (5/5 fotos)'
+                  : 'JPG, PNG hasta 5MB (máximo 5 fotos)'
+                }
+              </p>
+            </label>
+          </div>
+
+          {fotos.length > 0 && (
+            <div className="photo-previews">
+              {fotos.map((foto, index) => (
+                <div key={index} className="photo-preview-item">
+                  <img src={URL.createObjectURL(foto)} alt={`Preview ${index + 1}`} />
+                  <div className="photo-size">{(foto.size / 1024).toFixed(1)} KB</div>
+                  <button
+                    type="button"
+                    onClick={() => setFotos(fotos.filter((_, i) => i !== index))}
+                    className="photo-delete"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+       
