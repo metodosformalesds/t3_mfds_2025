@@ -7,9 +7,15 @@ function Callback() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Cuando se complete la autenticación, redirigir al home
     if (auth.isAuthenticated) {
-      navigate('/');
+      const returnTo = sessionStorage.getItem("afterLoginRedirect");
+
+      if (returnTo) {
+        sessionStorage.removeItem("afterLoginRedirect");
+        navigate(returnTo, { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
     }
   }, [auth.isAuthenticated, navigate]);
 
