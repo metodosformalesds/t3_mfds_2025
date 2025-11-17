@@ -70,8 +70,15 @@ def obtener_alertas(
                         except Exception:
                             foto_url = proveedor.foto_perfil
                     elif getattr(proveedor, "usuario", None) and proveedor.usuario.foto_perfil:
-                        foto_url = proveedor.usuario.foto_perfil
-
+                        foto_usuario = proveedor.usuario.foto_perfil
+                        if isinstance(foto_usuario, str) and foto_usuario.startswith(("http://", "https://")):
+                            foto_url = foto_usuario
+                        else:
+                            try:
+                                foto_url = s3_service.get_presigned_url(foto_usuario)
+                            except Exception:
+                                foto_url = foto_usuario
+ 
                     nombre_proveedor = proveedor.nombre_completo
                     if not nombre_proveedor and getattr(proveedor, "usuario", None):
                         nombre_proveedor = proveedor.usuario.nombre
