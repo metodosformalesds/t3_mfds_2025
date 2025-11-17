@@ -15,11 +15,9 @@ function Header() {
     const logoutUri = "http://localhost:5173";
     const cognitoDomain = "https://us-east-1gbsgbtrls.auth.us-east-1.amazoncognito.com";
     
-    // Primero remover el usuario localmente
     auth.removeUser();
-    
-    // Luego redirigir al logout de Cognito para cerrar la sesión completamente
-    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+    window.location.href =
+      `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
   };
 
   return (
@@ -38,9 +36,26 @@ function Header() {
             <span className="text-home">Home</span>
           </Link>
         </div>
+
         <ul className="nav-right">
-          <li><a href="/cliente/feed">Publicaciones</a></li>
-          
+          {/* Publicaciones: si está logueado va directo; si no, guarda destino y manda a login */}
+          <li>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                if (auth.isAuthenticated) {
+                  window.location.href = "/cliente/feed";
+                } else {
+                  sessionStorage.setItem("afterLoginRedirect", "/cliente/feed");
+                  auth.signinRedirect();
+                }
+              }}
+            >
+              Publicaciones
+            </a>
+          </li>
+
           {auth.isAuthenticated ? (
             <>
               {isAdmin(auth.user) && (
@@ -54,25 +69,37 @@ function Header() {
                 </Link>
               </li>
               <li>
-                <a href="#" onClick={(e) => { e.preventDefault(); handleLogout(); }}>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleLogout();
+                  }}
+                >
                   Cerrar Sesión
                 </a>
               </li>
             </>
           ) : (
             <li>
-              <a href="#" onClick={(e) => { e.preventDefault(); handleLogin(); }}>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLogin();
+                }}
+              >
                 Iniciar Sesión
               </a>
             </li>
           )}
-          
+
           <li><Link to="/subscriptions">Suscripciones</Link></li>
           <li><Link to="/advertise">Anúnciate</Link></li>    
         </ul>
       </nav>
     </header>
-  )
+  );
 }
 
-export default Header
+export default Header;
