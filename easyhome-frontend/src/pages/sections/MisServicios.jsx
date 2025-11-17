@@ -91,8 +91,8 @@ const handleEliminar = async (idPublicacion) => {
 
   try {
     await api.delete(`/api/v1/publicaciones/${idPublicacion}`, {
-      params: { user_email: userEmail }
-    });
+      headers: { user_email: userEmail }
+    }); 
 
     // quitar de la lista visual sin recargar
     setServicios(prev =>

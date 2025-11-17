@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status, Query
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status, Query, Header
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from datetime import datetime
@@ -256,7 +256,7 @@ def listar_publicaciones(
 @router.delete("/{id_publicacion}", status_code=200)
 def eliminar_publicacion(
     id_publicacion: int,
-    user_email: str = Query(...),
+    user_email: str = Header(...),
     db: Session = Depends(get_db)
 ):
     """
