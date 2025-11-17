@@ -1,0 +1,109 @@
+.agreement-alert-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.agreement-alert-container {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 32px 40px;
+  max-width: 520px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  position: relative;
+  text-align: center;
+}
+
+.agreement-alert-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.agreement-alert-title {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.agreement-alert-subtitle-main {
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 24px;
+}
+
+.agreement-alert-provider-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-radius: 20px;
+  border: 2px solid #e0b259; /* doradito */
+  padding: 12px 16px;
+  margin: 0 auto 24px;
+  max-width: 420px;
+}
+
+.agreement-alert-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.agreement-alert-provider-info {
+  text-align: left;
+}
+
+.provider-name {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.provider-badge {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.provider-rating {
+  font-size: 14px;
+}
+
+.agreement-alert-help-text {
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.agreement-alert-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.agreement-alert-btn {
+  min-width: 150px;
+  padding: 12px 20px;
+  border-radius: 16px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #fff;
+}
+
+.agreement-alert-btn-success {
+  background-color: #37a34a;
+}
+
+.agreement-alert-btn-danger {
+  background-color: #a1352b;
+}
