@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from 'react-oidc-context';
 import '../../assets/styles/Categories.css';
 import categoryService from '../../services/categoryService';
 
@@ -9,6 +10,7 @@ function Categories() {
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
+  const auth = useAuth();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -63,23 +65,37 @@ function Categories() {
                   <p className="category-description">{category.descripcion}</p>
                 )}
 
-                {/* 👉 BOTÓN QUE FILTRA Y REDIRIGE */}
-  <button
-  className="category-btn"
-  onClick={() =>
-    navigate("/cliente/feed", {
-      state: {
-        filtrosIniciales: {
-          categorias: [category.id_categoria],
-          suscriptores: false,
-          ordenar_por: null,
-        },
-      },
-    })
-  }
->
-  Ver publicaciones ›
-</button>
+                {/* Botón que manda filtros y soporta login */}
+                <button
+                  className="category-btn"
+                  onClick={() => {
+                    const filtros = {
+                      categorias: [category.id_categoria],
+                      suscriptores: false,
+                      ordenar_por: null,
+                    };
+
+                    if (!auth.isAuthenticated) {
+                      // Guardar señal para ir al feed
+                      sessionStorage.setItem("goToFeedAfterLogin", "1");
+
+                      // Guardar filtros
+                      sessionStorage.setItem(
+                        "feedFiltrosAfterLogin",
+                        JSON.stringify(filtros)
+                      );
+
+                      auth.signinRedirect();
+                    } else {
+                      navigate("/cliente/feed", {
+                        state: { filtrosIniciales: filtros }
+                      });
+                    }
+                  }}
+                >
+                  Ver publicaciones ›
+                </button>
+
               </div>
             </div>
           ))}
