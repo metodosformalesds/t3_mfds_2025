@@ -8,13 +8,11 @@ function Feed() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const getFiltrosIniciales = () => {
-    // 1️⃣ Filtros enviados desde Categories (logueado)
+  const getFiltrosInicialES = () => {
+    // ... (tu lógica de filtros está bien) ...
     if (location.state?.filtrosIniciales) {
       return location.state.filtrosIniciales;
     }
-
-    // 2️⃣ Filtros guardados cuando se inició sesión
     const stored = sessionStorage.getItem('feedFiltrosAfterLogin');
     if (stored) {
       try {
@@ -25,8 +23,6 @@ function Feed() {
         sessionStorage.removeItem('feedFiltrosAfterLogin');
       }
     }
-
-    // 3️⃣ Filtros por defecto
     return {
       categorias: [],
       suscriptores: false,
@@ -34,7 +30,7 @@ function Feed() {
     };
   };
 
-  const [filtrosActivos, setFiltrosActivos] = useState(getFiltrosIniciales);
+  const [filtrosActivos, setFiltrosActivos] = useState(getFiltrosInicialES);
 
   useEffect(() => {
     if (location.state?.filtrosIniciales) {
@@ -42,6 +38,7 @@ function Feed() {
     }
   }, [location.state]);
 
+  // 1. Este hook te da las publicaciones
   const { publicaciones, isLoading, error } = usePublicaciones(filtrosActivos);
 
   const aplicarFiltros = (nuevosFiltros) => {
@@ -49,6 +46,20 @@ function Feed() {
   };
 
   const handleVerPerfil = (publicacion) => {
+
+    // --- 👇 ¡HAZ ESTA PRUEBA! 👇 ---
+    //
+    // 1. Abre la consola (F12) en tu navegador.
+    // 2. Haz clic en un perfil en el feed.
+    // 3. Revisa el objeto que se imprime en la consola.
+    //
+    // Verás que el objeto 'publicacion' NO TIENE
+    // las propiedades 'correo_proveedor' o 'telefono_proveedor'.
+    //
+    console.log("DATOS REALES QUE LLEGAN DEL HOOK 'usePublicaciones':", publicacion);
+    //
+    // --- 👆 FIN DE LA PRUEBA 👆 ---
+
     const provider = {
       id: publicacion.id_proveedor,
       nombreCompleto: publicacion.nombre_proveedor,
@@ -56,7 +67,13 @@ function Feed() {
       calificacionPromedio: publicacion.calificacion_proveedor || 0,
       totalResenas: publicacion.total_reseñas_proveedor || 0,
       oficio: publicacion.categoria || publicacion.titulo,
-      descripcion: publicacion.descripcion_completa
+      descripcion: publicacion.descripcion_completa,
+
+      // Estas líneas fallan porque 'publicacion.correo_proveedor'
+      // y 'publicacion.telefono_proveedor' están llegando como 'undefined'
+      // desde el hook 'usePublicaciones'.
+      correo: publicacion.correo_proveedor,
+      telefono: publicacion.telefono_proveedor
     };
 
     navigate("/cliente/proveedor", { state: { provider } });
