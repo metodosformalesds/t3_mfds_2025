@@ -58,15 +58,18 @@ export default function Publicaciones({ publicacionData, onVerPerfil }) {
         </div>
       </div>
 
-      {/* DESCRIPCIÓN */}
-      <p className="publicacion-descripcion">
-  {publicacionData.descripcion_completa || publicacionData.descripcion_corta}
-</p>
+
     {publicacionData.categoria && (
   <div className="categoria-tag">
     {publicacionData.categoria}
   </div>
 )}
+
+      {/* DESCRIPCIÓN */}
+      <p className="publicacion-descripcion">
+  {publicacionData.descripcion_completa || publicacionData.descripcion_corta}
+</p>
+
 
       {/* IMÁGENES */}
       <div className="imagenes-contenedor">
