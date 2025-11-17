@@ -8,32 +8,46 @@ function Feed() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 1️⃣ Leer filtros iniciales desde navegación (categorías.jsx)
-  const filtrosIniciales = location.state?.filtrosIniciales || {
-    categorias: [],
-    suscriptores: false,
-    ordenar_por: null,
+  const getFiltrosIniciales = () => {
+    // 1️⃣ Filtros enviados desde Categories (logueado)
+    if (location.state?.filtrosIniciales) {
+      return location.state.filtrosIniciales;
+    }
+
+    // 2️⃣ Filtros guardados cuando se inició sesión
+    const stored = sessionStorage.getItem('feedFiltrosAfterLogin');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        sessionStorage.removeItem('feedFiltrosAfterLogin');
+        return parsed;
+      } catch (e) {
+        sessionStorage.removeItem('feedFiltrosAfterLogin');
+      }
+    }
+
+    // 3️⃣ Filtros por defecto
+    return {
+      categorias: [],
+      suscriptores: false,
+      ordenar_por: null,
+    };
   };
 
-  // 2️⃣ Estado inicial corregido
-  const [filtrosActivos, setFiltrosActivos] = useState(filtrosIniciales);
+  const [filtrosActivos, setFiltrosActivos] = useState(getFiltrosIniciales);
 
-  // 3️⃣ Cuando vengan nuevos filtros desde navegación, aplicarlos
   useEffect(() => {
     if (location.state?.filtrosIniciales) {
       setFiltrosActivos(location.state.filtrosIniciales);
     }
   }, [location.state]);
 
-  // 4️⃣ Hook que obtiene las publicaciones
   const { publicaciones, isLoading, error } = usePublicaciones(filtrosActivos);
 
-  // Pasar filtros del UI → Hook
   const aplicarFiltros = (nuevosFiltros) => {
     setFiltrosActivos(nuevosFiltros);
   };
 
-  // Navegación al perfil
   const handleVerPerfil = (publicacion) => {
     const provider = {
       id: publicacion.id_proveedor,
