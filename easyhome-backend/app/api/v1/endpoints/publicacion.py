@@ -236,6 +236,8 @@ def listar_publicaciones(
                 "rango_precio_min": pub.rango_precio_min,
                 "rango_precio_max": pub.rango_precio_max,
 
+                 "categoria": pub.categoria_servicio.nombre_categoria if pub.categoria_servicio else None,
+
                 "url_imagen_portada": url_imagen_portada,
                 "imagen_publicacion": imagenes,   # 🟢 GALERÍA COMPLETA
             })
