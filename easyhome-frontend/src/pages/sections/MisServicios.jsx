@@ -147,15 +147,14 @@ function MisServicios({ idProveedor, publicView = false }) {
 
                   <div className="perfil-rating">
                     <span className="rating-estrella">★</span>
-                    <span>
-                      {servicio.calificacion_promedio_publicacion || '4.5'}
-                    </span>
+                    <span>{servicio.calificacion_promedio_publicacion || "4.5"}</span>
                     <span className="rating-count">
                       ({servicio.total_reseñas_publicacion || 10})
                     </span>
                   </div>
                 </div>
               </div>
+
             </div>
 
             {/* TÍTULO */}
