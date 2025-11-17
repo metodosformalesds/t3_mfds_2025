@@ -16,8 +16,8 @@ export default function AgreementAlert({ isOpen, provider, onClose, onResult }) 
     if (loading) return;
 
     // Validar que el usuario esté autenticado y sus datos cargados
-    const clienteId = userData?.id_usuario;
-    if (!clienteId) {
+    const userEmail = userData?.correo_electronico;
+    if (!userEmail) {
       console.error('Usuario no autenticado o datos no cargados');
       alert('Error: No se pudo identificar al usuario. Por favor, recarga la página e intenta de nuevo.');
       onClose();
@@ -28,6 +28,7 @@ export default function AgreementAlert({ isOpen, provider, onClose, onResult }) 
 
     try {
       // Llamamos al endpoint que acepta proveedor en body y usa current_user desde headers
+      // Usamos X-User-Email en lugar de X-User-Id porque API Gateway puede bloquear headers personalizados
       await api.post('/api/v1/proveedores/alerta/resultado',
         {
           proveedor_id: provider.id || provider.id_proveedor || provider.idProveedor,
@@ -36,7 +37,7 @@ export default function AgreementAlert({ isOpen, provider, onClose, onResult }) 
         },
         {
           headers: {
-            'X-User-Id': String(clienteId) // Asegurar que sea string
+            'X-User-Email': userEmail
           }
         }
       );
