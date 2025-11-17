@@ -126,6 +126,7 @@
   text-align: left;
   border-radius: 5px;
   margin-bottom: 10px;
+  overflow: hidden;
 }
 
 .admin-menu-item:hover {
