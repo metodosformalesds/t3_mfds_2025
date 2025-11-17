@@ -7,106 +7,103 @@ function MisServicios({ idProveedor, publicView = false }) {
   const navigate = useNavigate();
 
   const [servicios, setServicios] = useState([]);
-  const [nombreProveedor, setNombreProveedor] = useState("Proveedor");
+  const [nombreProveedor, setNombreProveedor] = useState('Proveedor');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // ============================
+  // Cargar servicios del proveedor
+  // ============================
   useEffect(() => {
-  const fetchServicios = async () => {
-    if (!idProveedor) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      // 1️⃣ Obtener información del proveedor (solo para nombre)
-      try {
-        const resPerfil = await api.get(
-          `/api/v1/proveedores/${idProveedor}/perfil-about`
-        );
-
-        const p = resPerfil.data;
-
-        const nombreDetectado =
-          p.nombre_completo ||
-          p.nombre ||
-          p.usuario?.nombre_completo ||
-          p.usuario?.nombre ||
-          "Proveedor";
-
-        setNombreProveedor(nombreDetectado);
-
-      } catch (e) {
-        console.warn("⚠️ No se pudo obtener el nombre del proveedor.");
+    const fetchServicios = async () => {
+      if (!idProveedor) {
+        setLoading(false);
+        return;
       }
 
-      // 2️⃣ Obtener servicios publicados
-      const response = await api.get(
-        `/api/v1/proveedores/${idProveedor}/servicios`
+      try {
+        setLoading(true);
+
+        // 1️⃣ Obtener información del proveedor (solo nombre)
+        try {
+          const resPerfil = await api.get(
+            `/api/v1/proveedores/${idProveedor}/perfil-about`
+          );
+
+          const p = resPerfil.data;
+
+          const nombreDetectado =
+            p.nombre_completo ||
+            p.nombre ||
+            p.usuario?.nombre_completo ||
+            p.usuario?.nombre ||
+            'Proveedor';
+
+          setNombreProveedor(nombreDetectado);
+        } catch (e) {
+          console.warn('⚠️ No se pudo obtener el nombre del proveedor.');
+        }
+
+        // 2️⃣ Obtener servicios publicados
+        const response = await api.get(
+          `/api/v1/proveedores/${idProveedor}/servicios`
+        );
+        const serviciosBase = response.data;
+
+        // 3️⃣ Obtener foto de perfil firmada
+        const serviciosConFoto = await Promise.all(
+          serviciosBase.map(async (servicio) => {
+            try {
+              const fotoRes = await api.get(
+                `/api/v1/usuarios/${servicio.id_proveedor}/foto-perfil`
+              );
+
+              return {
+                ...servicio,
+                foto_perfil_url: fotoRes.data.foto_perfil_url,
+              };
+            } catch {
+              return {
+                ...servicio,
+                foto_perfil_url: null,
+              };
+            }
+          })
+        );
+
+        setServicios(serviciosConFoto);
+        setError(null);
+      } catch (err) {
+        console.error('❌ Error al obtener servicios:', err);
+        setError('No se pudieron cargar los servicios');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServicios();
+  }, [idProveedor]);
+
+  // ============================
+  // Eliminar publicación
+  // ============================
+  const handleEliminar = async (idPublicacion) => {
+    if (!window.confirm('¿Seguro que deseas eliminar esta publicación?')) return;
+
+    try {
+      await api.delete(`/api/v1/publicaciones/${idPublicacion}`);
+
+      // Actualizar estado local quitando la publicación
+      setServicios((prev) =>
+        prev.filter((serv) => serv.id_publicacion !== idPublicacion)
       );
-      const serviciosBase = response.data;
 
-      // 3️⃣ Obtener foto de perfil firmada
-      const serviciosConFoto = await Promise.all(
-        serviciosBase.map(async (servicio) => {
-          try {
-            const fotoRes = await api.get(
-              `/api/v1/usuarios/${servicio.id_proveedor}/foto-perfil`
-            );
-
-            return {
-              ...servicio,
-              foto_perfil_url: fotoRes.data.foto_perfil_url
-            };
-          } catch {
-            return {
-              ...servicio,
-              foto_perfil_url: null
-            };
-          }
-        })
-      );
-
-      setServicios(serviciosConFoto);
-      setError(null);
-
-    } catch (err) {
-      console.error("❌ Error al obtener servicios:", err);
-      setError("No se pudieron cargar los servicios");
-    } finally {
-      setLoading(false);
+      alert('Publicación eliminada correctamente');
+    } catch (error) {
+      console.error('Error al eliminar:', error);
+      alert('Error al eliminar la publicación');
     }
   };
-
-  fetchServicios();
-}, [idProveedor]);
-
-// AQUI VA LA FUNCIÓN handleEliminar (NO ARRIBA, NO ABAJO, AQUI)
-const handleEliminar = async (idPublicacion) => {
-  const userEmail = localStorage.getItem("user_email");
-
-  if (!window.confirm("¿Seguro que deseas eliminar esta publicación?")) return;
-
-  try {
-    await api.delete(`/api/v1/publicaciones/${idPublicacion}`, {
-      headers: { user_email: userEmail }
-    }); 
-
-    // quitar de la lista visual sin recargar
-    setServicios(prev =>
-      prev.filter(serv => serv.id_publicacion !== idPublicacion)
-    );
-
-    alert("Publicación eliminada correctamente");
-  } catch (error) {
-    console.error("Error al eliminar:", error);
-    alert("Error al eliminar la publicación");
-  }
-};
-// 🔥🔥🔥 AQUÍ TERMINA — DESPUÉS DE ESTO SIGUE TU return()
-
 
   if (loading) return <div>Cargando servicios...</div>;
   if (error) return <div>{error}</div>;
@@ -115,7 +112,7 @@ const handleEliminar = async (idPublicacion) => {
     <div className="mis-servicios-contenedor">
       <div className="header-section">
         <h2 className="section-title">
-          {publicView ? "Servicios del proveedor" : "Mis Servicios"}
+          {publicView ? 'Servicios del proveedor' : 'Mis Servicios'}
         </h2>
 
         {!publicView && (
@@ -130,12 +127,10 @@ const handleEliminar = async (idPublicacion) => {
 
       {servicios.map((servicio) => {
         const fotoPerfil =
-          servicio.foto_perfil_url ||
-          "https://i.imgur.com/placeholder.png";
+          servicio.foto_perfil_url || 'https://i.imgur.com/placeholder.png';
 
         return (
           <div key={servicio.id_publicacion} className="publicacion-card">
-
             {/* HEADER */}
             <div className="publicacion-header">
               <div className="publicacion-perfil">
@@ -146,13 +141,13 @@ const handleEliminar = async (idPublicacion) => {
                 />
 
                 <div>
-                  <p className="perfil-nombre">
-                    {nombreProveedor}
-                  </p>
+                  <p className="perfil-nombre">{nombreProveedor}</p>
 
                   <div className="perfil-rating">
                     <span className="rating-estrella">★</span>
-                    <span>{servicio.calificacion_promedio_publicacion || "4.5"}</span>
+                    <span>
+                      {servicio.calificacion_promedio_publicacion || '4.5'}
+                    </span>
                     <span className="rating-count">
                       ({servicio.total_reseñas_publicacion || 10})
                     </span>
@@ -161,7 +156,7 @@ const handleEliminar = async (idPublicacion) => {
               </div>
             </div>
 
-            {/* TITULO */}
+            {/* TÍTULO */}
             <h3 className="publicacion-titulo">{servicio.titulo}</h3>
 
             {/* DESCRIPCIÓN */}
@@ -180,10 +175,13 @@ const handleEliminar = async (idPublicacion) => {
             </div>
 
             {/* FOOTER */}
-           <div className="publicacion-footer">
+            <div className="publicacion-footer">
               <p className="rango-precio">
                 Rango de precio:
-                <strong> ${servicio.rango_precio_min} – ${servicio.rango_precio_max}</strong>
+                <strong>
+                  {' '}
+                  ${servicio.rango_precio_min} – ${servicio.rango_precio_max}
+                </strong>
               </p>
 
               <div className="acciones-botones">
@@ -201,7 +199,7 @@ const handleEliminar = async (idPublicacion) => {
         );
       })}
 
-      {/* ESTILOS */}
+      {/* ESTILOS INLINE */}
       <style>{`
         .mis-servicios-contenedor {
           max-width: 900px;
@@ -285,6 +283,11 @@ const handleEliminar = async (idPublicacion) => {
           margin-right: 4px;
         }
 
+        .rating-count {
+          margin-left: 4px;
+          color: #777;
+        }
+
         .publicacion-titulo {
           font-size: 1.8em;
           font-weight: 700;
@@ -327,6 +330,11 @@ const handleEliminar = async (idPublicacion) => {
           color: #16394F;
         }
 
+        .acciones-botones {
+          display: flex;
+          gap: 10px;
+        }
+
         .boton-perfil {
           background-color: #16394F;
           color: #fff;
@@ -336,14 +344,9 @@ const handleEliminar = async (idPublicacion) => {
           cursor: pointer;
         }
 
-        .acciones-botones {
-          display: flex;
-          gap: 10px;
-        }
-
         .boton-eliminar {
           background-color: #b30000;
-          color: white;
+          color: #fff;
           padding: 8px 16px;
           border: none;
           border-radius: 6px;
@@ -355,14 +358,14 @@ const handleEliminar = async (idPublicacion) => {
         .boton-eliminar:hover {
           background-color: #d11a1a;
         }
-
       `}</style>
     </div>
   );
 }
 
 MisServicios.propTypes = {
-  idProveedor: PropTypes.number
+  idProveedor: PropTypes.number,
+  publicView: PropTypes.bool,
 };
 
 export default MisServicios;
