@@ -2,21 +2,31 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import useClientServices from '../../hooks/useClientServices';
 import ServiceCard from '../../components/features/ServiceCard';
+import { useUserProfile } from '../../hooks/useUserProfile';
 
 
 // Componente para la pantalla completa 
 const ClienteServicios = () => {
-    // Simulamos que el ID del cliente es 1 para la demo
-    const clientId = 1; 
     const navigate = useNavigate();
+    const { userData, loading: userLoading } = useUserProfile();
+    const clientId = userData?.id_usuario;
 
     // 1. Usar el hook personalizado para obtener datos
     const { services, isLoading, error } = useClientServices(clientId);
 
-    if (isLoading) {
+    if (userLoading || isLoading) {
         return (
             <div className="flex justify-center items-center h-48 bg-gray-50 p-6">
                 <div className="text-lg font-medium text-blue-600">Cargando servicios contratados...</div>
+            </div>
+        );
+    }
+
+    if (!userData) {
+        return (
+            <div className="p-6 bg-red-100 text-red-700 border border-red-300 rounded-lg">
+                <p className="font-semibold">Error:</p>
+                <p>No se pudo cargar la información del usuario.</p>
             </div>
         );
     }
