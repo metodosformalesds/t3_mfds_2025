@@ -6,6 +6,7 @@ import MisServicios from "../sections/MisServicios";
 import Portafolio from "../sections/Portafolio";
 import Resenas from "../sections/Resenas";
 import AgreementAlert from "../cliente/alerta_contratacion";
+import ReportForm from "../trabajador/reporte";
 // AgreementAlert will perform the API call; no direct api import needed here
 
 function ProveedorPublicProfile() {
@@ -18,6 +19,8 @@ function ProveedorPublicProfile() {
   //Estados de alerta
   const [showAlert, setShowAlert] = useState(false); 
   const [nextPath, setNextPath] = useState(null);
+  //Estado para modal de reporte
+  const [showReportForm, setShowReportForm] = useState(false);
   
 
   if (!provider) {
@@ -188,6 +191,29 @@ function ProveedorPublicProfile() {
                 </div>
               </div>
             </div>
+
+            <div className="perfil-section">
+              <button
+                onClick={() => setShowReportForm(true)}
+                className="report-button"
+                style={{
+                  width: "100%",
+                  padding: "0.75rem 1rem",
+                  backgroundColor: "#ff4757",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "0.5rem",
+                  cursor: "pointer",
+                  fontWeight: "500",
+                  fontSize: "0.95rem",
+                  transition: "background-color 0.2s"
+                }}
+                onMouseEnter={(e) => (e.target.style.backgroundColor = "#ff3838")}
+                onMouseLeave={(e) => (e.target.style.backgroundColor = "#ff4757")}
+              >
+                ⚠️ Reportar
+              </button>
+            </div>
           </aside>
         </div>
 
@@ -246,6 +272,14 @@ function ProveedorPublicProfile() {
           provider={provider}
           onClose={() => setShowAlert(false)}
           onResult={handleAlertResult}
+        />
+
+        {/*Formulario de reporte */}
+        <ReportForm
+          isOpen={showReportForm}
+          provider={provider}
+          onClose={() => setShowReportForm(false)}
+          onSuccess={() => alert("Reporte enviado exitosamente")}
         />
         
       </div>

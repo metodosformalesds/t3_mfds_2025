@@ -10,6 +10,7 @@ from app.api.v1.endpoints import (
     publicacion,
     resenas,
     status_servicio,
+    reportes,
 )
 
 app = FastAPI(
@@ -36,6 +37,7 @@ app.include_router(perfil_proveedor.router, prefix="/api/v1")
 app.include_router(perfil_usuario.router, prefix="/api/v1")
 app.include_router(resenas.router, prefix="/api/v1")
 app.include_router(status_servicio.router, prefix="/api/v1")
+app.include_router(reportes.router, prefix="/api/v1")
 
 @app.get("/")
 def root():
