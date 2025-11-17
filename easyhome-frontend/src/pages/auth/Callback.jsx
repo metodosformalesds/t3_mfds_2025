@@ -8,14 +8,27 @@ function Callback() {
 
   useEffect(() => {
     if (auth.isAuthenticated) {
-      const returnTo = sessionStorage.getItem("afterLoginRedirect");
+      const redirectData = sessionStorage.getItem("afterLoginRedirect");
 
-      if (returnTo) {
+      if (redirectData) {
         sessionStorage.removeItem("afterLoginRedirect");
-        navigate(returnTo, { replace: true });
-      } else {
-        navigate('/', { replace: true });
+
+        const parsed = JSON.parse(redirectData);
+
+        // Publicaciones o categorías
+        if (parsed.goToFeed) {
+          navigate("/cliente/feed", {
+            replace: true,
+            state: parsed.filtrosIniciales
+              ? { filtrosIniciales: parsed.filtrosIniciales }
+              : {}
+          });
+          return;
+        }
       }
+
+      // Default
+      navigate('/', { replace: true });
     }
   }, [auth.isAuthenticated, navigate]);
 
