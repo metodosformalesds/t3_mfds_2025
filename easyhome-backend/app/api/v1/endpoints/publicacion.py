@@ -221,7 +221,7 @@ def listar_publicaciones(
             resultado.append({
                 "id_publicacion": pub.id_publicacion,
                 "titulo": pub.titulo,
-                "descripcion_corta": pub.descripcion[:100] if pub.descripcion else "Sin descripción",
+                "descripcion_completa": pub.descripcion,
                 "id_proveedor": pub.id_proveedor,
 
                 "nombre_proveedor": (
