@@ -13,45 +13,37 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   async (config) => {
     const user = await userManager.getUser();
- 
-    // Para FormData, NO establecer ningún header de Content-Type
-    // Axios lo hará automáticamente con el boundary correcto
-    if (config.data instanceof FormData) {
-      // NO tocar config.headers para FormData - dejar que Axios lo maneje
-      if (user && !user.expired && user.access_token) {
-        // Solo agregar Authorization sin tocar otros headers
-        if (!config.headers) config.headers = {};
-        config.headers.Authorization = `Bearer ${user.access_token}`;
-      }
-    } else {
-      // Para otros tipos de request, preservar headers normalmente
-      if (user && !user.expired && user.access_token) {
-        config.headers = {
-          ...config.headers,
-          Authorization: `Bearer ${user.access_token}`
-        };
-      }
+
+    // 1. Asegurarnos de que config.headers exista
+    if (!config.headers) {
+      config.headers = {};
     }
 
-    // 🔍 DEBUG temporal - quitar después
+    // 2. Añadir token de autorización SIEMPRE (si existe)
+    if (user && !user.expired && user.access_token) {
+      config.headers.Authorization = `Bearer ${user.access_token}`;
+    }
+
+    // 3. Manejar el Content-Type
+    if (config.data instanceof FormData) {
+      // SI ES FORMDATA: Borramos explícitamente el Content-Type.
+      // Esto FUERZA a Axios a generar el 'multipart/form-data'
+      // con el 'boundary' correcto.
+      delete config.headers['Content-Type'];
+    } else {
+      // SI NO ES FORMDATA: Asumimos JSON.
+      // Esto arregla otras peticiones (POST, PUT) que envíen JSON.
+      config.headers['Content-Type'] = 'application/json';
+    }
+
+    // 🔍 DEBUG (lo dejas como lo tenías)
     console.log('=== AXIOS REQUEST DEBUG ===');
     console.log('URL:', config.baseURL + config.url);
     console.log('Method:', config.method?.toUpperCase());
-    console.log('Headers:', config.headers);
+    console.log('Headers:', config.headers); // <-- Revisa aquí que Content-Type ya no esté
     console.log('Data type:', config.data?.constructor.name);
-
-    if (config.data instanceof FormData) {
-      console.log('✓ Es FormData - Contenido:');
-      for (let pair of config.data.entries()) {
-        if (pair[1] instanceof File) {
-          console.log(`  ${pair[0]}: [File] ${pair[1].name} (${pair[1].size} bytes)`);
-        } else {
-          console.log(`  ${pair[0]}: ${pair[1]}`);
-        }
-      }
-    }
-    console.log('===========================');
- 
+    // ... (el resto de tu debug) ...
+    
     return config;
   },
   (error) => {
