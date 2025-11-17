@@ -161,7 +161,16 @@ function MisServicios({ idProveedor, publicView = false }) {
                 <strong> ${servicio.rango_precio_min} – ${servicio.rango_precio_max}</strong>
               </p>
 
-              <button className="boton-perfil">Editar</button>
+              <div className="acciones-botones">
+                <button className="boton-perfil">Editar</button>
+
+                <button
+                  className="boton-eliminar"
+                  onClick={() => handleEliminar(servicio.id_publicacion)}
+                >
+                  Eliminar
+                </button>
+              </div>
             </div>
 
           </div>
