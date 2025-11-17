@@ -36,7 +36,7 @@ function ProveedorPublicProfile() {
     navigate(nextPath);
   };
 
-  // 🚀 URLs DE ACCIÓN
+  // URLs de acción
   const whatsappUrl = provider.telefono
     ? `https://wa.me/${provider.telefono}`
     : null;
@@ -111,16 +111,15 @@ function ProveedorPublicProfile() {
                   <span>{provider.correo || "correo@ejemplo.com"}</span>
                 </div>
 
-                {/* Teléfono */}
+                {/* Teléfono -> SOLO ICONO, SIN NÚMERO */}
                 {provider.telefono && (
                   <div className="contact-item">
                     <i className="icon">📱</i>
-                    <span>{provider.telefono}</span>
                   </div>
                 )}
               </div>
 
-              {/* 🚀 BOTONES DE ACCIÓN */}
+              {/* BOTONES */}
               <div className="contact-buttons">
                 {whatsappUrl && (
                   <button
@@ -142,22 +141,6 @@ function ProveedorPublicProfile() {
               </div>
             </div>
 
-            <div className="perfil-section">
-              <h3>Información del plan</h3>
-              <div className="plan-info">
-                <div className="plan-item">
-                  <i className="icon">💼</i>
-                  <span>
-                    {provider.esPremium ? "Plan Pro" : "Plan Básico"}
-                  </span>
-                </div>
-
-                <div className="plan-item">
-                  <i className="icon">📅</i>
-                  <span>Renovación no disponible</span>
-                </div>
-              </div>
-            </div>
           </aside>
         </div>
 
