@@ -14,12 +14,23 @@ apiClient.interceptors.request.use(
   async (config) => {
     const user = await userManager.getUser();
  
-    if (user && !user.expired && user.access_token) {
-      // Preservar headers existentes y solo agregar Authorization
-      config.headers = {
-        ...config.headers,
-        Authorization: `Bearer ${user.access_token}`
-      };
+    // Para FormData, NO establecer ningún header de Content-Type
+    // Axios lo hará automáticamente con el boundary correcto
+    if (config.data instanceof FormData) {
+      // NO tocar config.headers para FormData - dejar que Axios lo maneje
+      if (user && !user.expired && user.access_token) {
+        // Solo agregar Authorization sin tocar otros headers
+        if (!config.headers) config.headers = {};
+        config.headers.Authorization = `Bearer ${user.access_token}`;
+      }
+    } else {
+      // Para otros tipos de request, preservar headers normalmente
+      if (user && !user.expired && user.access_token) {
+        config.headers = {
+          ...config.headers,
+          Authorization: `Bearer ${user.access_token}`
+        };
+      }
     }
 
     // 🔍 DEBUG temporal - quitar después
@@ -38,8 +49,6 @@ apiClient.interceptors.request.use(
           console.log(`  ${pair[0]}: ${pair[1]}`);
         }
       }
-      // Para FormData, eliminar Content-Type para que Axios lo establezca automáticamente
-      delete config.headers['Content-Type'];
     }
     console.log('===========================');
  
