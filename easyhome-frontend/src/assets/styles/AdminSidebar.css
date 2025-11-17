@@ -4,7 +4,7 @@
   top: 0;
   width: 280px;
   height: 100vh;
-  background: linear-gradient(180deg, #16394F 0%, #0d2332 100%);
+  background-color: var(--color-primary);
   color: white;
   display: flex;
   flex-direction: column;
@@ -33,30 +33,15 @@
 /* Header */
 .admin-sidebar-header {
   padding: 30px 25px 25px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: none;
 }
 
-.admin-logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: white;
-}
-
-.admin-logo svg {
-  width: 32px;
-  height: 32px;
-  color: #FFB74D;
-}
 
 /* User Info */
 .admin-user-info {
   padding: 30px 25px;
   text-align: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: none;
 }
 
 .admin-user-avatar {
@@ -139,17 +124,21 @@
   transition: all 0.3s ease;
   border-left: 4px solid transparent;
   text-align: left;
+  border-radius: 5px;
+  margin-bottom: 10px;
 }
 
 .admin-menu-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: white;
-  border-left-color: rgba(255, 183, 77, 0.5);
+  background: linear-gradient(135deg, #f5f7fa 0%, #e3e8ef 100%);
+  color: #FFB74D;
+  transform: translatex(10px);
+  border-left-color: #FFB74D;
 }
 
 .admin-menu-item.active {
-  background: rgba(255, 183, 77, 0.15);
-  color: white;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e3e8ef 100%);
+  color: #FFB74D;
+  transform: translatex(10px);
   border-left-color: #FFB74D;
 }
 
