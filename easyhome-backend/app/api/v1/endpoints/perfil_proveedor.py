@@ -123,6 +123,7 @@ class AlertaResultadoSchema(BaseModel):
     id_publicacion: int | None = None
 
 class AlertaResultadoBodySchema(BaseModel):
+    cliente_id: int
     proveedor_id: int
     logro: bool
     id_publicacion: int | None = None
@@ -408,22 +409,25 @@ def registrar_resultado_alerta(
 @router.post("/alerta/resultado", response_model=None)
 def registrar_resultado_alerta_body(
     payload: AlertaResultadoBodySchema,
-    db: Session = Depends(get_db),
-    current_user: Usuario = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """
-    Misma funcionalidad que `/{id_proveedor}/alerta/resultado` pero acepta
-    `proveedor_id` dentro del body. Útil para llamadas directas desde UI
-    donde no es conveniente construir la URL con path param.
-    Body esperado: { proveedor_id, cliente_id, logro, id_publicacion }
+    Endpoint público para registrar el resultado de una alerta de contratación.
+    Acepta todos los datos en el body (incluyendo cliente_id) para evitar
+    problemas con headers personalizados bloqueados por API Gateway/CORS.
+
+    Body esperado: { cliente_id, proveedor_id, logro, id_publicacion }
     """
     id_proveedor = payload.proveedor_id
-    cliente_id = current_user.id_usuario
+    cliente_id = payload.cliente_id
     logro = payload.logro
     id_publicacion = payload.id_publicacion
 
     if id_proveedor is None:
         raise HTTPException(status_code=400, detail="Se requiere 'proveedor_id' en el payload")
+
+    if cliente_id is None:
+        raise HTTPException(status_code=400, detail="Se requiere 'cliente_id' en el payload")
 
     if cliente_id == id_proveedor:
         raise HTTPException(status_code=400, detail="El cliente y proveedor no pueden ser la misma cuenta")

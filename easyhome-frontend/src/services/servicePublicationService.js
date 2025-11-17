@@ -25,6 +25,45 @@ const servicePublicationService = {
             throw new Error(error.message || "Error de conexión con la API.");
         }
     },
+
+    /**
+     * Obtener todas las publicaciones
+     */
+    getAllPublications: async () => {
+        try {
+            const response = await apiClient.get('/api/v1/publicaciones/');
+            return response.data;
+        } catch (error) {
+            console.error('Error en getAllPublications:', error);
+            if (error.response) {
+                throw {
+                    message: error.response.data?.detail || "Error al obtener publicaciones",
+                    detail: error.response.data?.detail
+                };
+            }
+            throw new Error(error.message || "Error de conexión con la API.");
+        }
+    },
+
+    /**
+     * Eliminar publicacion
+     * @param {number} id_publicacion
+     */
+    deletePublication: async (id_publicacion) => {
+        try {
+            const response = await apiClient.delete(`/api/v1/publicaciones/${id_publicacion}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error en deletePublication:', error);
+            if (error.response) {
+                throw {
+                    message: error.response.data?.detail || "Error al eliminar publicación",
+                    detail: error.response.data?.detail
+                };
+            }
+            throw new Error(error.message || "Error de conexión con la API.");
+        }
+    },
 };
 
 export default servicePublicationService;
