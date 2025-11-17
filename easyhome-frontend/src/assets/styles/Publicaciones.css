@@ -1,28 +1,32 @@
 /* --- CONTENEDOR PRINCIPAL (Publicación Completa) --- */
-
+ 
 .publicacion-card {
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     padding: 22px;
-    max-width: 780px;
+    margin-bottom: 30px;
+    max-width: 780px; /* Ancho ajustado */
     background-color: #ffffff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
     font-family: Arial, sans-serif;
+    margin-left: auto;    
+    margin-right: auto; /* Centrar la tarjeta */
+    margin-bottom: 30px;
     margin: 30px auto;
 }
-
+ 
 /* --- HEADER (Avatar, Nombre, Rating) --- */
 .publicacion-header {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 15px;  
 }
-
+ 
 .publicacion-perfil {
     display: flex;
     align-items: center;
 }
-
+ 
 .perfil-avatar {
     width: 50px;
     height: 50px;
@@ -31,14 +35,14 @@
     object-fit: cover;
     border: 1px solid #e0e0e0;
 }
-
+ 
 .perfil-nombre {
     font-size: 1.2em;
     font-weight: bold;
     color: #333333;
     margin: 0;
 }
-
+ 
 .perfil-rating {
     display: flex;
     align-items: center;
@@ -46,29 +50,30 @@
     color: #666666;
     margin-top: 2px;
 }
-
+ 
 .rating-estrella {
     color: #ffc107;
     margin-right: 5px;
 }
-
+ 
 .rating-count {
     font-size: 0.9em;
     color: #888888;
 }
-
+ 
 /* --- BADGE PREMIUM --- */
 .badge-premium {
     background-color: #F0AD4E;
     color: #ffffff;
     padding: 4px 10px;
     border-radius: 4px;
+    font-size: 0.8em;
+    align-self: flex-start;
     font-size: 1.1em;
     font-family: 'Nunito Sans', sans-serif;
     font-weight: 400;
-    margin-left: auto;
 }
-
+ 
 /* --- FECHA DE PUBLICACIÓN --- */
 .publicacion-fecha {
     font-size: 0.85em;
@@ -78,57 +83,74 @@
     font-style: italic;
     text-align: left;
 }
-
+ 
 /* --- DESCRIPCIÓN --- */
 .publicacion-descripcion {
     line-height: 1.5;
     color: #333333;
-    margin: 15px 0;
+    margin-bottom: 15px;
     text-align: left;
-    white-space: normal;        /* 🔥 Muestra el texto completo */
-    overflow-wrap: break-word;  /* 🔥 Evita desbordes */
 }
-
-/* --- IMÁGENES DE MUESTRA (Galería) --- */
+ 
+/* --- ETIQUETAS (Tags) --- */
+.etiquetas-contenedor {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 15px 0 20px 0;
+}
+ 
+.etiqueta-item {
+    border: 1px solid #cccccc;
+    border-radius: 15px;
+    padding: 4px 12px;
+    font-size: 0.8em;
+    color: #666666;
+    white-space: nowrap;
+}
+ 
+/* --- IMÁGENES DE MUESTRA --- */
 .imagenes-contenedor {
     display: flex;
-    flex-wrap: wrap;       /* 🔥 Las imágenes bajan a otra fila */
-    gap: 12px;
+    gap: 10px;
     margin-top: 20px;
-    border-top: 1.5px solid #16394F;
+    /* QUITAMOS EL BORDER-LEFT Y PADDING-LEFT DE AQUÍ */
+    border-top: 1.5px solid #16394F; /* Línea delgada gris */
     padding-top: 20px;
 }
-
-/* --- Cada imagen dentro del card --- */
+ 
 .imagen-muestra {
-    width: calc(50% - 6px);   /* 🔥 2 por fila */
-    height: 240px;            /* 🔥 Control de proporciones */
+    width: 100%;
+    max-height: 420px;
+    height: auto;
     border-radius: 6px;
-    object-fit: cover;        /* 🔥 sin deformarse */
+    object-fit: cover;
     display: block;
 }
-
+ 
 /* --- FOOTER (Precio y Botón) --- */
 .publicacion-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-top: 20px;
+     /* Espacio encima de la línea */
 }
-
+ 
 .rango-precio {
     font-size: 1.1em;
-    font-weight: 300;
-    font-family: 'Nunito Sans', sans-serif;
+    font-weight: 500;
+    font-family: 'Nunito Sans', sans-serif; /* Aplica la fuente */
+    font-weight: 300; /* Light */
     color: #16394F;
 }
-
+ 
 .rango-precio strong {
-    font-weight: 350;
-    color: #16394F;
+    font-weight: 350; /* Mantenemos el strong en negrita */
+    color: #16394F; /* Y el valor sigue siendo negro */
     font-family: 'Nunito Sans', sans-serif;
 }
-
+ 
 .boton-perfil {
     background-color: #16394F;
     color: #ffffff;
@@ -137,69 +159,30 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 1em;
+    text-decoration: none;
     font-family: 'Nunito Sans', sans-serif;
     font-weight: 300;
 }
-
+ 
 .boton-perfil:hover {
     background-color: #385D74;
+    color: #ffffff;
 }
-
-/* --- TÍTULO DE SECCIÓN ("Servicios disponibles") --- */
+ 
+/* --- TÍTULO DE SECCIÓN ("Servicios") --- */
 .section-title {
     margin-bottom: 25px;
+   
     max-width: 780px;
     margin-left: 0;
     margin-right: auto;
+   
     padding-left: 20px;
+ 
     font-size: 2.5em;
     font-weight: 800;
     color: #333333;
     text-align: left;
     margin-top: 50px;
+   
 }
-
-.categoria-tag {
-    display: inline-block;
-    margin: 10px 0 15px 0;
-    padding: 6px 14px;
-    font-size: 0.85em;
-    font-weight: 600;
-    color: #16394F;
-    border: 1.5px solid #16394F;
-    border-radius: 20px;
-    background-color: #F2F8FC;
-    font-family: 'Nunito Sans', sans-serif;
-
-    /* ESTA LÍNEA HACE LA MAGIA */
-    align-self: flex-start;
-}
-
-.categoria-wrapper {
-    display: flex;
-    justify-content: flex-start;   /* 🔥 Aquí está la izquierda real */
-    width: 100%;
-    margin-bottom: 10px;
-}
-
-.categoria-tag {
-    display: inline-block;
-    padding: 6px 14px;
-    font-size: 0.85em;
-    font-weight: 600;
-    color: #16394F;
-    border: 1.5px solid #16394F;
-    border-radius: 20px;
-    background-color: #F2F8FC;
-    font-family: 'Nunito Sans', sans-serif;
-}
-
-.publicacion-titulo {
-    font-size: 1.4em;
-    font-weight: 800;
-    margin: 10px 0 15px 0;
-    color: #16394F;
-    font-family: 'Nunito Sans', sans-serif;
-    text-align: left;
-}
-

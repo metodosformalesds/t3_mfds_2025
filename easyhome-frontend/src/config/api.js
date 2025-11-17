@@ -15,8 +15,11 @@ apiClient.interceptors.request.use(
     const user = await userManager.getUser();
  
     if (user && !user.expired && user.access_token) {
-      config.headers = config.headers || {};
-      config.headers.Authorization = `Bearer ${user.access_token}`;
+      // Preservar headers existentes y solo agregar Authorization
+      config.headers = {
+        ...config.headers,
+        Authorization: `Bearer ${user.access_token}`
+      };
     }
 
     // 🔍 DEBUG temporal - quitar después
@@ -25,7 +28,7 @@ apiClient.interceptors.request.use(
     console.log('Method:', config.method?.toUpperCase());
     console.log('Headers:', config.headers);
     console.log('Data type:', config.data?.constructor.name);
-    
+
     if (config.data instanceof FormData) {
       console.log('✓ Es FormData - Contenido:');
       for (let pair of config.data.entries()) {
@@ -35,6 +38,8 @@ apiClient.interceptors.request.use(
           console.log(`  ${pair[0]}: ${pair[1]}`);
         }
       }
+      // Para FormData, eliminar Content-Type para que Axios lo establezca automáticamente
+      delete config.headers['Content-Type'];
     }
     console.log('===========================');
  
