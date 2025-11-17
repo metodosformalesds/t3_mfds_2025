@@ -3,17 +3,17 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from 'react-oidc-context';
 import ResenaView from '../../components/features/componente_reseña_realizada';
 import reviewService from '../../services/reseñaservicio';
-
+ 
 function ResenasRealizadas() {
   const location = useLocation();
   const auth = useAuth();
   const [reseñas, setReseñas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+ 
   // Capturar nueva reseña del state de navegación
   const newReview = location.state?.newReview || null;
-
+ 
   useEffect(() => {
     const cargarReseñas = async () => {
       // Si no hay usuario autenticado, no cargar nada
@@ -21,14 +21,14 @@ function ResenasRealizadas() {
         setLoading(false);
         return;
       }
-
+ 
       try {
         setLoading(true);
         const userEmail = auth.user.profile.email;
         console.log('Cargando reseñas realizadas para:', userEmail);
         let data = await reviewService.getClienteReseñas(userEmail);
         console.log('Reseñas realizadas cargadas:', data);
-
+ 
         // Ordenar por fecha descendente (más recientes primero)
         const parseFecha = (r) => {
           const f = r?.reseña?.fecha_reseña;
@@ -37,14 +37,14 @@ function ResenasRealizadas() {
         data = Array.isArray(data)
           ? [...data].sort((a, b) => parseFecha(b) - parseFecha(a))
           : [];
-        
+       
         // Si hay una nueva reseña del state, agregarla al inicio del historial
         if (newReview) {
           // Verificar si la nueva reseña ya existe en el historial (evitar duplicados)
           const existeReseña = data.some(
             r => r.reseña?.id_reseña === newReview.reseña?.id_reseña
           );
-          
+         
           if (!existeReseña) {
             const combined = [newReview, ...data];
             setReseñas(combined.sort((a, b) => parseFecha(b) - parseFecha(a)));
@@ -54,7 +54,7 @@ function ResenasRealizadas() {
         } else {
           setReseñas(data);
         }
-        
+       
         setError(null);
       } catch (err) {
         console.error('Error al cargar reseñas:', err);
@@ -65,10 +65,10 @@ function ResenasRealizadas() {
         setLoading(false);
       }
     };
-
+ 
     cargarReseñas();
   }, [auth.isAuthenticated, auth.user, newReview]);
-
+ 
   if (loading) {
     return (
       <div className="resenas-realizadas-container" style={{ padding: '24px' }}>
@@ -77,15 +77,15 @@ function ResenasRealizadas() {
       </div>
     );
   }
-
+ 
   if (error) {
     return (
       <div className="resenas-realizadas-container" style={{ padding: '24px' }}>
         <h2 style={{ marginBottom: '16px' }}>Mis Reseñas Realizadas</h2>
-        <div style={{ 
-          padding: '16px', 
-          backgroundColor: '#fee2e2', 
-          border: '1px solid #fecaca', 
+        <div style={{
+          padding: '16px',
+          backgroundColor: '#fee2e2',
+          border: '1px solid #fecaca',
           borderRadius: '8px',
           color: '#991b1b'
         }}>
@@ -94,15 +94,15 @@ function ResenasRealizadas() {
       </div>
     );
   }
-
+ 
   return (
     <div className="resenas-realizadas-container" style={{ padding: '24px' }}>
       <h2 style={{ marginBottom: '16px' }}>Mis Reseñas Realizadas</h2>
-      
+     
       {reseñas.length === 0 ? (
-        <div style={{ 
-          padding: '32px', 
-          textAlign: 'center', 
+        <div style={{
+          padding: '32px',
+          textAlign: 'center',
           backgroundColor: '#f9fafb',
           borderRadius: '8px',
           border: '1px solid #e5e7eb'
@@ -132,5 +132,5 @@ function ResenasRealizadas() {
     </div>
   );
 }
-
+ 
 export default ResenasRealizadas;
