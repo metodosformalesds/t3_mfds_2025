@@ -250,3 +250,13 @@
 .whatsapp-button:hover {
   background-color: #28d165;
 }
+
+.icon-svg-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.icon-svg {
+  width: 20px;
+  height: 20px;
+}
