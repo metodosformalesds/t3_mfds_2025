@@ -16,38 +16,35 @@ export default function ServiceFinishedAlert({
   const markAsRead = async () => {
     try {
       await api.put(`/api/v1/alertas/${alert.id_alerta}/marcar-leida`);
-    } catch (err) {
-      console.error("Error marcando alerta como leída:", err);
+    } catch (e) {
+      console.error(e);
     }
+  };
+
+  const handleClose = async () => {
+    await markAsRead();
+    onClose();
+  };
+
+  const handleReview = async () => {
+    await markAsRead();
+    onReview();
   };
 
   return (
     <div className="sf-alert-backdrop">
       <div className="sf-alert-container">
 
-        <button className="sf-alert-close" onClick={async () => { 
-          await markAsRead(); 
-          onClose(); 
-        }}>
-          ×
-        </button>
+        <button className="sf-alert-close" onClick={handleClose}>×</button>
 
         <h2 className="sf-alert-title">{alert.mensaje}</h2>
 
         <div className="sf-alert-provider-card">
-          <img className="sf-alert-avatar"
-            src={provider?.fotoPerfil}
-            alt="Proveedor"
-          />
-          <div className="sf-alert-provider-info">
-            <p className="sf-provider-name">{provider?.nombreCompleto}</p>
-          </div>
+          <img className="sf-alert-avatar" src={provider?.fotoPerfil} />
+          <p className="sf-provider-name">{provider?.nombreCompleto}</p>
         </div>
 
-        <button className="sf-alert-btn-review" onClick={async () => {
-          await markAsRead();
-          onReview();
-        }}>
+        <button className="sf-alert-btn-review" onClick={handleReview}>
           Agregar reseña
         </button>
 
