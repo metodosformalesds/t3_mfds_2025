@@ -195,11 +195,12 @@
 /* Tabs Navigation */
 .perfil-tabs {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start; /* Alinear a la izquierda para evitar corte del primer botón */
   background: var(--color-bg-white);
   border-bottom: none;
   gap: 0.25rem;
   padding: 0.25rem;
+  padding-left: 1rem; /* Espacio adicional a la izquierda para que se vea completo */
   overflow-x: auto;
   scrollbar-width: none; /* Firefox */
 }
