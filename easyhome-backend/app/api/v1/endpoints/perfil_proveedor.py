@@ -1,4 +1,5 @@
 # app/api/v1/endpoints/perfil_proveedor.py
+from app.services.s3_service import s3_service
 
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session, joinedload, aliased
@@ -131,13 +132,39 @@ class AlertaResultadoBodySchema(BaseModel):
 # -----------------------------------------------------------------
 @router.get(
     "/{id_proveedor}/servicios",
-    response_model=List[PublicacionServicioSchema]
+    response_model=None
 )
 def get_perfil_servicios(id_proveedor: int, db: Session = Depends(get_db)):
     """
-    Devuelve las publicaciones del proveedor, incluyendo todas sus imágenes,
-    y genera URLs firmadas de S3.
+    Devuelve todas las publicaciones del proveedor con:
+    - Nombre correcto del proveedor
+    - Foto de perfil firmada desde S3
+    - Todas las imágenes de la publicación con URL firmada
     """
+    proveedor = db.query(Proveedor_Servicio).filter(
+        Proveedor_Servicio.id_proveedor == id_proveedor
+    ).first()
+
+    if not proveedor:
+        raise HTTPException(status_code=404, detail="Proveedor no encontrado")
+
+    usuario = proveedor.usuario
+
+    # ===========================
+    # OBTENER FOTO DE PERFIL
+    # ===========================
+    foto_perfil_url = None
+    foto_key = proveedor.foto_perfil or (usuario.foto_perfil if usuario else None)
+
+    if foto_key:
+        try:
+            foto_perfil_url = s3_service.get_presigned_url(foto_key)
+        except:
+            foto_perfil_url = None
+
+    # ===========================
+    # PUBLICACIONES DEL PROVEEDOR
+    # ===========================
     publicaciones = (
         db.query(Publicacion_Servicio)
         .filter(Publicacion_Servicio.id_proveedor == id_proveedor)
@@ -147,13 +174,42 @@ def get_perfil_servicios(id_proveedor: int, db: Session = Depends(get_db)):
         .all()
     )
 
-    from app.services.s3_service import s3_service
+    resultado = []
 
     for pub in publicaciones:
-        for img in pub.imagen_publicacion:
-            img.url_imagen = s3_service.get_presigned_url(img.url_imagen)
+        # Galería completa
+        imagenes = []
+        for img in sorted(pub.imagen_publicacion, key=lambda x: x.orden):
+            try:
+                img_url = s3_service.get_presigned_url(img.url_imagen)
+            except:
+                img_url = None
 
-    return publicaciones
+            imagenes.append({
+                "id_imagen": img.id_imagen,
+                "url_imagen": img_url
+            })
+
+        # Agregar al resultado final
+        resultado.append({
+            "id_publicacion": pub.id_publicacion,
+            "titulo": pub.titulo,
+            "descripcion": pub.descripcion,
+            "rango_precio_min": pub.rango_precio_min,
+            "rango_precio_max": pub.rango_precio_max,
+
+            # 🟢  NOMBRE REAL
+            "nombre_proveedor": proveedor.nombre_completo or usuario.nombre or "Proveedor",
+
+            # 🟢  FOTO DE PERFIL REAL
+            "foto_perfil_url": foto_perfil_url,
+
+            # 🟢  TODAS LAS IMÁGENES
+            "imagen_publicacion": imagenes
+        })
+
+    return resultado
+
 
 # -----------------------------------------------------------------
 # --- Endpoint 3: Pestaña "Portafolio" ---
