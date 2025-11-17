@@ -5,13 +5,15 @@ import ResenaView from '../../components/features/componente_reseña_realizada';
 import reviewService from '../../services/reseñaservicio';
 import { useUserProfile } from '../../hooks/useUserProfile';
 
-function Resenas() {
+function Resenas({ idProveedor: idProveedorProp }) {
   const location = useLocation();
   const auth = useAuth();
   const { userData } = useUserProfile();
   const [reseñas, setReseñas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Determinar id del proveedor: prop (público) o del usuario autenticado (proveedor)
+  const providerId = idProveedorProp ?? userData?.id_proveedor ?? null;
   
   // Capturar nueva reseña del state de navegación
   const newReview = location.state?.newReview || null;
@@ -25,8 +27,8 @@ function Resenas() {
         return;
       }
 
-      // Si no hay usuario autenticado, no cargar nada
-      if (!auth.isAuthenticated) {
+      // En vista pública no requerimos sesión, pero sí un id proveedor válido
+      if (!providerId) {
         setLoading(false);
         return;
       }
@@ -35,13 +37,11 @@ function Resenas() {
         setLoading(true);
         let data = [];
 
-        // Si el usuario es proveedor (tiene id_proveedor), cargar reseñas recibidas
-        if (userData?.id_proveedor) {
-          console.log('Cargando reseñas para proveedor ID:', userData.id_proveedor);
-          data = await reviewService.getProveedorReseñas(userData.id_proveedor);
+        // Cargar reseñas del proveedor indicado (público o propio)
+        if (providerId) {
+          console.log('Cargando reseñas para proveedor ID:', providerId);
+          data = await reviewService.getProveedorReseñas(providerId);
           console.log('Reseñas cargadas:', data);
-        } else {
-          console.log('Usuario no es proveedor, no se cargan reseñas recibidas');
         }
 
         setReseñas(data || []);
@@ -57,12 +57,12 @@ function Resenas() {
     };
 
     cargarReseñas();
-  }, [auth.isAuthenticated, auth.user, userData?.id_proveedor, newReview]);
+  }, [providerId, newReview]);
 
   if (loading) {
     return (
       <div className="resenas-container" style={{ padding: '24px' }}>
-        <h2 style={{ marginBottom: '16px' }}>Reseñas Recibidas</h2>
+        <h2 style={{ marginBottom: '16px' }}>{idProveedorProp ? 'Reseñas' : 'Reseñas Recibidas'}</h2>
         <p style={{ color: '#6b7280' }}>Cargando...</p>
       </div>
     );
@@ -71,7 +71,7 @@ function Resenas() {
   if (error) {
     return (
       <div className="resenas-container" style={{ padding: '24px' }}>
-        <h2 style={{ marginBottom: '16px' }}>Reseñas Recibidas</h2>
+        <h2 style={{ marginBottom: '16px' }}>{idProveedorProp ? 'Reseñas' : 'Reseñas Recibidas'}</h2>
         <div style={{ 
           padding: '16px', 
           backgroundColor: '#fee2e2', 
@@ -87,7 +87,7 @@ function Resenas() {
 
   return (
     <div className="resenas-container" style={{ padding: '24px' }}>
-      <h2 style={{ marginBottom: '16px' }}>Reseñas Recibidas</h2>
+      <h2 style={{ marginBottom: '16px' }}>{idProveedorProp ? 'Reseñas' : 'Reseñas Recibidas'}</h2>
       
       {reseñas.length === 0 ? (
         <div style={{ 
@@ -98,7 +98,7 @@ function Resenas() {
           border: '1px solid #e5e7eb'
         }}>
           <p style={{ color: '#6b7280', marginBottom: '8px' }}>
-            Aún no has recibido ninguna reseña.
+            {idProveedorProp ? 'Este profesional aún no tiene reseñas.' : 'Aún no has recibido ninguna reseña.'}
           </p>
           <p style={{ color: '#9ca3af', fontSize: '14px' }}>
             Cuando los clientes completen servicios contigo, sus reseñas aparecerán aquí.
