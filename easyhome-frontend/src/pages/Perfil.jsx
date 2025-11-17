@@ -187,27 +187,21 @@ function Perfil() {
           )}
         </div>
 
-        {/* CONTACTO - SIEMPRE */}
+        {/* CONTACTO (TEXTO NORMAL) */}
         <div className="perfil-section">
           <h3>Información del contacto</h3>
 
-          <a
-            href={`mailto:${userData.correo_electronico}?subject=Contacto desde EasyHome&body=Hola, vi tu publicación en EasyHome por favor...`}
-            className="contact-button"
-          >
-            📧 Enviar correo
-          </a>
+          <div className="contact-item">
+            <i className="icon">📧</i>
+            <span>{userData.correo_electronico}</span>
+          </div>
 
-          <a
-            href={`https://wa.me/${userData.numero_telefono || ""}?text=${encodeURIComponent(
-              "Hola, vi tu publicación en EasyHome por favor..."
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="contact-button whatsapp-button"
-          >
-            💬 WhatsApp
-          </a>
+          {userData.numero_telefono && (
+            <div className="contact-item">
+              <i className="icon">📱</i>
+              <span>{userData.numero_telefono}</span>
+            </div>
+          )}
         </div>
 
         {/* PLAN */}
