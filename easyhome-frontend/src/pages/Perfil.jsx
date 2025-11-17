@@ -24,7 +24,7 @@ function Perfil() {
   const auth = useAuth();
   const location = useLocation();
 
-  // Lógica de logout robusta: igual que AdminSidebar.jsx
+  // Logout
   const handleLogout = () => {
     const clientId = "478qnp7vk39jamq13sl8k4sp7t";
     const logoutUri = "http://localhost:5173";
@@ -32,6 +32,7 @@ function Perfil() {
     auth.removeUser();
     window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
   };
+
   const { 
     userData, 
     loading, 
@@ -58,11 +59,9 @@ function Perfil() {
         }
       }
     };
-    
     loadProfilePhoto();
   }, [userData?.id_usuario]);
 
-  // Permitir activar una pestaña específica cuando se navega con state
   useEffect(() => {
     if (location.state?.goToTab) {
       setActiveTab(location.state.goToTab);
@@ -98,7 +97,6 @@ function Perfil() {
     return 'Usuario';
   };
 
-  // Tabs
   const clientTabs = [
     { id: "cambiarDatos", label: "Cambiar datos" },
     { id: "serviciosContratados", label: "Servicios contratados" },
@@ -117,18 +115,12 @@ function Perfil() {
 
   const handleSavePhoto = async (file) => {
     setUploadingPhoto(true);
-    
     try {
       const result = await uploadProfilePhoto(file);
-      
       if (result.success) {
         setProfilePhoto(result.url);
-        return result;
-      } else {
-        return result;
       }
-    } catch (error) {
-      return { success: false, error: "Error inesperado" };
+      return result;
     } finally {
       setUploadingPhoto(false);
     }
@@ -136,24 +128,15 @@ function Perfil() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "cambiarDatos":
-        return <CambiarDatos userData={userData} splitName={splitName} calculateAge={calculateAge} />;
-      case "serviciosContratados":
-        return <ServiciosContratados />;
-      case "resenasRealizadas":
-        return <ResenasRealizadas />;
-      case "acercaDe":
-        return <AcercaDe idProveedor={userData.id_proveedor} />;
-      case "misServicios":
-        return <MisServicios idProveedor={userData.id_proveedor} />;
-      case "portafolio":
-        return <Portafolio idProveedor={userData.id_proveedor} />;
-      case "resenas":
-        return <Resenas />;
-      case "servicios":
-        return <Servicios idProveedor={userData.id_proveedor} />;
-      default:
-        return <CambiarDatos userData={userData} splitName={splitName} calculateAge={calculateAge} />;
+      case "cambiarDatos": return <CambiarDatos userData={userData} splitName={splitName} calculateAge={calculateAge} />;
+      case "serviciosContratados": return <ServiciosContratados />;
+      case "resenasRealizadas": return <ResenasRealizadas />;
+      case "acercaDe": return <AcercaDe idProveedor={userData.id_proveedor} />;
+      case "misServicios": return <MisServicios idProveedor={userData.id_proveedor} />;
+      case "portafolio": return <Portafolio idProveedor={userData.id_proveedor} />;
+      case "resenas": return <Resenas />;
+      case "servicios": return <Servicios idProveedor={userData.id_proveedor} />;
+      default: return <CambiarDatos userData={userData} splitName={splitName} calculateAge={calculateAge} />;
     }
   };
 
@@ -171,10 +154,7 @@ function Perfil() {
           </div>
 
           {auth.user?.profile?.email === userData.correo_electronico && (
-            <button 
-              className="edit-photo-btn"
-              onClick={() => setIsModalOpen(true)}
-            >
+            <button className="edit-photo-btn" onClick={() => setIsModalOpen(true)}>
               ✏️
             </button>
           )}
@@ -182,29 +162,8 @@ function Perfil() {
         
         <h2 className="perfil-nombre">{userData.nombre}</h2>
         <span className="perfil-badge">{getBadge()}</span>
-        
-        {/* Stats */}
-        <div className="perfil-stats">
-          <div className="stat-item">
-            <span className="stat-value">15</span>
-            <span className="stat-label">Servicios<br/>Contratados</span>
-          </div>
 
-          {isWorker && (
-            <>
-              <div className="stat-item">
-                <span className="stat-value">90%</span>
-                <span className="stat-label">Satisfacción</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-value">7</span>
-                <span className="stat-label">Años</span>
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* CONTACTO (TEXTO NORMAL) */}
+        {/* CONTACTO */}
         <div className="perfil-section">
           <h3>Información del contacto</h3>
 
@@ -224,6 +183,7 @@ function Perfil() {
         {/* PLAN */}
         <div className="perfil-section">
           <h3>Información del plan</h3>
+
           <div className="plan-info">
             <div className="plan-item">
               <i className="icon">💼</i>
@@ -236,12 +196,27 @@ function Perfil() {
           </div>
         </div>
 
-          </>
-        )}
-
-        {/* Botón de cerrar sesión para todos los usuarios */}
+        {/* LOGOUT */}
         <div className="perfil-section">
-          <button className="logout-btn" onClick={handleLogout} style={{marginTop: '2rem', width: '100%', padding: '0.75rem', background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'}}>
+          <button 
+            className="logout-btn" 
+            onClick={handleLogout}
+            style={{
+              marginTop: '2rem',
+              width: '100%',
+              padding: '0.75rem',
+              background: '#e74c3c',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem'
+            }}
+          >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '0.5rem'}}>
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
               <polyline points="16 17 21 12 16 7"></polyline>
@@ -252,7 +227,7 @@ function Perfil() {
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN */}
       <main className="perfil-main">
         <nav className="perfil-tabs">
           {tabs.map(tab => (
