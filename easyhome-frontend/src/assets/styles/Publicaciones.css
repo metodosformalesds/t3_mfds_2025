@@ -183,3 +183,12 @@
     background-color: #F2F8FC;
     font-family: 'Nunito Sans', sans-serif;
 }
+
+.publicacion-titulo {
+    font-size: 1.9em;
+    font-weight: 800;
+    margin: 10px 0 15px 0;
+    color: #16394F;
+    font-family: 'Nunito Sans', sans-serif;
+    text-align: left;
+}
