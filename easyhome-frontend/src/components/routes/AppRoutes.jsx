@@ -13,6 +13,11 @@ import Perfil from '../../pages/Perfil';
 import ClienteDashboard from '../../pages/cliente/Dashboard';
 import ClienteServicios from '../../pages/cliente/Servicios';
 import ClienteFeed from '../../pages/cliente/feed';
+import ProviderProfile from '../../pages/cliente/alerta_contratacion';
+import ProveedorPublicProfile from '../../pages/trabajador/perfil_publico';
+import ReviewPage from '../../pages/cliente/Formulario_reseña';
+import ReportPage from '../../pages/trabajador/reporte';
+
 
 // Páginas de Trabajador
 import TrabajadorDashboard from '../../pages/trabajador/Dashboard';
@@ -82,6 +87,33 @@ const AppRoutes = () => {
             <ClienteServicios />
           </ProtectedRoute>
         } 
+      />
+
+      <Route 
+        path="/cliente/proveedor"
+        element={
+          <ProtectedRoute allowedRoles={['Clientes']}>
+            <ProveedorPublicProfile />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route 
+        path="/cliente/resena"
+        element={
+          <ProtectedRoute allowedRoles={['Clientes']}>
+            <ReviewPage />
+          </ProtectedRoute>
+        }
+      />
+      
+      <Route 
+        path="/cliente/reporte"
+        element={
+          <ProtectedRoute allowedRoles={['Clientes']}>
+            <ReportPage />
+          </ProtectedRoute>
+        }
       />
 
       {/* Rutas de Trabajador (prioridad 2) */}

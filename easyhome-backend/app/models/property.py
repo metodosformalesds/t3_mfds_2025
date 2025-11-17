@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Text, ForeignKey, DECIMAL, TIMES
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from .base import Base
+from fastapi import Request
 
 
 # ────────────────────────────────────────────────
@@ -94,3 +95,8 @@ class Imagen_Publicacion(Base):
 
     # Relaciones
     publicacion_servicio = relationship("Publicacion_Servicio", back_populates="imagen_publicacion")
+    # 🔥 MÉTODO NUEVO
+    def get_url_completa(self, request: Request):
+        base_url = str(request.base_url).rstrip("/")
+        return f"{base_url}/{self.url_imagen}"
+# ────────────────────────────────────────────────

@@ -216,3 +216,26 @@
   }
 }
 
+/* --- BOTÓN ESTILO "Nuevo Servicio" PERO VERSIÓN VER PUBLICACIONES --- */
+.category-btn {
+  background-color: #0F3A52; /* azul oscuro bonito */
+  color: white;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.category-btn:hover {
+  background-color: #0C2E41; /* 10% más oscuro */
+  transform: translateY(-1px); /* mini levantamiento */
+}
+
+.category-btn:active {
+  background-color: #08212D;
+  transform: translateY(0);
+}
