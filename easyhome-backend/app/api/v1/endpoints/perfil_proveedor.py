@@ -197,16 +197,16 @@ def get_perfil_portafolio(id_proveedor: int, db: Session = Depends(get_db)):
 # --- Endpoint 4: Pestaña "Reseñas" ---
 # -----------------------------------------------------------------
 @router.get(
-    "/{id_proveedor}/reseñas",
+    "/{id_proveedor}/resenas",
     response_model=List[ReseñaPublicaSchema]
 )
-def get_perfil_reseñas(id_proveedor: int, db: Session = Depends(get_db)):
+def get_perfil_resenas(id_proveedor: int, db: Session = Depends(get_db)):
     """
     Obtiene la lista de todas las reseñas que ha recibido
     un proveedor, incluyendo las imágenes adjuntas y el
     nombre del cliente.
     """
-    reseñas = (
+    resenas = (
         db.query(Reseña_Servicio)
         .options(
             joinedload(Reseña_Servicio.usuario),
@@ -218,7 +218,7 @@ def get_perfil_reseñas(id_proveedor: int, db: Session = Depends(get_db)):
         .order_by(Reseña_Servicio.fecha_reseña.desc())
         .all()
     )
-    return reseñas
+    return resenas
 
 # -----------------------------------------------------------------
 # --- Endpoint 5 y 6: COMENTADOS - Requieren ServicioHistorialSchema ---
