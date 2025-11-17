@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import '../../assets/styles/Filters.css';
 import categoryService from '../../services/categoryService';
@@ -12,10 +11,10 @@ export default function Filtros({ onApplyFilters, currentFilters = {} }) {
     const busquedaPor = [
         { name: "Suscriptores", value: "suscriptores" },
         { name: "Mejor calificados", value: "mejor_calificados" },
-        { name: "Más recientes", value: "mas_recientes" },
+        { name: "Más recientes", value: "mas_recientes" }
     ];
 
-    // Cargar categorías al montar (usar el servicio compartido)
+    // Cargar categorías
     useEffect(() => {
         const fetchCategorias = async () => {
             try {
@@ -28,33 +27,36 @@ export default function Filtros({ onApplyFilters, currentFilters = {} }) {
                 setLoadingCategories(false);
             }
         };
-
         fetchCategorias();
     }, []);
 
-    // Sincronizar con los filtros actuales cuando cambien externamente
+    // Sincronizar categorías seleccionadas con el feed actual
     useEffect(() => {
         if (currentFilters?.categorias) {
             setSelectedCategories(currentFilters.categorias);
         }
         if (currentFilters?.ordenar_por) {
-            setSelectedFilters(currentFilters.ordenar_por ? [currentFilters.ordenar_por] : []);
+            setSelectedFilters(
+                currentFilters.ordenar_por ? [currentFilters.ordenar_por] : []
+            );
         }
     }, [currentFilters]);
 
-    // Manejador para cambio de categorías
     const handleCategoryChange = (e, categoryId) => {
         const { checked } = e.target;
         if (checked) {
             setSelectedCategories([...selectedCategories, categoryId]);
         } else {
-            setSelectedCategories(selectedCategories.filter(id => id !== categoryId));
+            setSelectedCategories(
+                selectedCategories.filter(id => id !== categoryId)
+            );
         }
     };
 
-    // Manejador para cambio de filtros de búsqueda
     const handleFilterChange = (e, filterValue) => {
         const { checked } = e.target;
+
+        // Solo un filtro activo a la vez
         if (checked) {
             setSelectedFilters([filterValue]);
         } else {
@@ -62,19 +64,17 @@ export default function Filtros({ onApplyFilters, currentFilters = {} }) {
         }
     };
 
-    // Aplicar filtros y notificar al padre
     const handleApplyFilters = () => {
         const filtrosFinales = {
             categorias: selectedCategories,
             suscriptores: selectedFilters.includes("suscriptores"),
-            ordenar_por: selectedFilters.includes("mejor_calificados") 
+            ordenar_por: selectedFilters.includes("mejor_calificados")
                 ? "mejor_calificados"
                 : selectedFilters.includes("mas_recientes")
                 ? "mas_recientes"
-                : null,
+                : null
         };
 
-        // Llamar a la función del padre para actualizar los filtros
         if (onApplyFilters) {
             onApplyFilters(filtrosFinales);
         }
@@ -86,47 +86,47 @@ export default function Filtros({ onApplyFilters, currentFilters = {} }) {
         <div className="filtro-card">
             <h2 className="filtro-titulo-principal">Filtros</h2>
 
-            {/* Sección de Categorías */}
+            {/* Categorías */}
             <div className="filtro-seccion">
                 <h3 className="filtro-titulo-seccion">Categorías</h3>
+
                 <div className="filtro-grupo-checkbox">
                     {loadingCategories ? (
-                        <p style={{ fontSize: '0.9em', color: '#999' }}>Cargando categorías...</p>
+                        <p>Cargando categorías...</p>
                     ) : categorias.length > 0 ? (
                         categorias.map(cat => (
                             <label key={cat.id_categoria} className="filtro-item">
                                 <input
                                     type="checkbox"
-                                    name="category"
-                                    value={cat.id_categoria}
-                                    checked={selectedCategories.includes(cat.id_categoria)}
-                                    onChange={(e) => handleCategoryChange(e, cat.id_categoria)}
                                     className="filtro-checkbox"
+                                    checked={selectedCategories.includes(cat.id_categoria)}
+                                    onChange={(e) =>
+                                        handleCategoryChange(e, cat.id_categoria)
+                                    }
                                 />
-                                <span>{cat.nombre_categoria}</span>
+                                {cat.nombre_categoria}
                             </label>
                         ))
                     ) : (
-                        <p style={{ fontSize: '0.9em', color: '#999' }}>No hay categorías disponibles</p>
+                        <p>No hay categorías disponibles.</p>
                     )}
                 </div>
             </div>
 
             <hr className="filtro-separador" />
 
-            {/* Sección de Buscar por */}
+            {/* Buscar por */}
             <div className="filtro-seccion">
                 <h3 className="filtro-titulo-seccion">Buscar por</h3>
+
                 <div className="filtro-grupo-checkbox">
                     {busquedaPor.map(fil => (
                         <label key={fil.value} className="filtro-item">
                             <input
                                 type="checkbox"
-                                name="filter"
-                                value={fil.value}
+                                className="filtro-checkbox"
                                 checked={selectedFilters.includes(fil.value)}
                                 onChange={(e) => handleFilterChange(e, fil.value)}
-                                className="filtro-checkbox"
                             />
                             {fil.name}
                         </label>
@@ -134,11 +134,7 @@ export default function Filtros({ onApplyFilters, currentFilters = {} }) {
                 </div>
             </div>
 
-            {/* Botón Aplicar */}
-            <button
-                onClick={handleApplyFilters}
-                className="filtro-boton-aplicar"
-            >
+            <button className="filtro-boton-aplicar" onClick={handleApplyFilters}>
                 Aplicar
             </button>
         </div>

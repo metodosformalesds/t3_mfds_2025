@@ -7,9 +7,28 @@ function Callback() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Cuando se complete la autenticación, redirigir al home
     if (auth.isAuthenticated) {
-      navigate('/');
+      const redirectData = sessionStorage.getItem("afterLoginRedirect");
+
+      if (redirectData) {
+        sessionStorage.removeItem("afterLoginRedirect");
+
+        const parsed = JSON.parse(redirectData);
+
+        // Publicaciones o categorías
+        if (parsed.goToFeed) {
+          navigate("/cliente/feed", {
+            replace: true,
+            state: parsed.filtrosIniciales
+              ? { filtrosIniciales: parsed.filtrosIniciales }
+              : {}
+          });
+          return;
+        }
+      }
+
+      // Default
+      navigate('/', { replace: true });
     }
   }, [auth.isAuthenticated, navigate]);
 
