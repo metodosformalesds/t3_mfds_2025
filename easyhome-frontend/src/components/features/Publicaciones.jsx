@@ -52,10 +52,10 @@ export default function Publicaciones({ publicacionData, onVerPerfil  }) {
                                 {nombre_proveedor || "Proveedor sin nombre"}
                             </h3>
                             
-                            {/* Rating y opiniones */}
+                            {/* Satisfacción del proveedor (porcentaje) */}
                             <div className="perfil-rating">
                                 <span className="rating-estrella">★</span>
-                                <span>{calificacion_proveedor || 0}</span>
+                                <span>{calificacion_proveedor ? `${Math.round((Number(calificacion_proveedor) / 5) * 100)}%` : "0%"}</span>
                             </div>
                         </div>
                     </div>
@@ -66,6 +66,17 @@ export default function Publicaciones({ publicacionData, onVerPerfil  }) {
                     )}
                 </div>
 
+                {/* Fecha de publicación */}
+                {publicacionData.fecha_publicacion && (
+                    <p className="publicacion-fecha">
+                        Publicado: {new Date(publicacionData.fecha_publicacion).toLocaleDateString('es-MX', {
+                            day: '2-digit',
+                            month: 'long',
+                            year: 'numeric'
+                        })}
+                    </p>
+                )}
+                
                 {/* Resumen */}
                 <p className="publicacion-descripcion">{descripcion}</p>
 
