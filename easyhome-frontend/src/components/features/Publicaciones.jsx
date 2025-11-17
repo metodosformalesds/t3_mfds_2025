@@ -62,6 +62,12 @@ export default function Publicaciones({ publicacionData, onVerPerfil }) {
       <p className="publicacion-descripcion">
   {publicacionData.descripcion_completa || publicacionData.descripcion_corta}
 </p>
+    {publicacionData.categoria && (
+  <div className="categoria-tag">
+    {publicacionData.categoria}
+  </div>
+)}
+
       {/* IMÁGENES */}
       <div className="imagenes-contenedor">
         {tieneGaleria ? (
