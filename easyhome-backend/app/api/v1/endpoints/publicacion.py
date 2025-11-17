@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status, Query, Header
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import func
 from typing import List, Optional
 from datetime import datetime
 import uuid
@@ -230,6 +231,22 @@ def listar_publicaciones(
                     url_imagen_portada = None
 
             # ===========================
+            # CALCULAR CALIFICACIÓN PROMEDIO DEL PROVEEDOR
+            # ===========================
+            calificacion_promedio = 0.0
+            if prov:
+                # Calcular promedio de reseñas activas del proveedor
+                from app.models.reseña_servicio import Reseña_Servicio
+                avg_result = db.query(func.avg(Reseña_Servicio.calificacion_general))\
+                    .filter(Reseña_Servicio.id_proveedor == prov.id_proveedor)\
+                    .filter(Reseña_Servicio.estado == "activa")\
+                    .scalar()
+                
+                if avg_result is not None:
+                    calificacion_promedio = round(float(avg_result), 1)
+            
+            # ===========================
+            # AGREGAR PUBLICACIÓN AL RESULTADO
             # GALERÍA COMPLETA
             # ===========================
             imagenes = []
@@ -260,7 +277,7 @@ def listar_publicaciones(
                 ),
 
                 "foto_perfil_proveedor": foto_perfil_url,
-                "calificacion_proveedor": round(prov.calificacion_promedio, 1) if prov and prov.calificacion_promedio else 0,
+                "calificacion_proveedor": calificacion_promedio,
 
                 # --- 👇 AQUÍ ESTÁ LA SOLUCIÓN 👇 ---
                 # Agregamos los datos del 'usuario' asociado al proveedor
@@ -276,6 +293,7 @@ def listar_publicaciones(
                 "categoria": pub.categoria_servicio.nombre_categoria if pub.categoria_servicio else None,
 
                 "url_imagen_portada": url_imagen_portada,
+                "fecha_publicacion": pub.fecha_publicacion.isoformat() if pub.fecha_publicacion else None,
                 "imagen_publicacion": imagenes,
             })
 

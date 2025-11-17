@@ -42,7 +42,7 @@ const ClienteServicios = () => {
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
-            <h2 className="text-3xl font-extrabold text-gray-900 mb-6 border-b pb-2">
+            <h2 className="text-3xl font-extrabold mb-6 border-b pb-2" style={{ color: '#000000' }}>
                 Tus Servicios Contratados
             </h2>
             

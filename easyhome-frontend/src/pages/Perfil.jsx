@@ -3,6 +3,9 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from "react-oidc-context";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { useUserCapabilities } from "../hooks/useUserCapabilities";
+import { useClientServices } from "../hooks/useClientServices";
+import { useProviderServices } from "../hooks/useProviderServices";
+import reviewService from "../services/reseñaservicio";
 import "../assets/styles/Perfil.css";
 import "../assets/styles/sections/CambiarDatos.css";
 import "../assets/styles/sections/AcercaDe.css";
@@ -49,7 +52,14 @@ function Perfil() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
- 
+  
+  // Estados para estadísticas dinámicas
+  const [avgRating, setAvgRating] = useState(null);
+  
+  // Hooks para servicios (solo se activan si el usuario tiene el rol correspondiente)
+  const { services: clientServices } = useClientServices(userData?.id_usuario);
+  const { finishedServices } = useProviderServices(userData?.id_proveedor);
+
   useEffect(() => {
     const loadProfilePhoto = async () => {
       if (userData?.id_usuario) {
@@ -61,6 +71,35 @@ function Perfil() {
     };
     loadProfilePhoto();
   }, [userData?.id_usuario]);
+  
+  // Cargar reseñas del proveedor y calcular promedio de calificación general
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      if (!isWorker || !userData?.id_proveedor) return;
+      try {
+        const data = await reviewService.getProveedorReseñas(userData.id_proveedor);
+        const ratings = (Array.isArray(data) ? data : [])
+          .map((r) => Number(r?.reseña?.calificacion_general))
+          .filter((n) => Number.isFinite(n));
+        if (!mounted) return;
+        if (ratings.length) {
+          const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+          setAvgRating(avg);
+        } else {
+          setAvgRating(null);
+        }
+      } catch (_) {
+        if (mounted) setAvgRating(null);
+      }
+    };
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [isWorker, userData?.id_proveedor]);
+
+  // Permitir activar una pestaña específica cuando se navega con state
  
   useEffect(() => {
     if (location.state?.goToTab) {
@@ -157,14 +196,39 @@ function Perfil() {
               ✏️
 </button>
           )}
-</div>
-<h2 className="perfil-nombre">{userData.nombre}</h2>
-<span className="perfil-badge">{getBadge()}</span>
- 
-        {/* CONTACTO */}
-<div className="perfil-section">
-<h3>Información del contacto</h3>
- 
+        </div>
+        
+        <h2 className="perfil-nombre">{userData.nombre}</h2>
+        <span className="perfil-badge">{getBadge()}</span>
+        
+        {/* Estadísticas dinámicas */}
+        <div className="perfil-stats">
+          {isClient && (
+            <div className="stat-item">
+              <span className="stat-value">{Array.isArray(clientServices) ? clientServices.length : 0}</span>
+              <span className="stat-label">Servicios<br/>Contratados</span>
+            </div>
+          )}
+        
+
+          {isWorker && (
+            <>
+              <div className="stat-item">
+                <span className="stat-value">{Array.isArray(finishedServices) ? finishedServices.length : 0}</span>
+                <span className="stat-label">Servicios<br/>finalizados</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-value">{avgRating != null ? `${Math.round((avgRating / 5) * 100)}%` : "--%"}</span>
+                <span className="stat-label">Satisfacción</span>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* CONTACTO (TEXTO NORMAL) */}
+        <div className="perfil-section">
+          <h3>Información del contacto</h3>
+
           <div className="contact-item">
 <i className="icon">📧</i>
 <span>{userData.correo_electronico}</span>

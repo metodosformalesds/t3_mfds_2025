@@ -32,7 +32,8 @@ export const useClientServices = (clientId) => {
       estado: apiService.estado_servicio,
       tiene_reseña: apiService.tiene_reseña,
       tipo_tiene_reseña: typeof apiService.tiene_reseña,
-      confirmacion_cliente: apiService.confirmacion_cliente_finalizado
+      confirmacion_cliente: apiService.confirmacion_cliente_finalizado,
+      calificacion_cliente: apiService.calificacion_cliente
     });
     
     // Permitir reseñar cuando el servicio esté FINALIZADO y aún no tenga reseña
@@ -77,6 +78,7 @@ export const useClientServices = (clientId) => {
       canReview: canReview,
       providerId: proveedor.id_proveedor,
       providerUserId: proveedor.id_usuario,
+      clientRating: apiService.calificacion_cliente || null, // Calificación asignada por el cliente
     };
   };
 

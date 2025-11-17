@@ -261,6 +261,7 @@ class ServicioClienteSchema(BaseModel):
     fecha_finalizacion: datetime | None = None
     proveedor: ProveedorServicioSchema
     tiene_reseña: bool = False
+    calificacion_cliente: float | None = None
 
     class Config:
         from_attributes = True
@@ -312,14 +313,20 @@ def listar_servicios_cliente(
 
         # Verificar si tiene reseña (soporta relación uno-a-uno o lista)
         # bool(None) -> False, bool([]) -> False, bool(objeto o lista no vacía) -> True
-        tiene_reseña = bool(getattr(servicio, "reseña_servicio", None))
-
+        reseña_obj = getattr(servicio, "reseña_servicio", None)
+        tiene_reseña = bool(reseña_obj)
+        
+        # Obtener calificación del cliente si existe reseña
+        calificacion_cliente = None
+        if reseña_obj:
+            calificacion_cliente = getattr(reseña_obj, "calificacion_general", None)
         
         # DEBUG: Imprimir en consola del backend
         print(f"🔍 DEBUG Backend - Servicio {servicio.id_servicio_contratado}:")
         print(f"   - Estado: {servicio.estado_servicio}")
-        print(f"   - reseña_servicio object: {servicio.reseña_servicio}")
+        print(f"   - reseña_servicio object: {reseña_obj}")
         print(f"   - tiene_reseña calculado: {tiene_reseña}")
+        print(f"   - calificacion_cliente: {calificacion_cliente}")
 
         servicio_payload = {
             "id_servicio_contratado": servicio.id_servicio_contratado,
@@ -330,6 +337,7 @@ def listar_servicios_cliente(
             "acuerdo_confirmado": servicio.acuerdo_confirmado,
             "fecha_finalizacion": servicio.fecha_finalizacion,
             "tiene_reseña": tiene_reseña,
+            "calificacion_cliente": calificacion_cliente,
             "proveedor": {
                 "id_proveedor": proveedor_obj.id_proveedor if proveedor_obj else None,
                 "id_usuario": usuario_proveedor.id_usuario if usuario_proveedor else None,
