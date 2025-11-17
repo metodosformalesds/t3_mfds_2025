@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../../assets/styles/perfil_publico.css";
 import AcercaDe from "../sections/AcercaDe";
@@ -7,6 +7,8 @@ import Portafolio from "../sections/Portafolio";
 import Resenas from "../sections/Resenas";
 import AgreementAlert from "../cliente/alerta_contratacion";
 import ReportForm from "../trabajador/reporte";
+import reviewService from "../../services/reseñaservicio";
+import { useProviderServices } from "../../hooks/useProviderServices";
 // AgreementAlert will perform the API call; no direct api import needed here
 
 function ProveedorPublicProfile() {
@@ -16,6 +18,9 @@ function ProveedorPublicProfile() {
   const provider = location.state?.provider;
 
   const [activeTab, setActiveTab] = useState("acercaDe");
+  // Estadísticas dinámicas
+  const { activeServices, finishedServices } = useProviderServices(provider?.id);
+  const [avgRating, setAvgRating] = useState(null);
   //Estados de alerta
   const [showAlert, setShowAlert] = useState(false); 
   const [nextPath, setNextPath] = useState(null);
@@ -31,6 +36,43 @@ function ProveedorPublicProfile() {
       </div>
     );
   }
+
+
+  // Cargar reseñas del proveedor y calcular promedio de calificación general
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      if (!provider?.id) return;
+      try {
+        const data = await reviewService.getProveedorReseñas(provider.id);
+        const ratings = (Array.isArray(data) ? data : [])
+          .map((r) => Number(r?.reseña?.calificacion_general))
+          .filter((n) => Number.isFinite(n));
+        if (!mounted) return;
+        if (ratings.length) {
+          const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+          setAvgRating(avg);
+        } else {
+          setAvgRating(null);
+        }
+      } catch (_) {
+        if (mounted) setAvgRating(null);
+      }
+    };
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [provider?.id]);
+
+  const finishedServicesCount = useMemo(() => {
+    return Array.isArray(finishedServices) ? finishedServices.length : 0;
+  }, [finishedServices]);
+
+  const satisfactionPercent = useMemo(() => {
+    if (!Number.isFinite(avgRating)) return null;
+    return Math.round((avgRating / 5) * 100);
+  }, [avgRating]);
 
   //Funcion cuando intentar salir del perfil (alarma)
   const pedirAlertaYSalir = (rutaDestino) => {
@@ -145,18 +187,13 @@ function ProveedorPublicProfile() {
 
             <div className="perfil-stats">
               <div className="stat-item">
-                <span className="stat-value">{provider.servicios || 15}</span>
-                <span className="stat-label">Servicios<br />Contratados</span>
+                <span className="stat-value">{finishedServicesCount}</span>
+                <span className="stat-label">Servicios<br />finalizados</span>
               </div>
 
               <div className="stat-item">
-                <span className="stat-value">{provider.satisfaccion || "90%"}</span>
+                <span className="stat-value">{satisfactionPercent != null ? `${satisfactionPercent}%` : "--%"}</span>
                 <span className="stat-label">Satisfacción</span>
-              </div>
-
-              <div className="stat-item">
-                <span className="stat-value">{provider.anios || 7}</span>
-                <span className="stat-label">Años</span>
               </div>
             </div>
 
