@@ -166,7 +166,20 @@
 }
 
 .categoria-wrapper {
-    width: 100%;
     display: flex;
-    justify-content: flex-start;  /*  Izquierda */
+    justify-content: flex-start;   /* 🔥 Aquí está la izquierda real */
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.categoria-tag {
+    display: inline-block;
+    padding: 6px 14px;
+    font-size: 0.85em;
+    font-weight: 600;
+    color: #16394F;
+    border: 1.5px solid #16394F;
+    border-radius: 20px;
+    background-color: #F2F8FC;
+    font-family: 'Nunito Sans', sans-serif;
 }
