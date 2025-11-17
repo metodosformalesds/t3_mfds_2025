@@ -150,6 +150,7 @@ def listar_publicaciones(
 ):
     """
     Devuelve publicaciones con:
+    - Filtro por categorías
     - Nombre del proveedor
     - Fotografía del proveedor (URL prefirmada)
     - Portada de publicación (URL prefirmada)
@@ -157,19 +158,44 @@ def listar_publicaciones(
     """
 
     try:
-        publicaciones = (
+        # =====================================================
+        # 🟦 BASE QUERY + FILTROS
+        # =====================================================
+        query = (
             db.query(Publicacion_Servicio)
             .options(joinedload(Publicacion_Servicio.proveedor_servicio).joinedload(Proveedor_Servicio.usuario))
             .options(joinedload(Publicacion_Servicio.imagen_publicacion))
             .filter(Publicacion_Servicio.estado == "activo")
-            .limit(20)
-            .all()
         )
 
+        # 🟧 FILTRO POR CATEGORÍAS
+        if categorias:
+            query = query.filter(Publicacion_Servicio.id_categoria.in_(categorias))
+
+        # 🟩 FILTRO POR SUSCRIPTORES
+        if suscriptores:
+            query = query.join(Proveedor_Servicio).filter(
+                Proveedor_Servicio.id_plan_suscripcion.isnot(None)
+            )
+
+        # 🟨 ORDENAMIENTO
+        if ordenar_por == "mas_recientes":
+            query = query.order_by(Publicacion_Servicio.fecha_publicacion.desc())
+
+        elif ordenar_por == "mejor_calificados":
+            query = query.join(Proveedor_Servicio).order_by(
+                Proveedor_Servicio.calificacion_promedio.desc().nullslast()
+            )
+
+        # Obtener publicaciones finales
+        publicaciones = query.limit(100).all()
+
+        # =====================================================
+        # 🔄 ARMAR RESPUESTA
+        # =====================================================
         resultado = []
 
         for pub in publicaciones:
-
             prov = pub.proveedor_servicio
 
             # ===========================
@@ -216,7 +242,7 @@ def listar_publicaciones(
                 })
 
             # ===========================
-            # ARMAR RESPUESTA
+            # ARMAR RESPUESTA FINAL
             # ===========================
             resultado.append({
                 "id_publicacion": pub.id_publicacion,
@@ -236,10 +262,10 @@ def listar_publicaciones(
                 "rango_precio_min": pub.rango_precio_min,
                 "rango_precio_max": pub.rango_precio_max,
 
-                 "categoria": pub.categoria_servicio.nombre_categoria if pub.categoria_servicio else None,
+                "categoria": pub.categoria_servicio.nombre_categoria if pub.categoria_servicio else None,
 
                 "url_imagen_portada": url_imagen_portada,
-                "imagen_publicacion": imagenes,   # 🟢 GALERÍA COMPLETA
+                "imagen_publicacion": imagenes,
             })
 
         return resultado
@@ -247,7 +273,7 @@ def listar_publicaciones(
     except Exception as e:
         logger.error(f"Error al listar publicaciones: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-    
+
 # =========================================================
 # ELIMINAR PUBLICACIÓN POR ID (versión sencilla, SIN headers)
 # =========================================================
