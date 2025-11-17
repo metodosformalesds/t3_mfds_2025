@@ -141,7 +141,9 @@ function MisServicios({ idProveedor, publicView = false }) {
                 />
 
                 <div>
-                  <p className="perfil-nombre">{nombreProveedor}</p>
+                  <p className="perfil-nombre">
+                    {servicio.nombre_proveedor || nombreProveedor}
+                  </p>
 
                   <div className="perfil-rating">
                     <span className="rating-estrella">★</span>
