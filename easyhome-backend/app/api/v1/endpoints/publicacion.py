@@ -248,24 +248,6 @@ def listar_publicaciones(
         logger.error(f"Error al listar publicaciones: {e}")
         raise HTTPException(status_code=500, detail=str(e))
     
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from typing import List
-
-from app.core.database import get_db
-from app.models.user import Usuario
-from app.models.publicacion_servicio import Publicacion_Servicio
-from app.models.imagen_reseña import Imagen_Publicacion
-from app.services.s3_service import s3_service
-import logging
-
-logger = logging.getLogger(__name__)
-
-router = APIRouter(
-    prefix="/api/v1/publicaciones",
-    tags=["Publicaciones"]
-)
-
 # =========================================================
 # ELIMINAR PUBLICACIÓN POR ID (versión sencilla, SIN headers)
 # =========================================================
@@ -312,8 +294,6 @@ def eliminar_publicacion(
     db.commit()
 
     return {"message": "Publicación eliminada exitosamente"}
-
-
 
 
 # =========================================================
