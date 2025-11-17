@@ -7,7 +7,7 @@ const reviewService = {
      */
     getServicioInfo: async (id_servicio_contratado) => {
         try {
-            const response = await apiClient.get(`/reseñas/servicio-info/${id_servicio_contratado}`);
+            const response = await apiClient.get(`/resenas/servicio-info/${id_servicio_contratado}`);
             return response.data;
         } catch (error) {
             console.error('Error al obtener información del servicio:', error);
@@ -40,7 +40,7 @@ const reviewService = {
                 });
             }
             
-            const response = await apiClient.post('/reseñas/', formData, {
+            const response = await apiClient.post('/resenas/', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
