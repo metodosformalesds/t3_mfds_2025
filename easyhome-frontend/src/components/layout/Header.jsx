@@ -2,6 +2,7 @@ import '../../assets/styles/Header.css'
 import { useAuth } from "react-oidc-context";
 import { Link } from 'react-router-dom';
 import { isAdmin } from '../../utils/authUtils';
+import { useEffect } from 'react';
 
 function Header() {
   const auth = useAuth();
@@ -19,6 +20,17 @@ function Header() {
     window.location.href =
       `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
   };
+
+  // 🔁 Si el login viene desde "Publicaciones", regresar al feed
+  useEffect(() => {
+    if (auth.isAuthenticated) {
+      const shouldGoToFeed = sessionStorage.getItem("goToFeedAfterLogin");
+      if (shouldGoToFeed === "1") {
+        sessionStorage.removeItem("goToFeedAfterLogin");
+        window.location.href = "/cliente/feed";
+      }
+    }
+  }, [auth.isAuthenticated]);
 
   return (
     <header className="app-header">
@@ -38,17 +50,18 @@ function Header() {
         </div>
 
         <ul className="nav-right">
-          {/* Publicaciones: si está logueado va directo; si no, guarda destino y manda a login */}
+          {/* Publicaciones */}
           <li>
             <a
               href="#"
               onClick={(e) => {
                 e.preventDefault();
-                if (auth.isAuthenticated) {
-                  window.location.href = "/cliente/feed";
-                } else {
-                  sessionStorage.setItem("afterLoginRedirect", "/cliente/feed");
+
+                if (!auth.isAuthenticated) {
+                  sessionStorage.setItem("goToFeedAfterLogin", "1");
                   auth.signinRedirect();
+                } else {
+                  window.location.href = "/cliente/feed";
                 }
               }}
             >
