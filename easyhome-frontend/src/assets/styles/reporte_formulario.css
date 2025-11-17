@@ -1,0 +1,210 @@
+/* Backdrop */
+.report-form-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+/* Container */
+.report-form-container {
+  background-color: #f5e6d3;
+  border-radius: 12px;
+  max-width: 560px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Header */
+.report-form-header {
+  background-color: #d4a574;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.report-form-icon {
+  width: 56px;
+  height: 56px;
+  background-color: #c53030;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: white;
+  font-weight: bold;
+}
+
+.report-form-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: bold;
+  color: #2d3748;
+}
+
+.report-form-subtitle {
+  margin: 4px 0 0 0;
+  font-size: 14px;
+  color: #4a5568;
+}
+
+/* Body */
+.report-form-body {
+  padding: 24px;
+  background-color: white;
+}
+
+.report-form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 8px;
+}
+
+/* Textarea */
+.report-form-textarea {
+  width: 100%;
+  min-height: 160px;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+  background-color: white;
+  color: #2d3748;
+  box-sizing: border-box;
+}
+
+.report-form-textarea:focus {
+  border-color: #d4a574;
+}
+
+.report-form-textarea.disabled {
+  background-color: #f7fafc;
+  cursor: not-allowed;
+}
+
+.report-form-textarea::placeholder {
+  color: #a0aec0;
+}
+
+/* Counter */
+.report-form-counter {
+  font-size: 12px;
+  color: #718096;
+  margin-top: 6px;
+  text-align: right;
+}
+
+/* Error */
+.report-form-error {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #fed7d7;
+  border: 1px solid #fc8181;
+  border-radius: 6px;
+  color: #c53030;
+  font-size: 14px;
+}
+
+/* Actions */
+.report-form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  justify-content: center;
+}
+
+/* Buttons */
+.report-form-btn {
+  padding: 12px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.report-form-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.report-form-btn-cancel {
+  border: 2px solid #4a5568;
+  background-color: white;
+  color: #4a5568;
+}
+
+.report-form-btn-cancel:hover:not(.disabled) {
+  background-color: #f7fafc;
+  transform: translateY(-1px);
+}
+
+.report-form-btn-submit {
+  border: none;
+  background-color: #c53030;
+  color: white;
+}
+
+.report-form-btn-submit:hover:not(.disabled) {
+  background-color: #9b2c2c;
+  transform: translateY(-1px);
+}
+
+.report-form-btn-submit.disabled {
+  background-color: #9b2c2c;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .report-form-backdrop {
+    padding: 16px;
+  }
+
+  .report-form-header {
+    padding: 20px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .report-form-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 28px;
+  }
+
+  .report-form-title {
+    font-size: 18px;
+  }
+
+  .report-form-body {
+    padding: 20px;
+  }
+
+  .report-form-actions {
+    flex-direction: column;
+  }
+
+  .report-form-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
