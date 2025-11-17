@@ -6,19 +6,14 @@ import MisServicios from "../sections/MisServicios";
 import Portafolio from "../sections/Portafolio";
 import Resenas from "../sections/Resenas";
 import AgreementAlert from "../cliente/alerta_contratacion";
-// AgreementAlert will perform the API call; no direct api import needed here
 
 function ProveedorPublicProfile() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 1. EL PROBLEMA ESTÁ AQUÍ
-  // El objeto 'provider' que recibes de la pantalla anterior
-  // probablemente no tiene las propiedades 'correo' y 'telefono'.
   const provider = location.state?.provider;
 
   const [activeTab, setActiveTab] = useState("acercaDe");
-  //Estados de alerta
   const [showAlert, setShowAlert] = useState(false);
   const [nextPath, setNextPath] = useState(null);
 
@@ -31,23 +26,30 @@ function ProveedorPublicProfile() {
     );
   }
 
-  //Funcion cuando intentar salir del perfil (alarma)
   const pedirAlertaYSalir = (rutaDestino) => {
     setNextPath(rutaDestino);
     setShowAlert(true);
   };
 
-  // Funcion para redirigir despues de que AgreementAlert registre el resultado
   const handleAlertResult = () => {
     setShowAlert(false);
     navigate(nextPath);
   };
 
+  // 🚀 URLs DE ACCIÓN
+  const whatsappUrl = provider.telefono
+    ? `https://wa.me/${provider.telefono}`
+    : null;
+
+  const mailUrl = provider.correo
+    ? `mailto:${provider.correo}`
+    : null;
+
   return (
     <div className="public-profile-wrapper">
       <div className="perfil-container">
-        {/* SIDEBAR*/}
 
+        {/* SIDEBAR */}
         <div className="sidebar-wrapper">
           <div className="sidebar-back-btn">
             <button onClick={() => pedirAlertaYSalir("/cliente/feed")}>
@@ -98,22 +100,44 @@ function ProveedorPublicProfile() {
               </div>
             </div>
 
-            {/* 2. ESTE CÓDIGO FUNCIONA BIEN... SI RECIBE LOS DATOS */}
+            {/* INFORMACIÓN DE CONTACTO */}
             <div className="perfil-section">
               <h3>Información del contacto</h3>
+
               <div className="contact-info">
+                {/* Correo */}
                 <div className="contact-item">
                   <i className="icon">📧</i>
-                  {/* Si 'provider.correo' no existe, muestra el texto de relleno */}
                   <span>{provider.correo || "correo@ejemplo.com"}</span>
                 </div>
 
-                {/* Si 'provider.telefono' no existe, simplemente no muestra nada */}
+                {/* Teléfono */}
                 {provider.telefono && (
                   <div className="contact-item">
                     <i className="icon">📱</i>
                     <span>{provider.telefono}</span>
                   </div>
+                )}
+              </div>
+
+              {/* 🚀 BOTONES DE ACCIÓN */}
+              <div className="contact-buttons">
+                {whatsappUrl && (
+                  <button
+                    className="btn-contact whatsapp"
+                    onClick={() => window.open(whatsappUrl, "_blank")}
+                  >
+                    📲 WhatsApp
+                  </button>
+                )}
+
+                {mailUrl && (
+                  <button
+                    className="btn-contact email"
+                    onClick={() => window.location.href = mailUrl}
+                  >
+                    ✉️ Enviar correo
+                  </button>
                 )}
               </div>
             </div>
@@ -137,9 +161,8 @@ function ProveedorPublicProfile() {
           </aside>
         </div>
 
-        {/* Secciones*/}
+        {/* MAIN */}
         <main className="perfil-main">
-          {/* Tabs */}
           <nav className="public-profile-tabs">
             <button
               className={activeTab === "acercaDe" ? "active" : ""}
@@ -170,7 +193,6 @@ function ProveedorPublicProfile() {
             </button>
           </nav>
 
-          {/* Contenido dinámico */}
           <div className="public-profile-content">
             {activeTab === "acercaDe" && (
               <AcercaDe
@@ -185,11 +207,13 @@ function ProveedorPublicProfile() {
             {activeTab === "portafolio" && (
               <Portafolio idProveedor={provider.id} />
             )}
-            {activeTab === "resenas" && <Resenas idProveedor={provider.id} />}
+            {activeTab === "resenas" && (
+              <Resenas idProveedor={provider.id} />
+            )}
           </div>
         </main>
 
-        {/*Alerta contratacion */}
+        {/* ALERTA */}
         <AgreementAlert
           isOpen={showAlert}
           provider={provider}
