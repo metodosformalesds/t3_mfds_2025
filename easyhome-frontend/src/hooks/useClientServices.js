@@ -1,12 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
+import api from '../config/api';
 
-// URL base de tu API 
-const API_BASE_URL = 'http://localhost:8000/api/v1/client'; 
+const STATUS_LABELS = {
+  contactado: "Contactado",
+  confirmado: "Confirmado",
+  en_proceso: "En proceso",
+  finalizado: "Finalizado",
+  cancelado: "Cancelado",
+};
+
+const PLACEHOLDER_PHOTO = "https://via.placeholder.com/80";
 
 /**
  * Hook personalizado para obtener los servicios contratados de un cliente.
  * @param {number} clientId - El ID del cliente actual.
- * @param {string} token - Token de autenticación (opcional, si lo usas).
  * @returns {object} Un objeto con servicios, estado de carga y error.
  */
 export const useClientServices = (clientId) => {
@@ -16,102 +23,97 @@ export const useClientServices = (clientId) => {
 
   // Función para transformar el formato de respuesta de FastAPI al formato de React
   const formatServiceData = (apiService) => {
-    // Aquí usamos los campos de tu modelo ServicioResponse:
-    // nombre_completo, fecha_confirmacion_acuerdo, estado_servicio, confirmacion_cliente_finalizado
-    
-    // Suponemos datos mock para el proveedor (no están en tu endpoint actual,
-    // pero son necesarios para replicar el diseño de la imagen)
-    const mockProviderData = {
-        providerRating: 4.9,
-        providerReviews: 127,
-        isPremium: true,
-    };
-    
-    // Lógica para determinar si se puede dejar reseña
-    // Supuesto: Se puede reseñar si el estado es 'Terminado' (confirmacion_cliente_finalizado es true)
-    // y si NO existe una reseña previa (esta lógica requiere otro endpoint o un campo adicional en el futuro)
+    const proveedor = apiService.proveedor || {};
     const status = apiService.estado_servicio;
-    const isFinished = apiService.confirmacion_cliente_finalizado;
     
-    let canReview = false;
-    // Asumimos que si está finalizado (true) y el estado es 'Terminado', debe mostrar la opción de reseña.
-    if (status === 'Terminado' && isFinished) {
-        // En una app real, aquí se verificaría si ya hay una reseña
-        canReview = true; 
-    }
+    // DEBUG: Ver qué datos llegan del backend
+    console.log('🔍 DEBUG apiService:', {
+      id: apiService.id_servicio_contratado,
+      estado: apiService.estado_servicio,
+      tiene_reseña: apiService.tiene_reseña,
+      tipo_tiene_reseña: typeof apiService.tiene_reseña,
+      confirmacion_cliente: apiService.confirmacion_cliente_finalizado
+    });
+    
+    // Permitir reseñar cuando el servicio esté FINALIZADO y aún no tenga reseña
+    // (ya no dependemos de confirmacion_cliente_finalizado del cliente)}
+    const estadoFinalizado =
+      apiService.estado_servicio?.toLowerCase() === "finalizado";
+
+    const noTieneResena =
+      apiService.tiene_reseña === false ||
+      apiService.tiene_reseña === 0 ||
+      apiService.tiene_reseña === null ||
+      apiService.tiene_reseña === "false";
+
+    const canReview = estadoFinalizado && noTieneResena;
+    
+    console.log('✅ canReview calculado:', canReview, 'para servicio', apiService.id_servicio_contratado);
+
+
+
+
+    // Formatear fecha
+    const formatDate = (isoDate) => {
+      if (!isoDate) return 'Fecha no disponible';
+      const date = new Date(isoDate);
+      return new Intl.DateTimeFormat('es-MX', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      }).format(date);
+    };
 
     return {
-      id: apiService.id_servicio_contratado || Math.random(), // Usar un ID real si está disponible
-      providerName: apiService.nombre_completo,
-      providerRating: mockProviderData.providerRating,
-      providerReviews: mockProviderData.providerReviews,
-      isPremium: mockProviderData.isPremium,
-      date: apiService.fecha_confirmacion_acuerdo || 'Fecha no disponible',
-      status: status,
+      id: apiService.id_servicio_contratado,
+      providerName: proveedor.nombre || 'Proveedor sin nombre',
+      providerPhoto: proveedor.foto_perfil || PLACEHOLDER_PHOTO,
+      providerRating: proveedor.calificacion_promedio || 0,
+      providerReviews: 0, // Este dato requiere consulta adicional si se necesita
+      isPremium: false, // Este dato requiere consulta adicional si se necesita
+      date: formatDate(apiService.fecha_confirmacion_acuerdo || apiService.fecha_contacto),
+      status: STATUS_LABELS[status] || status,
+      statusRaw: status,
       canReview: canReview,
+      providerId: proveedor.id_proveedor,
+      providerUserId: proveedor.id_usuario,
     };
   };
 
   const fetchServices = useCallback(async () => {
-    if (!clientId) return;
+    if (!clientId) {
+      setServices([]);
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
 
     try {
-        // --- INICIO DE SIMULACIÓN (Reemplazar por fetch real) ---
-        
-        // Simulación de datos que vendrían de tu endpoint FastAPI:
-        // GET /{id_cliente}/servicios
-        const mockApiData = [
-            { nombre_completo: "Roberta Alvarado", fecha_confirmacion_acuerdo: "25/Octubre/2025", estado_servicio: "En proceso", confirmacion_cliente_finalizado: false, id_servicio_contratado: 1 },
-            { nombre_completo: "Roberta Alvarado", fecha_confirmacion_acuerdo: "25/Octubre/2025", estado_servicio: "Terminado", confirmacion_cliente_finalizado: true, id_servicio_contratado: 2 },
-            { nombre_completo: "Roberta Alvarado", fecha_confirmacion_acuerdo: "25/Octubre/2025", estado_servicio: "Terminado", confirmacion_cliente_finalizado: true, id_servicio_contratado: 3, has_review: true }, // Simulando una reseña existente
-        ];
-        
-        await new Promise(resolve => setTimeout(resolve, 800)); // Simular retraso de red
+      const { data } = await api.get(
+        `/api/v1/status-servicio/clientes/${clientId}/servicios`
+      );
 
-        const formattedServices = mockApiData.map(service => {
-            // Ajuste mock para simular que el servicio ID 3 ya tiene reseña
-            if (service.id_servicio_contratado === 3) {
-                 return formatServiceData({ ...service, has_review: true });
-            }
-            return formatServiceData(service);
-        });
-
-        setServices(formattedServices);
-
-        // --- FIN DE SIMULACIÓN ---
-
-        /* // --- CÓDIGO REAL DE FETCH (Descomentar para usar con tu API) ---
-        // const response = await fetch(`${API_BASE_URL}/${clientId}/servicios`, {
-        //   headers: {
-        //     'Authorization': `Bearer ${token}` // Si usas token
-        //   }
-        // });
-
-        // if (!response.ok) {
-        //   throw new Error('Error al cargar los servicios.');
-        // }
-
-        // const apiData = await response.json();
-        // const formattedServices = apiData.map(formatServiceData);
-        // setServices(formattedServices);
-        */
+      const formattedServices = data.map(formatServiceData);
+      setServices(formattedServices);
 
     } catch (err) {
-      setError(err.message || 'Error desconocido al cargar los datos.');
+      const detail =
+        err.response?.data?.detail ||
+        'No se pudieron cargar los servicios contratados.';
+
+      setError(detail);
       setServices([]);
     } finally {
       setIsLoading(false);
     }
-  }, [clientId]); // Dependencia del ID del cliente
+  }, [clientId]);
 
   useEffect(() => {
     fetchServices();
   }, [fetchServices]);
 
-  return { services, isLoading, error };
+  return { services, isLoading, error, fetchServices };
 };
 
 export default useClientServices;

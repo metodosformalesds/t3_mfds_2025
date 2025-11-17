@@ -7,7 +7,7 @@ const reviewService = {
      */
     getServicioInfo: async (id_servicio_contratado) => {
         try {
-            const response = await apiClient.get(`/resenas/servicio-info/${id_servicio_contratado}`);
+            const response = await apiClient.get(`/api/v1/status-servicio/servicios/${id_servicio_contratado}/info-resena`);
             return response.data;
         } catch (error) {
             console.error('Error al obtener información del servicio:', error);
@@ -40,7 +40,7 @@ const reviewService = {
                 });
             }
             
-            const response = await apiClient.post('/resenas/', formData, {
+            const response = await apiClient.post('/api/v1/reseñas/', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -49,6 +49,32 @@ const reviewService = {
             return response.data;
         } catch (error) {
             console.error('Error al crear reseña:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Obtener todas las reseñas de un cliente
+     */
+    getClienteReseñas: async (userEmail) => {
+        try {
+            const response = await apiClient.get(`/api/v1/reseñas/cliente/${encodeURIComponent(userEmail)}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error al obtener reseñas del cliente:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Obtener todas las reseñas recibidas por un proveedor
+     */
+    getProveedorReseñas: async (idProveedor) => {
+        try {
+            const response = await apiClient.get(`/api/v1/reseñas/proveedor/${encodeURIComponent(idProveedor)}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error al obtener reseñas del proveedor:', error);
             throw error;
         }
     },
