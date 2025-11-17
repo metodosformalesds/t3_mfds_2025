@@ -36,7 +36,7 @@ function ProveedorPublicProfile() {
     navigate(nextPath);
   };
 
-  // URLs de acción
+  // URLs
   const whatsappUrl = provider.telefono
     ? `https://wa.me/${provider.telefono}`
     : null;
@@ -77,6 +77,7 @@ function ProveedorPublicProfile() {
               {provider.esPremium ? "Proveedor verificado" : "Proveedor"}
             </span>
 
+            {/* STATS */}
             <div className="perfil-stats">
               <div className="stat-item">
                 <span className="stat-value">{provider.servicios || 15}</span>
@@ -100,26 +101,10 @@ function ProveedorPublicProfile() {
               </div>
             </div>
 
-            {/* INFORMACIÓN DE CONTACTO */}
+            {/* SOLO LOS BOTONES – SIN TEXTO NI ICONOS */}
             <div className="perfil-section">
-              <h3>Información del contacto</h3>
+              <h3>Contacto</h3>
 
-              <div className="contact-info">
-                {/* Correo */}
-                <div className="contact-item">
-                  <i className="icon">📧</i>
-                  <span>{provider.correo || "correo@ejemplo.com"}</span>
-                </div>
-
-                {/* Teléfono -> SOLO ICONO, SIN NÚMERO */}
-                {provider.telefono && (
-                  <div className="contact-item">
-                    <i className="icon">📱</i>
-                  </div>
-                )}
-              </div>
-
-              {/* BOTONES */}
               <div className="contact-buttons">
                 {whatsappUrl && (
                   <button
