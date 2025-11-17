@@ -12,76 +12,101 @@ function MisServicios({ idProveedor, publicView = false }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchServicios = async () => {
-      if (!idProveedor) {
-        setLoading(false);
-        return;
-      }
+  const fetchServicios = async () => {
+    if (!idProveedor) {
+      setLoading(false);
+      return;
+    }
 
+    try {
+      setLoading(true);
+
+      // 1️⃣ Obtener información del proveedor (solo para nombre)
       try {
-        setLoading(true);
-
-        // 1️⃣ Obtener información del proveedor (solo para nombre)
-        try {
-          const resPerfil = await api.get(
-            `/api/v1/proveedores/${idProveedor}/perfil-about`
-          );
-
-          const p = resPerfil.data;
-
-          const nombreDetectado =
-            p.nombre_completo ||
-            p.nombre ||
-            p.usuario?.nombre_completo ||
-            p.usuario?.nombre ||
-            "Proveedor";
-
-          setNombreProveedor(nombreDetectado);
-
-        } catch (e) {
-          console.warn("⚠️ No se pudo obtener el nombre del proveedor.");
-        }
-
-        // 2️⃣ Obtener servicios publicados
-        const response = await api.get(
-          `/api/v1/proveedores/${idProveedor}/servicios`
-        );
-        const serviciosBase = response.data;
-
-        // 3️⃣ Obtener foto de perfil firmada
-        const serviciosConFoto = await Promise.all(
-          serviciosBase.map(async (servicio) => {
-            try {
-              const fotoRes = await api.get(
-                `/api/v1/usuarios/${servicio.id_proveedor}/foto-perfil`
-              );
-
-              return {
-                ...servicio,
-                foto_perfil_url: fotoRes.data.foto_perfil_url
-              };
-            } catch {
-              return {
-                ...servicio,
-                foto_perfil_url: null
-              };
-            }
-          })
+        const resPerfil = await api.get(
+          `/api/v1/proveedores/${idProveedor}/perfil-about`
         );
 
-        setServicios(serviciosConFoto);
-        setError(null);
+        const p = resPerfil.data;
 
-      } catch (err) {
-        console.error("❌ Error al obtener servicios:", err);
-        setError("No se pudieron cargar los servicios");
-      } finally {
-        setLoading(false);
+        const nombreDetectado =
+          p.nombre_completo ||
+          p.nombre ||
+          p.usuario?.nombre_completo ||
+          p.usuario?.nombre ||
+          "Proveedor";
+
+        setNombreProveedor(nombreDetectado);
+
+      } catch (e) {
+        console.warn("⚠️ No se pudo obtener el nombre del proveedor.");
       }
-    };
 
-    fetchServicios();
-  }, [idProveedor]);
+      // 2️⃣ Obtener servicios publicados
+      const response = await api.get(
+        `/api/v1/proveedores/${idProveedor}/servicios`
+      );
+      const serviciosBase = response.data;
+
+      // 3️⃣ Obtener foto de perfil firmada
+      const serviciosConFoto = await Promise.all(
+        serviciosBase.map(async (servicio) => {
+          try {
+            const fotoRes = await api.get(
+              `/api/v1/usuarios/${servicio.id_proveedor}/foto-perfil`
+            );
+
+            return {
+              ...servicio,
+              foto_perfil_url: fotoRes.data.foto_perfil_url
+            };
+          } catch {
+            return {
+              ...servicio,
+              foto_perfil_url: null
+            };
+          }
+        })
+      );
+
+      setServicios(serviciosConFoto);
+      setError(null);
+
+    } catch (err) {
+      console.error("❌ Error al obtener servicios:", err);
+      setError("No se pudieron cargar los servicios");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchServicios();
+}, [idProveedor]);
+
+// AQUI VA LA FUNCIÓN handleEliminar (NO ARRIBA, NO ABAJO, AQUI)
+const handleEliminar = async (idPublicacion) => {
+  const userEmail = localStorage.getItem("user_email");
+
+  if (!window.confirm("¿Seguro que deseas eliminar esta publicación?")) return;
+
+  try {
+    await api.delete(`/api/v1/publicaciones/${idPublicacion}`, {
+      params: { user_email: userEmail }
+    });
+
+    // quitar de la lista visual sin recargar
+    setServicios(prev =>
+      prev.filter(serv => serv.id_publicacion !== idPublicacion)
+    );
+
+    alert("Publicación eliminada correctamente");
+  } catch (error) {
+    console.error("Error al eliminar:", error);
+    alert("Error al eliminar la publicación");
+  }
+};
+// 🔥🔥🔥 AQUÍ TERMINA — DESPUÉS DE ESTO SIGUE TU return()
+
 
   if (loading) return <div>Cargando servicios...</div>;
   if (error) return <div>{error}</div>;
