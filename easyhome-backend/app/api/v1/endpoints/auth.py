@@ -28,11 +28,18 @@ class CognitoUserSync(BaseModel):
 @router.post("/sync-cognito-user")
 def sync_cognito_user(user_data: CognitoUserSync, db: Session = Depends(get_db)):
     """
-    Sincroniza un usuario de Cognito con la base de datos local.
-    Si el usuario ya existe, actualiza su última sesión.
+    Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+    Descripción: Sincroniza un usuario de Cognito con la base de datos local.
+    Si el usuario ya existe, actualiza su última sesión, nombre, teléfono y rol.
     Si no existe, lo crea.
+    Asegura que el usuario tenga un grupo de Cognito por defecto ("Clientes") si no tiene grupos.
     
-    IMPORTANTE: Si el usuario no tiene grupos en Cognito, se le asigna automáticamente al grupo "Clientes"
+    Parámetros:
+        user_data (CognitoUserSync): Datos del usuario provenientes de Cognito.
+        db (Session): Sesión de la base de datos inyectada por dependencia.
+    
+    Retorna:
+        dict: Resultado de la sincronización (mensaje, id_usuario, is_new, groups).
     """
 
     # NUEVO: obtener atributos directamente desde Cognito (email → nombre, teléfono, sub)
