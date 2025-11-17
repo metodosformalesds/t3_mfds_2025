@@ -12,7 +12,7 @@ export const useAlerts = (userId) => {
     setLoading(true);
 
     try {
-      const { data } = await api.get(`/api/v1/alertas/${userId}`);
+      const { data } = await api.get(`/api/v1/alertas/usuario/${userId}`);
 
       setAlerts(data);
 
