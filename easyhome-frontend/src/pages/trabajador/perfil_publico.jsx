@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../../assets/styles/perfil_publico.css";
 import AcercaDe from "../sections/AcercaDe";
@@ -6,6 +6,8 @@ import MisServicios from "../sections/MisServicios";
 import Portafolio from "../sections/Portafolio";
 import Resenas from "../sections/Resenas";
 import AgreementAlert from "../cliente/alerta_contratacion";
+import ReportForm from "../trabajador/reporte";
+// AgreementAlert will perform the API call; no direct api import needed here
 
 function ProveedorPublicProfile() {
   const navigate = useNavigate();
@@ -16,6 +18,9 @@ function ProveedorPublicProfile() {
   const [activeTab, setActiveTab] = useState("acercaDe");
   const [showAlert, setShowAlert] = useState(false);
   const [nextPath, setNextPath] = useState(null);
+  //Estado para modal de reporte
+  const [showReportForm, setShowReportForm] = useState(false);
+  
 
   if (!provider) {
     return (
@@ -33,7 +38,11 @@ function ProveedorPublicProfile() {
 
   const handleAlertResult = () => {
     setShowAlert(false);
-    navigate(nextPath);
+    if (nextPath === -1) {
+      navigate(-1);
+    } else if (nextPath) {
+      navigate(nextPath);
+    }
   };
 
   // ----------------------
@@ -56,6 +65,65 @@ function ProveedorPublicProfile() {
   const mailUrl = provider.correo
     ? `mailto:${provider.correo}?subject=${subject}&body=${body}`
     : null;
+  // Interceptar SALIDA por cualquier navegación dentro de la app (links, header, etc.)
+  useEffect(() => {
+    // Intercepta clics en enlaces <a> de la misma SPA
+    const onDocumentClick = (e) => {
+      if (showAlert) return; // no interceptar si ya estamos mostrando la alerta
+      const anchor = e.target.closest && e.target.closest('a');
+      if (!anchor) return;
+
+      // Ignorar enlaces que abren en nueva pestaña o anchors locales
+      if (anchor.target === '_blank' || anchor.getAttribute('download')) return;
+      const href = anchor.getAttribute('href');
+      if (!href || href.startsWith('#')) return;
+
+      // Determinar si es navegación interna
+      try {
+        const url = new URL(anchor.href);
+        const isSameOrigin = url.origin === window.location.origin;
+        if (isSameOrigin) {
+          // Si estamos en esta página de perfil, bloqueamos y pedimos confirmación
+          e.preventDefault();
+          setNextPath(url.pathname + url.search + url.hash);
+          setShowAlert(true);
+        }
+      } catch (_) {
+        // Si no es una URL válida, lo ignoramos
+      }
+    };
+
+    // Intercepta navegación del botón atrás/adelante del navegador
+    const onPopState = (e) => {
+      if (showAlert) return;
+      // Cancelar navegación y mostrar alerta
+      e.preventDefault?.();
+      // Empujar nuevamente el estado actual para mantenernos en la vista hasta responder
+      window.history.pushState(null, '', location.pathname + location.search + location.hash);
+      setNextPath(-1);
+      setShowAlert(true);
+    };
+
+    document.addEventListener('click', onDocumentClick, true);
+    window.addEventListener('popstate', onPopState);
+
+    // Interceptar cierre/recarga de pestaña con confirmación nativa
+    const onBeforeUnload = (e) => {
+      if (showAlert) return;
+      e.preventDefault();
+      e.returnValue = '';
+      // Al cancelar la salida, mostraremos la alerta para registrar el resultado
+      setNextPath(null);
+      setShowAlert(true);
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+
+    return () => {
+      document.removeEventListener('click', onDocumentClick, true);
+      window.removeEventListener('popstate', onPopState);
+      window.removeEventListener('beforeunload', onBeforeUnload);
+    };
+  }, [location.pathname, location.search, location.hash, showAlert]);
 
   return (
     <div className="public-profile-wrapper">
@@ -137,6 +205,29 @@ function ProveedorPublicProfile() {
                 )}
               </div>
             </div>
+
+            <div className="perfil-section">
+              <button
+                onClick={() => setShowReportForm(true)}
+                className="report-button"
+                style={{
+                  width: "100%",
+                  padding: "0.75rem 1rem",
+                  backgroundColor: "#ff4757",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "0.5rem",
+                  cursor: "pointer",
+                  fontWeight: "500",
+                  fontSize: "0.95rem",
+                  transition: "background-color 0.2s"
+                }}
+                onMouseEnter={(e) => (e.target.style.backgroundColor = "#ff3838")}
+                onMouseLeave={(e) => (e.target.style.backgroundColor = "#ff4757")}
+              >
+                ⚠️ Reportar
+              </button>
+            </div>
           </aside>
         </div>
 
@@ -199,6 +290,15 @@ function ProveedorPublicProfile() {
           onClose={() => setShowAlert(false)}
           onResult={handleAlertResult}
         />
+
+        {/*Formulario de reporte */}
+        <ReportForm
+          isOpen={showReportForm}
+          provider={provider}
+          onClose={() => setShowReportForm(false)}
+          onSuccess={() => alert("Reporte enviado exitosamente")}
+        />
+        
       </div>
     </div>
   );

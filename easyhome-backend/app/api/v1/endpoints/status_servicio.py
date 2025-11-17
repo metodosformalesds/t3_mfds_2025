@@ -216,3 +216,182 @@ def listar_servicios_completos(
         "activos": [map_servicio(s) for s in servicios_activos],
         "finalizados": [map_servicio(s) for s in servicios_finalizados]
     }
+
+
+class ProveedorServicioSchema(BaseModel):
+    id_proveedor: int
+    id_usuario: int
+    nombre: str
+    numero_telefono: str | None = None
+    foto_perfil: str | None = None
+    calificacion_promedio: float | None = None
+
+    class Config:
+        from_attributes = True
+
+
+class ServicioClienteSchema(BaseModel):
+    id_servicio_contratado: int
+    fecha_contacto: datetime
+    fecha_confirmacion_acuerdo: datetime | None = None
+    estado_servicio: str
+    confirmacion_cliente_finalizado: bool
+    acuerdo_confirmado: bool
+    fecha_finalizacion: datetime | None = None
+    proveedor: ProveedorServicioSchema
+    tiene_reseña: bool = False
+
+    class Config:
+        from_attributes = True
+
+
+@router.get(
+    "/clientes/{id_cliente}/servicios",
+    response_model=List[ServicioClienteSchema],
+    summary="Devuelve los servicios contratados por un cliente"
+)
+def listar_servicios_cliente(
+    id_cliente: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Devuelve la lista de servicios contratados por un cliente,
+    incluyendo información del proveedor y si tiene reseña.
+    """
+    from app.models.user import Proveedor_Servicio
+    from app.models.reseña_servicio import Reseña_Servicio
+    
+    servicios = (
+        db.query(Servicio_Contratado)
+        .options(
+            joinedload(Servicio_Contratado.proveedor_servicio)
+            .joinedload(Proveedor_Servicio.usuario)
+        )
+        .options(joinedload(Servicio_Contratado.reseña_servicio))
+        .filter(Servicio_Contratado.id_cliente == id_cliente)
+        .filter(Servicio_Contratado.acuerdo_confirmado == True)
+        .order_by(Servicio_Contratado.fecha_contacto.desc())
+        .all()
+    )
+
+    respuesta: List[ServicioClienteSchema] = []
+
+    for servicio in servicios:
+        proveedor_obj = getattr(servicio, "proveedor_servicio", None)
+        usuario_proveedor = getattr(proveedor_obj, "usuario", None) if proveedor_obj else None
+        
+        foto_key = getattr(usuario_proveedor, "foto_perfil", None)
+        foto_url = None
+
+        if usuario_proveedor and foto_key:
+            try:
+                foto_url = s3_service.get_presigned_url(foto_key)
+            except Exception:
+                foto_url = foto_key
+
+        # Verificar si tiene reseña (soporta relación uno-a-uno o lista)
+        # bool(None) -> False, bool([]) -> False, bool(objeto o lista no vacía) -> True
+        tiene_reseña = bool(getattr(servicio, "reseña_servicio", None))
+
+        
+        # DEBUG: Imprimir en consola del backend
+        print(f"🔍 DEBUG Backend - Servicio {servicio.id_servicio_contratado}:")
+        print(f"   - Estado: {servicio.estado_servicio}")
+        print(f"   - reseña_servicio object: {servicio.reseña_servicio}")
+        print(f"   - tiene_reseña calculado: {tiene_reseña}")
+
+        servicio_payload = {
+            "id_servicio_contratado": servicio.id_servicio_contratado,
+            "fecha_contacto": servicio.fecha_contacto,
+            "fecha_confirmacion_acuerdo": servicio.fecha_confirmacion_acuerdo,
+            "estado_servicio": servicio.estado_servicio,
+            "confirmacion_cliente_finalizado": servicio.confirmacion_cliente_finalizado,
+            "acuerdo_confirmado": servicio.acuerdo_confirmado,
+            "fecha_finalizacion": servicio.fecha_finalizacion,
+            "tiene_reseña": tiene_reseña,
+            "proveedor": {
+                "id_proveedor": proveedor_obj.id_proveedor if proveedor_obj else None,
+                "id_usuario": usuario_proveedor.id_usuario if usuario_proveedor else None,
+                "nombre": usuario_proveedor.nombre if usuario_proveedor else "Proveedor sin nombre",
+                "numero_telefono": usuario_proveedor.numero_telefono if usuario_proveedor else None,
+                "foto_perfil": foto_url,
+                "calificacion_promedio": proveedor_obj.calificacion_promedio if proveedor_obj else None,
+            },
+        }
+
+        respuesta.append(ServicioClienteSchema(**servicio_payload))
+
+    return respuesta
+
+
+class ServicioInfoReseñaSchema(BaseModel):
+    nombre_proveedor: str
+    nombre_servicio: str
+    fecha_contratacion: str
+    foto_perfil: str | None = None
+
+    class Config:
+        from_attributes = True
+
+
+@router.get(
+    "/servicios/{id_servicio_contratado}/info-resena",
+    response_model=ServicioInfoReseñaSchema,
+    summary="Obtiene información del servicio para el formulario de reseña"
+)
+def obtener_info_servicio_resena(
+    id_servicio_contratado: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Devuelve la información del proveedor y servicio necesaria
+    para mostrar en el formulario de reseña.
+    """
+    from app.models.user import Proveedor_Servicio
+    from app.models.property import Publicacion_Servicio
+    
+    servicio = (
+        db.query(Servicio_Contratado)
+        .options(
+            joinedload(Servicio_Contratado.proveedor_servicio)
+            .joinedload(Proveedor_Servicio.usuario)
+        )
+        .options(joinedload(Servicio_Contratado.publicacion_servicio))
+        .filter(Servicio_Contratado.id_servicio_contratado == id_servicio_contratado)
+        .first()
+    )
+
+    if not servicio:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Servicio contratado no encontrado."
+        )
+
+    proveedor_obj = getattr(servicio, "proveedor_servicio", None)
+    usuario_proveedor = getattr(proveedor_obj, "usuario", None) if proveedor_obj else None
+    publicacion = getattr(servicio, "publicacion_servicio", None)
+    
+    foto_key = getattr(usuario_proveedor, "foto_perfil", None)
+    foto_url = None
+
+    if usuario_proveedor and foto_key:
+        try:
+            foto_url = s3_service.get_presigned_url(foto_key)
+        except Exception:
+            foto_url = foto_key
+
+    # Formatear fecha
+    fecha_contratacion = servicio.fecha_confirmacion_acuerdo or servicio.fecha_contacto
+    fecha_formateada = fecha_contratacion.strftime("%d/%B/%Y") if fecha_contratacion else "Fecha no disponible"
+
+    # Obtener nombre del servicio de la publicación o usar un valor por defecto
+    nombre_servicio = "Servicio"
+    if publicacion:
+        nombre_servicio = getattr(publicacion, "titulo", "Servicio")
+
+    return ServicioInfoReseñaSchema(
+        nombre_proveedor=usuario_proveedor.nombre if usuario_proveedor else "Proveedor",
+        nombre_servicio=nombre_servicio,
+        fecha_contratacion=fecha_formateada,
+        foto_perfil=foto_url
+    )

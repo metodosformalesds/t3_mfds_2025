@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from 'react-router-dom';
 import { useAuth } from "react-oidc-context";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { useUserCapabilities } from "../hooks/useUserCapabilities";
@@ -21,7 +22,7 @@ import EditarFotoModal from '../components/common/EditarFotoModal';
 
 function Perfil() {
   const auth = useAuth();
-
+  const location = useLocation();
   const { 
     userData, 
     loading, 
@@ -51,6 +52,13 @@ function Perfil() {
     
     loadProfilePhoto();
   }, [userData?.id_usuario]);
+
+  // Permitir activar una pestaña específica cuando se navega con state
+  useEffect(() => {
+    if (location.state?.goToTab) {
+      setActiveTab(location.state.goToTab);
+    }
+  }, [location.state?.goToTab]);
 
   if (loading) {
     return (
