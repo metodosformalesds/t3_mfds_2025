@@ -155,6 +155,7 @@ def listar_publicaciones(
     - Fotografía del proveedor (URL prefirmada)
     - Portada de publicación (URL prefirmada)
     - TODAS las imágenes de la publicación (galería completa)
+    - CORREO Y TELÉFONO DEL PROVEEDOR (¡NUEVO!)
     """
 
     try:
@@ -165,6 +166,7 @@ def listar_publicaciones(
             db.query(Publicacion_Servicio)
             .options(joinedload(Publicacion_Servicio.proveedor_servicio).joinedload(Proveedor_Servicio.usuario))
             .options(joinedload(Publicacion_Servicio.imagen_publicacion))
+            .options(joinedload(Publicacion_Servicio.categoria_servicio)) # Asegúrate de cargar la categoría
             .filter(Publicacion_Servicio.estado == "activo")
         )
 
@@ -197,6 +199,7 @@ def listar_publicaciones(
 
         for pub in publicaciones:
             prov = pub.proveedor_servicio
+            usuario = prov.usuario if prov else None
 
             # ===========================
             # FOTO DE PERFIL
@@ -206,7 +209,7 @@ def listar_publicaciones(
 
             if prov:
                 foto_key = prov.foto_perfil or (
-                    prov.usuario.foto_perfil if getattr(prov, "usuario", None) else None
+                    usuario.foto_perfil if usuario else None
                 )
 
             if foto_key:
@@ -252,12 +255,20 @@ def listar_publicaciones(
 
                 "nombre_proveedor": (
                     prov.nombre_completo if prov and getattr(prov, "nombre_completo", None)
-                    else prov.usuario.nombre if prov and prov.usuario and getattr(prov.usuario, "nombre", None)
+                    else usuario.nombre if usuario and getattr(usuario, "nombre", None)
                     else "Sin nombre"
                 ),
 
                 "foto_perfil_proveedor": foto_perfil_url,
                 "calificacion_proveedor": round(prov.calificacion_promedio, 1) if prov and prov.calificacion_promedio else 0,
+
+                # --- 👇 AQUÍ ESTÁ LA SOLUCIÓN 👇 ---
+                # Agregamos los datos del 'usuario' asociado al proveedor
+                
+                "correo_proveedor": usuario.correo_electronico if usuario else None,
+                "telefono_proveedor": usuario.numero_telefono if usuario else None,
+                
+                # --- 👆 FIN DE LA SOLUCIÓN 👆 ---
 
                 "rango_precio_min": pub.rango_precio_min,
                 "rango_precio_max": pub.rango_precio_max,
@@ -273,7 +284,7 @@ def listar_publicaciones(
     except Exception as e:
         logger.error(f"Error al listar publicaciones: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
+    
 # =========================================================
 # ELIMINAR PUBLICACIÓN POR ID (versión sencilla, SIN headers)
 # =========================================================
