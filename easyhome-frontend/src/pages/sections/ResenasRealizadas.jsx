@@ -16,13 +16,6 @@ function ResenasRealizadas() {
 
   useEffect(() => {
     const cargarReseñas = async () => {
-      // Si hay una nueva reseña en el state, agregarla primero
-      if (newReview) {
-        setReseñas([newReview]);
-        setLoading(false);
-        return;
-      }
-
       // Si no hay usuario autenticado, no cargar nada
       if (!auth.isAuthenticated || !auth.user?.profile?.email) {
         setLoading(false);
@@ -33,9 +26,35 @@ function ResenasRealizadas() {
         setLoading(true);
         const userEmail = auth.user.profile.email;
         console.log('Cargando reseñas realizadas para:', userEmail);
-        const data = await reviewService.getClienteReseñas(userEmail);
+        let data = await reviewService.getClienteReseñas(userEmail);
         console.log('Reseñas realizadas cargadas:', data);
-        setReseñas(data);
+
+        // Ordenar por fecha descendente (más recientes primero)
+        const parseFecha = (r) => {
+          const f = r?.reseña?.fecha_reseña;
+          return f ? new Date(f).getTime() : 0;
+        };
+        data = Array.isArray(data)
+          ? [...data].sort((a, b) => parseFecha(b) - parseFecha(a))
+          : [];
+        
+        // Si hay una nueva reseña del state, agregarla al inicio del historial
+        if (newReview) {
+          // Verificar si la nueva reseña ya existe en el historial (evitar duplicados)
+          const existeReseña = data.some(
+            r => r.reseña?.id_reseña === newReview.reseña?.id_reseña
+          );
+          
+          if (!existeReseña) {
+            const combined = [newReview, ...data];
+            setReseñas(combined.sort((a, b) => parseFecha(b) - parseFecha(a)));
+          } else {
+            setReseñas(data);
+          }
+        } else {
+          setReseñas(data);
+        }
+        
         setError(null);
       } catch (err) {
         console.error('Error al cargar reseñas:', err);
@@ -105,6 +124,7 @@ function ResenasRealizadas() {
               proveedor={review.proveedor}
               baseImageUrl={review.baseImageUrl || ''}
               showCliente={false}
+              commentVariant="client"
             />
           ))}
         </div>
