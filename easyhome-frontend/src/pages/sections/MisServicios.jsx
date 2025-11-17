@@ -180,7 +180,7 @@ const handleEliminar = async (idPublicacion) => {
             </div>
 
             {/* FOOTER */}
-            <div className="publicacion-footer">
+           <div className="publicacion-footer">
               <p className="rango-precio">
                 Rango de precio:
                 <strong> ${servicio.rango_precio_min} – ${servicio.rango_precio_max}</strong>
@@ -197,7 +197,6 @@ const handleEliminar = async (idPublicacion) => {
                 </button>
               </div>
             </div>
-
           </div>
         );
       })}
