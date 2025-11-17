@@ -91,61 +91,27 @@ function ProveedorPublicProfile() {
               </div>
             </div>
 
-            {/* INFORMACIÓN DE CONTACTO */}
-            <div className="perfil-section">
-              <h3>Información del contacto</h3>
-              <div className="contact-info">
-                <div className="contact-item">
-                  <i className="icon">📧</i>
-                  <span>{provider.correo || "correo@ejemplo.com"}</span>
-                </div>
+            {/* BOTONES DE CONTACTO */}
+            <div className="perfil-section contact-buttons-section">
 
-                {provider.telefono && (
-                  <div className="contact-item">
-                    <i className="icon">📱</i>
-                    <span>{provider.telefono}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* BOTONES DE CONTACTO 🔥🔥🔥 */}
-            <div className="perfil-section">
-              {/* EMAIL */}
               <a
                 href={`mailto:${provider.correo}?subject=Contacto desde EasyHome&body=Hola, vi tu publicación en EasyHome por favor...`}
-                className="contact-button"
+                className="e-btn mail-button"
               >
                 📧 Enviar correo
               </a>
 
-              {/* WHATSAPP */}
               <a
                 href={`https://wa.me/${provider.telefono || ""}?text=${encodeURIComponent(
                   "Hola, vi tu publicación en EasyHome por favor..."
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="contact-button whatsapp-button"
+                className="e-btn whatsapp-button"
               >
                 💬 WhatsApp
               </a>
-            </div>
 
-            {/* INFORMACIÓN DEL PLAN */}
-            <div className="perfil-section">
-              <h3>Información del plan</h3>
-              <div className="plan-info">
-                <div className="plan-item">
-                  <i className="icon">💼</i>
-                  <span>{provider.esPremium ? "Plan Pro" : "Plan Básico"}</span>
-                </div>
-
-                <div className="plan-item">
-                  <i className="icon">📅</i>
-                  <span>Renovación no disponible</span>
-                </div>
-              </div>
             </div>
 
           </aside>
