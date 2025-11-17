@@ -6,7 +6,6 @@ import MisServicios from "../sections/MisServicios";
 import Portafolio from "../sections/Portafolio";
 import Resenas from "../sections/Resenas";
 import AgreementAlert from "../cliente/alerta_contratacion";
-// AgreementAlert will perform the API call; no direct api import needed here
 
 function ProveedorPublicProfile() {
   const navigate = useNavigate();
@@ -15,10 +14,8 @@ function ProveedorPublicProfile() {
   const provider = location.state?.provider;
 
   const [activeTab, setActiveTab] = useState("acercaDe");
-  //Estados de alerta
-  const [showAlert, setShowAlert] = useState(false); 
+  const [showAlert, setShowAlert] = useState(false);
   const [nextPath, setNextPath] = useState(null);
-  
 
   if (!provider) {
     return (
@@ -29,13 +26,11 @@ function ProveedorPublicProfile() {
     );
   }
 
-  //Funcion cuando intentar salir del perfil (alarma)
   const pedirAlertaYSalir = (rutaDestino) => {
     setNextPath(rutaDestino);
     setShowAlert(true);
   };
 
-  // Funcion para redirigir despues de que AgreementAlert registre el resultado
   const handleAlertResult = () => {
     setShowAlert(false);
     navigate(nextPath);
@@ -45,8 +40,7 @@ function ProveedorPublicProfile() {
     <div className="public-profile-wrapper">
       <div className="perfil-container">
 
-        {/* SIDEBAR*/}
-
+        {/* SIDEBAR */}
         <div className="sidebar-wrapper">
 
           <div className="sidebar-back-btn">
@@ -57,6 +51,7 @@ function ProveedorPublicProfile() {
 
           <aside className="perfil-sidebar">
 
+            {/* FOTO */}
             <div className="perfil-avatar-container">
               <div className="perfil-avatar">
                 <img
@@ -70,16 +65,19 @@ function ProveedorPublicProfile() {
               </div>
             </div>
 
+            {/* NOMBRE */}
             <h2 className="perfil-nombre">{provider.nombreCompleto}</h2>
 
+            {/* BADGE */}
             <span className="perfil-badge">
               {provider.esPremium ? "Proveedor verificado" : "Proveedor"}
             </span>
 
+            {/* ESTADÍSTICAS */}
             <div className="perfil-stats">
               <div className="stat-item">
                 <span className="stat-value">{provider.servicios || 15}</span>
-                <span className="stat-label">Servicios<br />Contratados</span>
+                <span className="stat-label">Servicios<br />Realizados</span>
               </div>
 
               <div className="stat-item">
@@ -93,6 +91,7 @@ function ProveedorPublicProfile() {
               </div>
             </div>
 
+            {/* INFORMACIÓN DE CONTACTO */}
             <div className="perfil-section">
               <h3>Información del contacto</h3>
               <div className="contact-info">
@@ -110,6 +109,30 @@ function ProveedorPublicProfile() {
               </div>
             </div>
 
+            {/* BOTONES DE CONTACTO 🔥🔥🔥 */}
+            <div className="perfil-section">
+              {/* EMAIL */}
+              <a
+                href={`mailto:${provider.correo}?subject=Contacto desde EasyHome&body=Hola, vi tu publicación en EasyHome por favor...`}
+                className="contact-button"
+              >
+                📧 Enviar correo
+              </a>
+
+              {/* WHATSAPP */}
+              <a
+                href={`https://wa.me/${provider.telefono || ""}?text=${encodeURIComponent(
+                  "Hola, vi tu publicación en EasyHome por favor..."
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="contact-button whatsapp-button"
+              >
+                💬 WhatsApp
+              </a>
+            </div>
+
+            {/* INFORMACIÓN DEL PLAN */}
             <div className="perfil-section">
               <h3>Información del plan</h3>
               <div className="plan-info">
@@ -124,13 +147,14 @@ function ProveedorPublicProfile() {
                 </div>
               </div>
             </div>
+
           </aside>
         </div>
 
-        {/* Secciones*/}
+        {/* SECCIONES */}
         <main className="perfil-main">
 
-          {/* Tabs */}
+          {/* TABS */}
           <nav className="public-profile-tabs">
             <button
               className={activeTab === "acercaDe" ? "active" : ""}
@@ -161,7 +185,7 @@ function ProveedorPublicProfile() {
             </button>
           </nav>
 
-          {/* Contenido dinámico */}
+          {/* CONTENIDO */}
           <div className="public-profile-content">
             {activeTab === "acercaDe" && (
               <AcercaDe
@@ -176,14 +200,14 @@ function ProveedorPublicProfile() {
           </div>
         </main>
 
-        {/*Alerta contratacion */}
+        {/* ALERTA */}
         <AgreementAlert
           isOpen={showAlert}
           provider={provider}
           onClose={() => setShowAlert(false)}
           onResult={handleAlertResult}
         />
-        
+
       </div>
     </div>
   );
