@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session, joinedload, aliased
 from sqlalchemy import func, cast, DECIMAL
 from datetime import datetime, timezone
 from typing import List
+from pydantic import BaseModel
+from app.api.v1.deps import get_current_user
 
 # --- Imports de Esquemas ---
 from app.schemas.proveedor import (
@@ -20,6 +22,8 @@ from app.models.property import Publicacion_Servicio, Imagen_Publicacion
 from app.models.servicio_contratado import Servicio_Contratado
 from app.models.reseña_servicio import Reseña_Servicio
 from app.models.imagen_reseña import Imagen_Reseña
+from app.models.alerta_sistema import Alerta_Sistema
+from app.models.user import Usuario
 
 # --- Import de DB ---
 from app.core.database import get_db 
@@ -63,6 +67,64 @@ def get_perfil_about(id_proveedor: int, db: Session = Depends(get_db)):
     proveedor.años_activo = años_activo
 
     return proveedor
+
+
+# -----------------------------------------------------------------
+# --- Endpoint adicional: Datos para la alerta de contratación -----
+# -----------------------------------------------------------------
+@router.get("/{id_proveedor}/alerta", response_model=None)
+def get_proveedor_alerta(id_proveedor: int, db: Session = Depends(get_db)):
+    """
+    Devuelve un resumen ligero del proveedor para la ventana de
+    "alerta de contratación" usada en el frontend. Retorna la URL
+    pre-firmada de la foto de perfil (si existe), nombre, calificación
+    y total de reseñas.
+    """
+    proveedor = db.query(Proveedor_Servicio)\
+                  .options(joinedload(Proveedor_Servicio.usuario))\
+                  .filter(Proveedor_Servicio.id_proveedor == id_proveedor)\
+                  .first()
+
+    if not proveedor:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Proveedor con id {id_proveedor} no encontrado"
+        )
+
+    # Contar reseñas asociadas
+    total_reseñas = db.query(func.count(Reseña_Servicio.id_reseña))\
+                       .filter(Reseña_Servicio.id_proveedor == id_proveedor)\
+                       .scalar() or 0
+
+    # Generar URL pre-firmada para la foto de perfil (si existe)
+    from app.services.s3_service import s3_service
+
+    foto_key = proveedor.foto_perfil or (proveedor.usuario.foto_perfil if getattr(proveedor, 'usuario', None) else None)
+    foto_url = None
+    if foto_key:
+        try:
+            foto_url = s3_service.get_presigned_url(foto_key)
+        except Exception:
+            foto_url = None
+
+    nombre = proveedor.nombre_completo or (proveedor.usuario.nombre if getattr(proveedor, 'usuario', None) else "Proveedor")
+
+    return {
+        "id": proveedor.id_proveedor,
+        "nombreCompleto": nombre,
+        "fotoPerfil": foto_url,
+        "calificacionPromedio": proveedor.calificacion_promedio or 0,
+        "totalResenas": total_reseñas
+    }
+
+class AlertaResultadoSchema(BaseModel):
+    logro: bool
+    id_publicacion: int | None = None
+
+class AlertaResultadoBodySchema(BaseModel):
+    proveedor_id: int
+    logro: bool
+    id_publicacion: int | None = None
 
 # -----------------------------------------------------------------
 # --- Endpoint 2: Pestaña "Mis servicios" ---
@@ -189,6 +251,180 @@ def get_perfil_reseñas(id_proveedor: int, db: Session = Depends(get_db)):
 #     )
 #     
 #     return servicios
+
+
+# -----------------------------------------------------------------
+# --- Endpoint: Registrar resultado de la alerta de contratación -----
+# -----------------------------------------------------------------
+@router.post("/{id_proveedor}/alerta/resultado", response_model=None)
+def registrar_resultado_alerta(
+    id_proveedor: int,
+    payload: AlertaResultadoSchema,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    """
+    Registra en la base de datos el resultado de la alerta que se muestra
+    al cliente cuando visita un perfil de proveedor.
+
+    Espera un JSON con:
+    - `cliente_id` (int): id del usuario cliente que responde
+    - `logro` (bool): si logró el acuerdo (true) o no (false)
+    - `id_publicacion` (int, opcional): id de la publicación asociada
+
+    Si `logro` es true se crea un registro en `servicio_contratado` con
+    acuerdo_confirmado=True y se generan `Alerta_Sistema` para el proveedor
+    y para el cliente. Si es false sólo se registra una alerta de feedback.
+    """
+
+    # Obtener cliente desde el usuario autenticado
+    cliente_id = current_user.id_usuario
+    logro = payload.logro
+    id_publicacion = payload.id_publicacion
+
+    # Validación: cliente no puede ser el mismo proveedor
+    if cliente_id == id_proveedor:
+        raise HTTPException(status_code=400, detail="El cliente y proveedor no pueden ser la misma cuenta")
+
+    proveedor = db.query(Proveedor_Servicio).options(joinedload(Proveedor_Servicio.usuario)).filter(Proveedor_Servicio.id_proveedor == id_proveedor).first()
+    if not proveedor:
+        raise HTTPException(status_code=404, detail=f"Proveedor con id {id_proveedor} no encontrado")
+
+    try:
+        if logro:
+            # Crear servicio contratado (acuerdo confirmado)
+            nuevo_servicio = Servicio_Contratado(
+                id_cliente=cliente_id,
+                id_proveedor=id_proveedor,
+                id_publicacion=id_publicacion,
+                acuerdo_confirmado=True,
+                fecha_confirmacion_acuerdo=datetime.now(timezone.utc),
+                estado_servicio="confirmado"
+            )
+            db.add(nuevo_servicio)
+            db.commit()
+            db.refresh(nuevo_servicio)
+
+            # Crear alerta para el proveedor (su usuario es el mismo id que id_proveedor)
+            alerta_proveedor = Alerta_Sistema(
+                id_usuario=proveedor.id_proveedor,
+                id_servicio_contratado=nuevo_servicio.id_servicio_contratado,
+                tipo_alerta="contratacion_exitosa",
+                mensaje=f"Cliente {cliente_id} confirmó un acuerdo contigo.",
+                leida=False
+            )
+            db.add(alerta_proveedor)
+
+            # Crear alerta para el cliente confirmando registro
+            alerta_cliente = Alerta_Sistema(
+                id_usuario=cliente_id,
+                id_servicio_contratado=nuevo_servicio.id_servicio_contratado,
+                tipo_alerta="contratacion_registrada",
+                mensaje=f"Tu acuerdo con el proveedor {id_proveedor} ha sido registrado.",
+                leida=False
+            )
+            db.add(alerta_cliente)
+
+            db.commit()
+
+            return {"message": "Registro guardado", "id_servicio_contratado": nuevo_servicio.id_servicio_contratado}
+
+        else:
+            # Registrar feedback de no acuerdo
+            alerta = Alerta_Sistema(
+                id_usuario=cliente_id,
+                tipo_alerta="contratacion_no_lograda",
+                mensaje=f"El cliente {cliente_id} indicó que no logró un acuerdo con el proveedor {id_proveedor}.",
+                leida=False
+            )
+            db.add(alerta)
+            db.commit()
+            return {"message": "Feedback de no acuerdo guardado"}
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error al guardar resultado: {e}")
+
+
+# -----------------------------------------------------------------
+# --- Endpoint alternativo: recibir proveedor en el body -----------
+# -----------------------------------------------------------------
+@router.post("/alerta/resultado", response_model=None)
+def registrar_resultado_alerta_body(
+    payload: AlertaResultadoBodySchema,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    """
+    Misma funcionalidad que `/{id_proveedor}/alerta/resultado` pero acepta
+    `proveedor_id` dentro del body. Útil para llamadas directas desde UI
+    donde no es conveniente construir la URL con path param.
+    Body esperado: { proveedor_id, cliente_id, logro, id_publicacion }
+    """
+    id_proveedor = payload.proveedor_id
+    cliente_id = current_user.id_usuario
+    logro = payload.logro
+    id_publicacion = payload.id_publicacion
+
+    if id_proveedor is None:
+        raise HTTPException(status_code=400, detail="Se requiere 'proveedor_id' en el payload")
+
+    if cliente_id == id_proveedor:
+        raise HTTPException(status_code=400, detail="El cliente y proveedor no pueden ser la misma cuenta")
+
+    proveedor = db.query(Proveedor_Servicio).options(joinedload(Proveedor_Servicio.usuario)).filter(Proveedor_Servicio.id_proveedor == id_proveedor).first()
+    if not proveedor:
+        raise HTTPException(status_code=404, detail=f"Proveedor con id {id_proveedor} no encontrado")
+
+    try:
+        if logro:
+            nuevo_servicio = Servicio_Contratado(
+                id_cliente=cliente_id,
+                id_proveedor=id_proveedor,
+                id_publicacion=id_publicacion,
+                acuerdo_confirmado=True,
+                fecha_confirmacion_acuerdo=datetime.now(timezone.utc),
+                estado_servicio="confirmado"
+            )
+            db.add(nuevo_servicio)
+            db.commit()
+            db.refresh(nuevo_servicio)
+
+            alerta_proveedor = Alerta_Sistema(
+                id_usuario=proveedor.id_proveedor,
+                id_servicio_contratado=nuevo_servicio.id_servicio_contratado,
+                tipo_alerta="contratacion_exitosa",
+                mensaje=f"Cliente {cliente_id} confirmó un acuerdo contigo.",
+                leida=False
+            )
+            db.add(alerta_proveedor)
+
+            alerta_cliente = Alerta_Sistema(
+                id_usuario=cliente_id,
+                id_servicio_contratado=nuevo_servicio.id_servicio_contratado,
+                tipo_alerta="contratacion_registrada",
+                mensaje=f"Tu acuerdo con el proveedor {id_proveedor} ha sido registrado.",
+                leida=False
+            )
+            db.add(alerta_cliente)
+
+            db.commit()
+            return {"message": "Registro guardado", "id_servicio_contratado": nuevo_servicio.id_servicio_contratado}
+
+        else:
+            alerta = Alerta_Sistema(
+                id_usuario=cliente_id,
+                tipo_alerta="contratacion_no_lograda",
+                mensaje=f"El cliente {cliente_id} indicó que no logró un acuerdo con el proveedor {id_proveedor}.",
+                leida=False
+            )
+            db.add(alerta)
+            db.commit()
+            return {"message": "Feedback de no acuerdo guardado"}
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error al guardar resultado: {e}")
 
 # @router.patch(
 #     "/servicios/{id_servicio_contratado}/finalizar",
