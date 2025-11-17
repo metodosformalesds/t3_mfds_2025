@@ -1,47 +1,53 @@
-import { useState, useEffect } from 'react';
-import apiClient from '../config/api';
+import { useState, useEffect } from "react";
+import api from "../config/api";
 
-/**
- * Hook para obtener publicaciones del endpoint, con filtros y manejo de loading/error
- * @param {Object} filtrosActivos - Estado de filtros (categorias, suscriptores, ordenar_por)
- * @returns {Object} { publicaciones, isLoading, error, refetch }
- */
-export default function usePublicaciones(filtrosActivos) {
+export default function usePublicaciones(filtros = {}) {
   const [publicaciones, setPublicaciones] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Refetch manual si se requiere
-  const [refetchIndex, setRefetchIndex] = useState(0);
-  const refetch = () => setRefetchIndex(i => i + 1);
-
   useEffect(() => {
-    setIsLoading(true);
-    setError(null);
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
 
-    // Construir params para axios
-    const params = {};
-    if (filtrosActivos.categorias && filtrosActivos.categorias.length > 0) {
-      params.categorias = filtrosActivos.categorias;
-    }
-    if (filtrosActivos.suscriptores) {
-      params.suscriptores = true;
-    }
-    if (filtrosActivos.ordenar_por) {
-      params.ordenar_por = filtrosActivos.ordenar_por;
-    }
+      try {
+        // Construcción dinámica de query params
+        const params = new URLSearchParams();
 
-    apiClient.get('/api/v1/publicaciones', { params })
-      .then(response => {
-        setPublicaciones(response.data);
-      })
-      .catch(err => {
-        setError(err.response?.data?.detail || err.message);
-      })
-      .finally(() => {
+        // 🔹 Categorías (pueden ser varias)
+        if (Array.isArray(filtros.categorias) && filtros.categorias.length > 0) {
+          filtros.categorias.forEach((catId) => {
+            params.append("categorias", catId);
+          });
+        }
+
+        // 🔹 Suscriptores
+        if (filtros.suscriptores === true) {
+          params.append("suscriptores", "true");
+        }
+
+        // 🔹 Ordenar
+        if (filtros.ordenar_por) {
+          params.append("ordenar_por", filtros.ordenar_por);
+        }
+
+        const url = `/api/v1/publicaciones?${params.toString()}`;
+        console.log("📌 URL generada:", url);
+
+        const response = await api.get(url);
+        setPublicaciones(response.data || []);
+
+      } catch (err) {
+        console.error("❌ Error obteniendo publicaciones:", err);
+        setError("Error al obtener publicaciones");
+      } finally {
         setIsLoading(false);
-      });
-  }, [filtrosActivos, refetchIndex]);
+      }
+    };
 
-  return { publicaciones, isLoading, error, refetch };
+    fetchData();
+  }, [JSON.stringify(filtros)]); // 🔥 Para que se actualice cuando los filtros cambien
+
+  return { publicaciones, isLoading, error };
 }
