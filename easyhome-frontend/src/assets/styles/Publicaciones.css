@@ -161,6 +161,12 @@
     background-color: #F2F8FC;
     font-family: 'Nunito Sans', sans-serif;
 
-    /* 🔥 ESTA LÍNEA HACE LA MAGIA */
+    /* ESTA LÍNEA HACE LA MAGIA */
     align-self: flex-start;
+}
+
+.categoria-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;  /*  Izquierda */
 }
