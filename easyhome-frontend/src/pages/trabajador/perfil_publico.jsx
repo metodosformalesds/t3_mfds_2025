@@ -36,13 +36,25 @@ function ProveedorPublicProfile() {
     navigate(nextPath);
   };
 
-  // URLs
+  // ----------------------
+  // MENSAJES PERSONALIZADOS
+  // ----------------------
+
+  const mensajeWhatsApp = encodeURIComponent(
+    `Hola ${provider.nombreCompleto}, vi tu perfil en EasyHome y me interesa tu servicio. ¿Podemos hablar?`
+  );
+
   const whatsappUrl = provider.telefono
-    ? `https://wa.me/${provider.telefono}`
+    ? `https://wa.me/${provider.telefono}?text=${mensajeWhatsApp}`
     : null;
 
+  const subject = encodeURIComponent("Interesado en su servicio - EasyHome");
+  const body = encodeURIComponent(
+    `Hola ${provider.nombreCompleto},\n\nVi su perfil en EasyHome y estoy interesado en su servicio.\n¿Podemos hablar?\n\nGracias.`
+  );
+
   const mailUrl = provider.correo
-    ? `mailto:${provider.correo}`
+    ? `mailto:${provider.correo}?subject=${subject}&body=${body}`
     : null;
 
   return (
@@ -101,7 +113,7 @@ function ProveedorPublicProfile() {
               </div>
             </div>
 
-            {/* SOLO LOS BOTONES – SIN TEXTO NI ICONOS */}
+            {/* SOLO LOS BOTONES */}
             <div className="perfil-section">
               <h3>Contacto</h3>
 
@@ -125,7 +137,6 @@ function ProveedorPublicProfile() {
                 )}
               </div>
             </div>
-
           </aside>
         </div>
 
