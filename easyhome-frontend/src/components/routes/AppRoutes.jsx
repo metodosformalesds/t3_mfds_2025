@@ -105,7 +105,8 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
+  
+    
       {/* Rutas de Trabajador (prioridad 2) */}
       <Route 
         path="/trabajador/dashboard" 
