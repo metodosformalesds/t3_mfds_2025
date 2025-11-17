@@ -1,0 +1,270 @@
+.admin-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 280px;
+  height: 100vh;
+  background-color: var(--color-primary);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+  z-index: 1100;
+  overflow-y: auto;
+}
+
+.admin-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Header */
+.admin-sidebar-header {
+  padding: 30px 25px 25px;
+  border-bottom: none;
+}
+
+
+/* User Info */
+.admin-user-info {
+  padding: 30px 25px;
+  text-align: center;
+  border-bottom: none;
+}
+
+.admin-user-avatar {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 15px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #FFB74D;
+  box-shadow: 0 4px 12px rgba(255, 183, 77, 0.2);
+}
+
+.admin-user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-avatar-initials {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #FFB74D 0%, #FFA726 100%);
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #16394F;
+}
+
+.admin-user-details {
+  margin-top: 12px;
+}
+
+.admin-welcome {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 5px 0;
+}
+
+.admin-user-name {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+
+/* Navigation */
+.admin-sidebar-nav {
+  flex: 1;
+  padding: 20px 0;
+}
+
+.admin-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.admin-menu li {
+  margin: 0;
+}
+
+.admin-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 16px 25px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+  text-align: left;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.admin-menu-item:hover {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e3e8ef 100%);
+  color: #FFB74D;
+  transform: translatex(10px);
+  border-left-color: #FFB74D;
+}
+
+.admin-menu-item.active {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e3e8ef 100%);
+  color: #FFB74D;
+  transform: translatex(10px);
+  border-left-color: #FFB74D;
+}
+
+.admin-menu-item.active .admin-menu-icon {
+  color: #FFB74D;
+}
+
+.admin-menu-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+}
+
+.admin-menu-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.admin-menu-label {
+  flex: 1;
+}
+
+/* Footer */
+.admin-sidebar-footer {
+  padding: 20px 25px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.admin-logout-btn:hover {
+  background: rgba(187, 33, 36, 0.2);
+  border-color: #BB2124;
+  color: #ffdddd;
+}
+
+.admin-logout-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    width: 240px;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .admin-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .admin-sidebar-header {
+    padding: 20px 20px 15px;
+  }
+
+  .admin-logo {
+    font-size: 1.3rem;
+  }
+
+  .admin-logo svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .admin-user-info {
+    padding: 20px 15px;
+  }
+
+  .admin-user-avatar {
+    width: 70px;
+    height: 70px;
+  }
+
+  .admin-user-name {
+    font-size: 1.1rem;
+  }
+
+  .admin-menu-item {
+    padding: 14px 20px;
+    font-size: 0.95rem;
+  }
+
+  .admin-sidebar-footer {
+    padding: 15px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-sidebar {
+    width: 220px;
+  }
+
+  .admin-menu-item {
+    padding: 12px 15px;
+    font-size: 0.9rem;
+  }
+
+  .admin-user-avatar {
+    width: 60px;
+    height: 60px;
+  }
+
+  .admin-avatar-initials {
+    font-size: 1.5rem;
+  }
+}

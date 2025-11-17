@@ -12,14 +12,13 @@ function Header() {
   };
 
   const handleLogout = () => {
-    const clientId = "478qnp7vk39jamq13sl8k4sp7t";
-    const logoutUri = "http://localhost:5173";
-    const cognitoDomain = "https://us-east-1gbsgbtrls.auth.us-east-1.amazoncognito.com";
-    
-    auth.removeUser();
-    window.location.href =
-      `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
-  };
+  const clientId = "478qnp7vk39jamq13sl8k4sp7t";
+  const logoutUri = "http://localhost:5173";
+  const cognitoDomain = "https://us-east-1gbsgbtrls.auth.us-east-1.amazoncognito.com";
+  
+  auth.removeUser();
+  window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+};
 
   // 🔁 Si el login viene desde "Publicaciones", regresar al feed
   useEffect(() => {
@@ -78,7 +77,7 @@ function Header() {
               )}
               <li>
                 <Link to="/perfil">
-                  👤 Perfil
+                  Perfil
                 </Link>
               </li>
               <li>
@@ -92,6 +91,7 @@ function Header() {
                   Cerrar Sesión
                 </a>
               </li>
+              {/* Botón de cerrar sesión movido al perfil, eliminado de aquí */}
             </>
           ) : (
             <li>

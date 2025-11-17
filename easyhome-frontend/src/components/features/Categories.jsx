@@ -16,8 +16,15 @@ function Categories() {
     const fetchCategories = async () => {
       try {
         const data = await categoryService.getAll();
-        setCategories(data);
+        console.log('🔍 Datos recibidos de la API:', data);
+        console.log('🔍 Tipo de datos:', typeof data);
+        console.log('🔍 Es array?:', Array.isArray(data));
+        
+        // Asegurar que siempre sea un array
+        const categoriesArray = Array.isArray(data) ? data : [];
+        setCategories(categoriesArray);
       } catch (err) {
+        console.error('❌ Error al cargar categorías:', err);
         setError(err.detail || err.message || 'Error al cargar las categorías');
       } finally {
         setLoading(false);
@@ -33,6 +40,11 @@ function Categories() {
 
   if (error) {
     return <div className="categories-error">Error: {error}</div>;
+  }
+
+  // Verificar que categories sea un array válido
+  if (!Array.isArray(categories) || categories.length === 0) {
+    return <div className="categories-loading">No hay categorías disponibles.</div>;
   }
 
   return (
