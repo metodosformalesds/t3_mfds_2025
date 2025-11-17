@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status, Query
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status, Query, Header
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from datetime import datetime
@@ -71,15 +71,22 @@ async def crear_publicacion(
         raise HTTPException(status_code=404, detail="La categoría seleccionada no existe.")
 
     try:
+        proveedor = current_user.proveedor_servicio
+
+        if not proveedor:
+            raise HTTPException(
+                status_code=403,
+                detail="Tu cuenta debe estar registrada como proveedor para crear publicaciones."
+            )
         # 🔹 4. Crear la publicación en la BD
         nueva_publicacion = Publicacion_Servicio(
-            id_proveedor=current_user.id_usuario, # ID del proveedor autenticado
+            id_proveedor=proveedor.id_proveedor,
             id_categoria=id_categoria,
             titulo=titulo,
             descripcion=descripcion,
             rango_precio_min=rango_precio_min,
             rango_precio_max=rango_precio_max,
-            estado="activo", # Estado por defecto
+            estado="activo",
             fecha_publicacion=datetime.utcnow()
         )
         
@@ -131,54 +138,190 @@ async def crear_publicacion(
         logger.error(f"Error al crear publicación para proveedor {current_user.id_usuario}: {e}")
         raise HTTPException(status_code=500, detail=f"Error interno al crear la publicación: {e}")
 
-
 # =========================================================
-# 2️⃣ MOSTRAR TODAS LAS PUBLICACIONES (Feed / Tarjetas)
-# (Esta es la "Feed Page" para Clientes CON FILTROS)
+# 2️⃣ MOSTRAR TODAS LAS PUBLICACIONES (FEED COMPLETO)
 # =========================================================
-@router.get("/", response_model=None) 
+@router.get("/", response_model=None)
 def listar_publicaciones(
     db: Session = Depends(get_db),
     categorias: Optional[List[int]] = Query(None),
     suscriptores: Optional[bool] = Query(False),
     ordenar_por: Optional[str] = Query(None)
 ):
-    """Lista publicaciones - Versión de debugging"""
-    try:
-        query = db.query(Publicacion_Servicio)\
-            .filter(Publicacion_Servicio.estado == 'activo')
-        
-        publicaciones = query.limit(5).all()  # ← Solo 5 para probar
-        
-        resultado = []
-        for pub in publicaciones:
-            # Obtener la imagen de portada (la de menor orden)
-            url_imagen_portada = None
-            if pub.imagen_publicacion and len(pub.imagen_publicacion) > 0:
-                portada = sorted(pub.imagen_publicacion, key=lambda x: x.orden)[0]
-                url_imagen_portada = s3_service.get_presigned_url(portada.url_imagen)
+    """
+    Devuelve publicaciones con:
+    - Filtro por categorías
+    - Nombre del proveedor
+    - Fotografía del proveedor (URL prefirmada)
+    - Portada de publicación (URL prefirmada)
+    - TODAS las imágenes de la publicación (galería completa)
+    """
 
+    try:
+        # =====================================================
+        # 🟦 BASE QUERY + FILTROS
+        # =====================================================
+        query = (
+            db.query(Publicacion_Servicio)
+            .options(joinedload(Publicacion_Servicio.proveedor_servicio).joinedload(Proveedor_Servicio.usuario))
+            .options(joinedload(Publicacion_Servicio.imagen_publicacion))
+            .filter(Publicacion_Servicio.estado == "activo")
+        )
+
+        # 🟧 FILTRO POR CATEGORÍAS
+        if categorias:
+            query = query.filter(Publicacion_Servicio.id_categoria.in_(categorias))
+
+        # 🟩 FILTRO POR SUSCRIPTORES
+        if suscriptores:
+            query = query.join(Proveedor_Servicio).filter(
+                Proveedor_Servicio.id_plan_suscripcion.isnot(None)
+            )
+
+        # 🟨 ORDENAMIENTO
+        if ordenar_por == "mas_recientes":
+            query = query.order_by(Publicacion_Servicio.fecha_publicacion.desc())
+
+        elif ordenar_por == "mejor_calificados":
+            query = query.join(Proveedor_Servicio).order_by(
+                Proveedor_Servicio.calificacion_promedio.desc().nullslast()
+            )
+
+        # Obtener publicaciones finales
+        publicaciones = query.limit(100).all()
+
+        # =====================================================
+        # 🔄 ARMAR RESPUESTA
+        # =====================================================
+        resultado = []
+
+        for pub in publicaciones:
+            prov = pub.proveedor_servicio
+
+            # ===========================
+            # FOTO DE PERFIL
+            # ===========================
+            foto_perfil_url = None
+            foto_key = None
+
+            if prov:
+                foto_key = prov.foto_perfil or (
+                    prov.usuario.foto_perfil if getattr(prov, "usuario", None) else None
+                )
+
+            if foto_key:
+                try:
+                    foto_perfil_url = s3_service.get_presigned_url(foto_key)
+                except:
+                    foto_perfil_url = None
+
+            # ===========================
+            # PORTADA (primera imagen)
+            # ===========================
+            url_imagen_portada = None
+            if pub.imagen_publicacion:
+                portada = sorted(pub.imagen_publicacion, key=lambda x: x.orden)[0]
+                try:
+                    url_imagen_portada = s3_service.get_presigned_url(portada.url_imagen)
+                except:
+                    url_imagen_portada = None
+
+            # ===========================
+            # GALERÍA COMPLETA
+            # ===========================
+            imagenes = []
+            for img in sorted(pub.imagen_publicacion, key=lambda x: x.orden):
+                try:
+                    img_url = s3_service.get_presigned_url(img.url_imagen)
+                except:
+                    img_url = None
+
+                imagenes.append({
+                    "id_imagen": img.id_imagen,
+                    "url_imagen": img_url
+                })
+
+            # ===========================
+            # ARMAR RESPUESTA FINAL
+            # ===========================
             resultado.append({
                 "id_publicacion": pub.id_publicacion,
                 "titulo": pub.titulo,
-                "descripcion_corta": pub.descripcion[:100] if pub.descripcion else "Sin descripción",
+                "descripcion_completa": pub.descripcion,
                 "id_proveedor": pub.id_proveedor,
-                "nombre_proveedor": "Proveedor Test",  # ← Hardcodeado
-                "foto_perfil_proveedor": None,
-                "calificacion_proveedor": 4.5,
-                "total_reseñas_proveedor": 10,
-                "categoria": "Test",
+
+                "nombre_proveedor": (
+                    prov.nombre_completo if prov and getattr(prov, "nombre_completo", None)
+                    else prov.usuario.nombre if prov and prov.usuario and getattr(prov.usuario, "nombre", None)
+                    else "Sin nombre"
+                ),
+
+                "foto_perfil_proveedor": foto_perfil_url,
+                "calificacion_proveedor": round(prov.calificacion_promedio, 1) if prov and prov.calificacion_promedio else 0,
+
                 "rango_precio_min": pub.rango_precio_min,
                 "rango_precio_max": pub.rango_precio_max,
+
+                "categoria": pub.categoria_servicio.nombre_categoria if pub.categoria_servicio else None,
+
                 "url_imagen_portada": url_imagen_portada,
-                "id_plan_suscripcion": None,
+                "imagen_publicacion": imagenes,
             })
-        
+
         return resultado
-        
+
     except Exception as e:
-        logger.error(f"Error: {e}")
+        logger.error(f"Error al listar publicaciones: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# =========================================================
+# ELIMINAR PUBLICACIÓN POR ID (versión sencilla, SIN headers)
+# =========================================================
+@router.delete("/{id_publicacion}", status_code=status.HTTP_200_OK)
+def eliminar_publicacion(
+    id_publicacion: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Elimina una publicación de servicio por su ID.
+    (Versión sencilla, sin validar usuario para evitar errores 422
+    mientras terminas el flujo de MisServicios).
+    """
+
+    # 1. Buscar publicación
+    publicacion = (
+        db.query(Publicacion_Servicio)
+        .filter(Publicacion_Servicio.id_publicacion == id_publicacion)
+        .first()
+    )
+
+    if not publicacion:
+        raise HTTPException(status_code=404, detail="La publicación no existe")
+
+    # 2. Obtener imágenes asociadas
+    imagenes = db.query(Imagen_Publicacion).filter(
+        Imagen_Publicacion.id_publicacion == id_publicacion
+    ).all()
+
+    # 3. Intentar eliminar archivos en S3 (si truena, solo se registra)
+    for img in imagenes:
+        try:
+            s3_service.delete_file(img.url_imagen)
+        except Exception as e:
+            logger.error(f"Error al eliminar archivo S3 {img.url_imagen}: {e}")
+
+    # 4. Eliminar registros de imágenes
+    db.query(Imagen_Publicacion).filter(
+        Imagen_Publicacion.id_publicacion == id_publicacion
+    ).delete()
+
+    # 5. Eliminar la publicación
+    db.delete(publicacion)
+    db.commit()
+
+    return {"message": "Publicación eliminada exitosamente"}
+
+
 # =========================================================
 # 3️⃣ (NUEVO) OBTENER MIEMBROS PREMIUM
 # (Para la barra lateral)
@@ -218,13 +361,13 @@ def listar_miembros_premium(
         resultado = []
         for prov in proveedores_premium:
             url_foto = None
-            # Generar URL pre-firmada para la foto de perfil
-            if prov.foto_perfil:
+            # Generar URL pre-firmada para la foto de perfil (fallback a Usuario.foto_perfil)
+            foto_key = prov.foto_perfil or (prov.usuario.foto_perfil if getattr(prov, 'usuario', None) else None)
+            if foto_key:
                 try:
-                    # Asumimos que foto_perfil es una S3 key
-                    url_foto = s3_service.get_presigned_url(prov.foto_perfil)
+                    url_foto = s3_service.get_presigned_url(foto_key)
                 except Exception as e:
-                    logger.error(f"Error S3 URL para foto de perfil {prov.foto_perfil}: {e}")
+                    logger.error(f"Error S3 URL para foto de perfil {foto_key}: {e}")
             
             resultado.append({
                 "id_proveedor": prov.id_proveedor,

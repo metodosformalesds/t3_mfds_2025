@@ -47,7 +47,7 @@ function Header() {
               )}
               <li>
                 <Link to="/perfil">
-                  👤 Perfil
+                  Perfil
                 </Link>
               </li>
               <li>

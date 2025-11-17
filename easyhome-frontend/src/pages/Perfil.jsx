@@ -139,7 +139,7 @@ function Perfil() {
       case 'resenas':
         return <Resenas />;
       case 'servicios':
-        return <Servicios />;
+        return <Servicios idProveedor={userData.id_proveedor} />;
       default:
         return <CambiarDatos userData={userData} splitName={splitName} calculateAge={calculateAge} />;
     }

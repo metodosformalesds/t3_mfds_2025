@@ -3,7 +3,7 @@
 import apiClient from '../config/api';
  
 const servicePublicationService = {
- 
+
     /**
      * Crear publicacion de servicio
      * @param {FormData} formData
@@ -26,5 +26,5 @@ const servicePublicationService = {
         }
     },
 };
- 
+
 export default servicePublicationService;

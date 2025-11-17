@@ -13,17 +13,19 @@ import Perfil from '../../pages/Perfil';
 import ClienteDashboard from '../../pages/cliente/Dashboard';
 import ClienteServicios from '../../pages/cliente/Servicios';
 import ClienteFeed from '../../pages/cliente/feed';
+import ProviderProfile from '../../pages/cliente/alerta_contratacion';
+import ProveedorPublicProfile from '../../pages/trabajador/perfil_publico';
+import ReviewPage from '../../pages/cliente/Formulario_reseña';
+
 
 // Páginas de Trabajador
 import TrabajadorDashboard from '../../pages/trabajador/Dashboard';
 import TrabajadorServicios from '../../pages/trabajador/Servicios';
 
 // Páginas de Admin
-import AdminDashboard from '../../pages/admin/AdminDashboard';
-import AdminCategories from '../../pages/admin/AdminCategories';
+import AdminLayout from '../layout/AdminLayout';
 import AdminUsuarios from '../../pages/admin/AdminUsuarios';
 import AdminReportes from '../../pages/admin/AdminReportes';
-import AdminSolicitudes from '../../pages/admin/AdminSolicitudes';
 import PublicarServicio from '../../pages/Service_publication_form';
 
 const AppRoutes = () => {
@@ -84,6 +86,24 @@ const AppRoutes = () => {
         } 
       />
 
+      <Route 
+        path="/cliente/proveedor"
+        element={
+          <ProtectedRoute allowedRoles={['Clientes']}>
+            <ProveedorPublicProfile />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route 
+        path="/cliente/resena"
+        element={
+          <ProtectedRoute allowedRoles={['Clientes']}>
+            <ReviewPage />
+          </ProtectedRoute>
+        }
+      />
+
       {/* Rutas de Trabajador (prioridad 2) */}
       <Route 
         path="/trabajador/dashboard" 
@@ -103,45 +123,29 @@ const AppRoutes = () => {
       />
 
       {/* Rutas de Admin */}
-      <Route 
-        path="/admin/dashboard" 
+      <Route
+        path="/admin/dashboard"
         element={
           <ProtectedRoute allowedRoles={['Admin']}>
-            <AdminDashboard />
+            <AdminLayout />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/usuarios" 
+      <Route
+        path="/admin/usuarios"
         element={
           <ProtectedRoute allowedRoles={['Admin']}>
             <AdminUsuarios />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/reportes" 
+      <Route
+        path="/admin/reportes"
         element={
           <ProtectedRoute allowedRoles={['Admin']}>
             <AdminReportes />
           </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/categories" 
-        element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <AdminCategories />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/solicitudes" 
-        element={
-          <ProtectedRoute allowedRoles={['Admin']}>
-            <AdminSolicitudes />
-          </ProtectedRoute>
-        } 
+        }
       />
 
       {/* Ruta 404 */}
