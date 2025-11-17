@@ -62,6 +62,7 @@ export default function Publicaciones({ publicacionData, onVerPerfil }) {
     {publicacionData.categoria && (
         
 <div className="categoria-wrapper">
+
   <div className="categoria-tag">{publicacionData.categoria}</div>
 </div>
 )}
