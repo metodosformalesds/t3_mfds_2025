@@ -138,15 +138,10 @@ async def crear_publicacion(
         logger.error(f"Error al crear publicación para proveedor {current_user.id_usuario}: {e}")
         raise HTTPException(status_code=500, detail=f"Error interno al crear la publicación: {e}")
 
-
 # =========================================================
-# 2️⃣ MOSTRAR TODAS LAS PUBLICACIONES (Feed / Tarjetas)
-# (Esta es la "Feed Page" para Clientes CON FILTROS)
+# 2️⃣ MOSTRAR TODAS LAS PUBLICACIONES (FEED COMPLETO)
 # =========================================================
-# =========================================================
-# 2️⃣ MOSTRAR TODAS LAS PUBLICACIONES (Feed / Tarjetas)
-# =========================================================
-@router.get("/", response_model=None) 
+@router.get("/", response_model=None)
 def listar_publicaciones(
     db: Session = Depends(get_db),
     categorias: Optional[List[int]] = Query(None),
@@ -157,14 +152,13 @@ def listar_publicaciones(
     Devuelve publicaciones con:
     - Nombre del proveedor
     - Fotografía del proveedor (URL prefirmada)
-    - Imagen de portada (URL prefirmada)
+    - Portada de publicación (URL prefirmada)
+    - TODAS las imágenes de la publicación (galería completa)
     """
 
     try:
         publicaciones = (
             db.query(Publicacion_Servicio)
-            # Cargamos el proveedor y su usuario asociado para acceder a campos
-            # como `foto_perfil` que pueden estar en `Proveedor_Servicio` o en `Usuario`.
             .options(joinedload(Publicacion_Servicio.proveedor_servicio).joinedload(Proveedor_Servicio.usuario))
             .options(joinedload(Publicacion_Servicio.imagen_publicacion))
             .filter(Publicacion_Servicio.estado == "activo")
@@ -179,54 +173,71 @@ def listar_publicaciones(
             prov = pub.proveedor_servicio
 
             # ===========================
-            # FOTO DE PERFIL DEL PROVEEDOR
+            # FOTO DE PERFIL
             # ===========================
             foto_perfil_url = None
-            # El campo foto de perfil puede almacenarse en Proveedor_Servicio.foto_perfil
-            # o en Usuario.foto_perfil. Usamos el primero disponible como key a S3.
             foto_key = None
+
             if prov:
-                foto_key = prov.foto_perfil or (prov.usuario.foto_perfil if getattr(prov, 'usuario', None) else None)
+                foto_key = prov.foto_perfil or (
+                    prov.usuario.foto_perfil if getattr(prov, "usuario", None) else None
+                )
+
             if foto_key:
                 try:
                     foto_perfil_url = s3_service.get_presigned_url(foto_key)
-                except Exception as e:
-                    logger.error(f"Error URL foto perfil proveedor {prov.id_proveedor if prov else 'unknown'}: {e}")
+                except:
                     foto_perfil_url = None
 
             # ===========================
-            # IMAGEN DE PORTADA
+            # PORTADA (primera imagen)
             # ===========================
             url_imagen_portada = None
             if pub.imagen_publicacion:
                 portada = sorted(pub.imagen_publicacion, key=lambda x: x.orden)[0]
                 try:
                     url_imagen_portada = s3_service.get_presigned_url(portada.url_imagen)
-                except Exception as e:
-                    logger.error(f"Error URL imagen portada pub {pub.id_publicacion}: {e}")
+                except:
                     url_imagen_portada = None
 
             # ===========================
-            # AGREGAR PUBLICACIÓN AL RESULTADO
+            # GALERÍA COMPLETA
+            # ===========================
+            imagenes = []
+            for img in sorted(pub.imagen_publicacion, key=lambda x: x.orden):
+                try:
+                    img_url = s3_service.get_presigned_url(img.url_imagen)
+                except:
+                    img_url = None
+
+                imagenes.append({
+                    "id_imagen": img.id_imagen,
+                    "url_imagen": img_url
+                })
+
+            # ===========================
+            # ARMAR RESPUESTA
             # ===========================
             resultado.append({
                 "id_publicacion": pub.id_publicacion,
                 "titulo": pub.titulo,
                 "descripcion_corta": pub.descripcion[:100] if pub.descripcion else "Sin descripción",
-
                 "id_proveedor": pub.id_proveedor,
+
                 "nombre_proveedor": (
-                    # Preferimos el nombre almacenado en Proveedor_Servicio (nombre_completo).
-                    # Si no existe, intentamos usar el nombre en la entidad Usuario (campo `nombre`).
                     prov.nombre_completo if prov and getattr(prov, "nombre_completo", None)
-                    else (prov.usuario.nombre if prov and prov.usuario and getattr(prov.usuario, "nombre", None) else "Sin nombre")
+                    else prov.usuario.nombre if prov and prov.usuario and getattr(prov.usuario, "nombre", None)
+                    else "Sin nombre"
                 ),
+
                 "foto_perfil_proveedor": foto_perfil_url,
                 "calificacion_proveedor": round(prov.calificacion_promedio, 1) if prov and prov.calificacion_promedio else 0,
 
                 "rango_precio_min": pub.rango_precio_min,
                 "rango_precio_max": pub.rango_precio_max,
+
                 "url_imagen_portada": url_imagen_portada,
+                "imagen_publicacion": imagenes,   # 🟢 GALERÍA COMPLETA
             })
 
         return resultado
