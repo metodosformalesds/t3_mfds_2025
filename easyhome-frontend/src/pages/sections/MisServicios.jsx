@@ -7,13 +7,12 @@ function MisServicios({ idProveedor, publicView = false }) {
   const navigate = useNavigate();
 
   const [servicios, setServicios] = useState([]);
-  const [nombreProveedor, setNombreProveedor] = useState("Proveedor");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // =============================
-  // FUNCION PARA ELIMINAR
-  // =============================
+  // =========================================================
+  // 🔥 FUNCIÓN PARA ELIMINAR PUBLICACIÓN
+  // =========================================================
   const handleEliminar = async (id_publicacion) => {
     const confirmar = window.confirm("¿Seguro que deseas eliminar esta publicación?");
     if (!confirmar) return;
@@ -21,22 +20,19 @@ function MisServicios({ idProveedor, publicView = false }) {
     try {
       await api.delete(`/api/v1/publicaciones/${id_publicacion}`);
 
-      // ACTUALIZA EL FRONTEND INMEDIATAMENTE
-      setServicios((prev) =>
-        prev.filter((s) => s.id_publicacion !== id_publicacion)
-      );
+      // Filtrar publicaciones que SÍ quedan
+      setServicios(prev => prev.filter(s => s.id_publicacion !== id_publicacion));
 
       alert("Publicación eliminada correctamente");
-
     } catch (error) {
-      console.error("❌ Error al eliminar:", error);
+      console.error("❌ Error al eliminar publicación:", error);
       alert("Error al eliminar la publicación");
     }
   };
 
-  // =============================
-  // CARGAR SERVICIOS
-  // =============================
+  // =========================================================
+  // 🔥 CARGAR SERVICIOS DEL PROVEEDOR
+  // =========================================================
   useEffect(() => {
     const fetchServicios = async () => {
       if (!idProveedor) {
@@ -47,54 +43,11 @@ function MisServicios({ idProveedor, publicView = false }) {
       try {
         setLoading(true);
 
-        // ------- NOMBRE DEL PROVEEDOR -------
-        try {
-          const resPerfil = await api.get(
-            `/api/v1/proveedores/${idProveedor}/perfil-about`
-          );
-
-          const p = resPerfil.data;
-
-          const nombreDetectado =
-            p.nombre_completo ||
-            p.nombre ||
-            p.usuario?.nombre_completo ||
-            p.usuario?.nombre ||
-            "Proveedor";
-
-          setNombreProveedor(nombreDetectado);
-        } catch (e) {
-          console.warn("⚠️ No se pudo obtener el nombre del proveedor.");
-        }
-
-        // ------- SERVICIOS -------
-        const response = await api.get(
-          `/api/v1/proveedores/${idProveedor}/servicios`
-        );
+        // Obtener servicios del proveedor
+        const response = await api.get(`/api/v1/proveedores/${idProveedor}/servicios`);
         const serviciosBase = response.data;
 
-        // Foto de perfil firmada para cada servicio
-        const serviciosConFoto = await Promise.all(
-          serviciosBase.map(async (servicio) => {
-            try {
-              const fotoRes = await api.get(
-                `/api/v1/usuarios/${servicio.id_proveedor}/foto-perfil`
-              );
-
-              return {
-                ...servicio,
-                foto_perfil_url: fotoRes.data.foto_perfil_url
-              };
-            } catch {
-              return {
-                ...servicio,
-                foto_perfil_url: null
-              };
-            }
-          })
-        );
-
-        setServicios(serviciosConFoto);
+        setServicios(serviciosBase);
         setError(null);
 
       } catch (err) {
@@ -108,7 +61,7 @@ function MisServicios({ idProveedor, publicView = false }) {
     fetchServicios();
   }, [idProveedor]);
 
-
+  // RENDER
   if (loading) return <div>Cargando servicios...</div>;
   if (error) return <div>{error}</div>;
 
@@ -130,9 +83,7 @@ function MisServicios({ idProveedor, publicView = false }) {
       </div>
 
       {servicios.map((servicio) => {
-        const fotoPerfil =
-          servicio.foto_perfil_url ||
-          "https://i.imgur.com/placeholder.png";
+        const nombreProv = servicio.nombre_proveedor || "Proveedor";
 
         return (
           <div key={servicio.id_publicacion} className="publicacion-card">
@@ -141,15 +92,13 @@ function MisServicios({ idProveedor, publicView = false }) {
             <div className="publicacion-header">
               <div className="publicacion-perfil">
                 <img
-                  src={fotoPerfil}
+                  src={servicio.foto_perfil_url || "https://i.imgur.com/placeholder.png"}
                   className="perfil-avatar"
                   alt="proveedor"
                 />
 
                 <div>
-                  <p className="perfil-nombre">
-                    {servicio.nombre_proveedor || nombreProveedor}
-                  </p>
+                  <p className="perfil-nombre">{nombreProv}</p>
 
                   <div className="perfil-rating">
                     <span className="rating-estrella">★</span>
@@ -187,16 +136,18 @@ function MisServicios({ idProveedor, publicView = false }) {
                 <strong> ${servicio.rango_precio_min} – ${servicio.rango_precio_max}</strong>
               </p>
 
-              <div style={{ display: "flex", gap: "10px" }}>
-                <button className="boton-perfil">Editar</button>
+              {!publicView && (
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <button className="boton-perfil">Editar</button>
 
-                <button
-                  className="boton-eliminar"
-                  onClick={() => handleEliminar(servicio.id_publicacion)}
-                >
-                  Eliminar
-                </button>
-              </div>
+                  <button
+                    className="boton-eliminar"
+                    onClick={() => handleEliminar(servicio.id_publicacion)}
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              )}
             </div>
 
           </div>
@@ -226,19 +177,14 @@ function MisServicios({ idProveedor, publicView = false }) {
           font-size: 1em;
           border-radius: 6px;
           cursor: pointer;
-          transition: 0.2s ease;
         }
 
-        .btn-nuevo-servicio:hover {
-          background-color: #1f4e67;
-        }
+        .btn-nuevo-servicio:hover { background-color: #1f4e67; }
 
         .section-title {
           font-size: 2.5em;
           font-weight: 800;
-          margin-bottom: 25px;
           color: #16394F;
-          text-align: left;
         }
 
         .publicacion-card {
@@ -250,17 +196,9 @@ function MisServicios({ idProveedor, publicView = false }) {
           box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         }
 
-        .publicacion-header {
-          display: flex;
-          align-items: center;
-          margin-bottom: 15px;
-        }
+        .publicacion-header { display: flex; align-items: center; margin-bottom: 15px; }
 
-        .publicacion-perfil {
-          display: flex;
-          align-items: center;
-          gap: 15px;
-        }
+        .publicacion-perfil { display: flex; align-items: center; gap: 15px; }
 
         .perfil-avatar {
           width: 55px;
@@ -270,36 +208,19 @@ function MisServicios({ idProveedor, publicView = false }) {
           border: 2px solid #e0e0e0;
         }
 
-        .perfil-nombre {
-          font-size: 1.2em;
-          font-weight: bold;
-          margin: 0;
-          color: #333;
-        }
-
-        .perfil-rating {
-          font-size: 0.85em;
-          color: #555;
-        }
-
-        .rating-estrella {
-          color: #ffc107;
-          margin-right: 4px;
-        }
+        .perfil-nombre { font-size: 1.2em; font-weight: bold; margin: 0; color: #333; }
 
         .publicacion-titulo {
           font-size: 1.8em;
           font-weight: 700;
           color: #16394F;
           margin: 10px 0;
-          text-align: left;
         }
 
         .publicacion-descripcion {
           color: #444;
           line-height: 1.5;
           margin-bottom: 20px;
-          text-align: left;
         }
 
         .imagenes-contenedor {
@@ -324,11 +245,6 @@ function MisServicios({ idProveedor, publicView = false }) {
           margin-top: 10px;
         }
 
-        .rango-precio {
-          font-size: 1.1em;
-          color: #16394F;
-        }
-
         .boton-perfil {
           background-color: #16394F;
           color: #fff;
@@ -339,7 +255,7 @@ function MisServicios({ idProveedor, publicView = false }) {
         }
 
         .boton-eliminar {
-          background-color: #B00020;
+          background-color: #C1292E;
           color: #fff;
           padding: 8px 16px;
           border: none;
@@ -347,9 +263,7 @@ function MisServicios({ idProveedor, publicView = false }) {
           cursor: pointer;
         }
 
-        .boton-eliminar:hover {
-          background-color: #D32F2F;
-        }
+        .boton-eliminar:hover { background-color: #A82020; }
       `}</style>
     </div>
   );
