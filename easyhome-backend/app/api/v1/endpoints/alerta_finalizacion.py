@@ -15,7 +15,7 @@ router = APIRouter(
 )
 
 @router.get(
-    "/{id_usuario}",
+    "/usuario/{id_usuario}",
     summary="Devuelve las alertas del cliente"
 )
 def obtener_alertas(
