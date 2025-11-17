@@ -247,6 +247,75 @@ def listar_publicaciones(
     except Exception as e:
         logger.error(f"Error al listar publicaciones: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+    # =========================================================
+# 2️⃣ Eliminar publicaciones.
+# =========================================================
+
+@router.delete("/{id_publicacion}", status_code=200)
+def eliminar_publicacion(
+    id_publicacion: int,
+    user_email: str = Query(...),
+    db: Session = Depends(get_db)
+):
+    """
+    Elimina una publicación si pertenece al proveedor autenticado.
+    """
+
+    # Buscar usuario por email
+    usuario = db.query(Usuario).filter(Usuario.correo_electronico == user_email).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    if usuario.tipo_usuario != "proveedor" or not usuario.proveedor_servicio:
+        raise HTTPException(
+            status_code=403,
+            detail="No tienes permisos para eliminar esta publicación"
+        )
+
+    proveedor = usuario.proveedor_servicio
+
+    # Buscar publicación
+    publicacion = (
+        db.query(Publicacion_Servicio)
+        .filter(Publicacion_Servicio.id_publicacion == id_publicacion)
+        .first()
+    )
+
+    if not publicacion:
+        raise HTTPException(status_code=404, detail="La publicación no existe")
+
+    # Verificar que pertenece al proveedor
+    if publicacion.id_proveedor != proveedor.id_proveedor:
+        raise HTTPException(
+            status_code=403,
+            detail="No puedes eliminar una publicación que no es tuya"
+        )
+
+    # Obtener imágenes
+    imagenes = db.query(Imagen_Publicacion).filter(
+        Imagen_Publicacion.id_publicacion == id_publicacion
+    ).all()
+
+    # Eliminar imágenes de S3
+    for img in imagenes:
+        try:
+            s3_service.delete_file(img.url_imagen)
+        except Exception:
+            pass
+
+    # Eliminar registros de imágenes
+    db.query(Imagen_Publicacion).filter(
+        Imagen_Publicacion.id_publicacion == id_publicacion
+    ).delete()
+
+    # Eliminar publicación
+    db.delete(publicacion)
+    db.commit()
+
+    return {"message": "Publicación eliminada exitosamente"}
+
 
 # =========================================================
 # 3️⃣ (NUEVO) OBTENER MIEMBROS PREMIUM
