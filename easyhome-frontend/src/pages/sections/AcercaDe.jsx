@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import api from '../../config/api';
 
-function AcercaDe({ idProveedor }) {
+function AcercaDe({idProveedor, isPublicProfile = false, providerName = ""}) {
   const [proveedorData, setProveedorData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -57,7 +57,11 @@ function AcercaDe({ idProveedor }) {
 
   return (
     <div className="acerca-de-container">
-      <h2>Acerca de mí</h2>
+      <h2>
+        {isPublicProfile 
+          ? `Acerca de ${providerName}`   //Segun sea perfil publico o personal
+          : "Acerca de mí"}               
+      </h2>
       
       {/* Biografía */}
       <section className="bio-section">

@@ -1,90 +1,132 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../assets/styles/Filters.css';
+import categoryService from '../../services/categoryService';
 
-import api from '../../config/api';
-const API_BASE_URL = api.BASE_URL;
-
-// Si usas CSS Modules, importarías: import styles from './Filtros.module.css';
-
-export default function Filtros() {
+export default function Filtros({ onApplyFilters, currentFilters = {} }) {
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedFilters, setSelectedFilters] = useState([]);
-
-    // Datos de ejemplo para las secciones
-    const categorias = [
-        { name: "Carpintería", count: 10 },
-        { name: "Electricidad", count: 12 },
-        { name: "Plomería", count: 8 },
-        { name: "Limpieza", count: 18 },
-        { name: "Pintura", count: 14 },
-        { name: "Construcción", count: 21 },
-    ];
+    const [categorias, setCategorias] = useState([]);
+    const [loadingCategories, setLoadingCategories] = useState(true);
 
     const busquedaPor = [
-        { name: "Suscriptores" },
-        { name: "Mejor calificados" },
-        { name: "Más recientes" },
+        { name: "Suscriptores", value: "suscriptores" },
+        { name: "Mejor calificados", value: "mejor_calificados" },
+        { name: "Más recientes", value: "mas_recientes" }
     ];
 
-    // Manejador genérico para checkboxes
-    const handleCheckboxChange = (e, setter, currentList) => {
-        const { value, checked } = e.target;
+    // Cargar categorías
+    useEffect(() => {
+        const fetchCategorias = async () => {
+            try {
+                const data = await categoryService.getAll();
+                setCategorias(data);
+            } catch (error) {
+                console.error("Error al cargar categorías:", error);
+                setCategorias([]);
+            } finally {
+                setLoadingCategories(false);
+            }
+        };
+        fetchCategorias();
+    }, []);
+
+    // Sincronizar categorías seleccionadas con el feed actual
+    useEffect(() => {
+        if (currentFilters?.categorias) {
+            setSelectedCategories(currentFilters.categorias);
+        }
+        if (currentFilters?.ordenar_por) {
+            setSelectedFilters(
+                currentFilters.ordenar_por ? [currentFilters.ordenar_por] : []
+            );
+        }
+    }, [currentFilters]);
+
+    const handleCategoryChange = (e, categoryId) => {
+        const { checked } = e.target;
         if (checked) {
-            setter([...currentList, value]);
+            setSelectedCategories([...selectedCategories, categoryId]);
         } else {
-            setter(currentList.filter(item => item !== value));
+            setSelectedCategories(
+                selectedCategories.filter(id => id !== categoryId)
+            );
+        }
+    };
+
+    const handleFilterChange = (e, filterValue) => {
+        const { checked } = e.target;
+
+        // Solo un filtro activo a la vez
+        if (checked) {
+            setSelectedFilters([filterValue]);
+        } else {
+            setSelectedFilters([]);
         }
     };
 
     const handleApplyFilters = () => {
-        // Lógica para enviar o aplicar los filtros
-        console.log("Filtros aplicados. Categorías:", selectedCategories, "Filtros:", selectedFilters);
+        const filtrosFinales = {
+            categorias: selectedCategories,
+            suscriptores: selectedFilters.includes("suscriptores"),
+            ordenar_por: selectedFilters.includes("mejor_calificados")
+                ? "mejor_calificados"
+                : selectedFilters.includes("mas_recientes")
+                ? "mas_recientes"
+                : null
+        };
+
+        if (onApplyFilters) {
+            onApplyFilters(filtrosFinales);
+        }
+
+        console.log("Filtros aplicados:", filtrosFinales);
     };
 
     return (
-        // Contenedor principal de filtros. Usaremos la clase CSS 'filtro-card'
         <div className="filtro-card">
             <h2 className="filtro-titulo-principal">Filtros</h2>
 
-            {/* Sección de Categorías */}
+            {/* Categorías */}
             <div className="filtro-seccion">
                 <h3 className="filtro-titulo-seccion">Categorías</h3>
+
                 <div className="filtro-grupo-checkbox">
-                    {categorias.map(cat => (
-                        <label key={cat.name} className="filtro-item">
-                            <input
-                                type="checkbox"
-                                name="category"
-                                value={cat.name}
-                                checked={selectedCategories.includes(cat.name)}
-                                onChange={(e) => handleCheckboxChange(e, setSelectedCategories, selectedCategories)}
-                                className="filtro-checkbox"
-                            />
-                            {/* El texto y el contador se muestran en la misma etiqueta */}
-                            <span>{cat.name}</span>
-                            <span className="filtro-contador">({cat.count})</span>
-                        </label>
-                    ))}
+                    {loadingCategories ? (
+                        <p>Cargando categorías...</p>
+                    ) : categorias.length > 0 ? (
+                        categorias.map(cat => (
+                            <label key={cat.id_categoria} className="filtro-item">
+                                <input
+                                    type="checkbox"
+                                    className="filtro-checkbox"
+                                    checked={selectedCategories.includes(cat.id_categoria)}
+                                    onChange={(e) =>
+                                        handleCategoryChange(e, cat.id_categoria)
+                                    }
+                                />
+                                {cat.nombre_categoria}
+                            </label>
+                        ))
+                    ) : (
+                        <p>No hay categorías disponibles.</p>
+                    )}
                 </div>
             </div>
 
-            {/* Separador visual si lo necesitas (no se ve en la imagen, pero puede ser útil) */}
             <hr className="filtro-separador" />
 
-            {/* Sección de Buscar por */}
+            {/* Buscar por */}
             <div className="filtro-seccion">
                 <h3 className="filtro-titulo-seccion">Buscar por</h3>
+
                 <div className="filtro-grupo-checkbox">
                     {busquedaPor.map(fil => (
-                        <label key={fil.name} className="filtro-item">
+                        <label key={fil.value} className="filtro-item">
                             <input
                                 type="checkbox"
-                                name="filter"
-                                value={fil.name}
-                                checked={selectedFilters.includes(fil.name)}
-                                onChange={(e) => handleCheckboxChange(e, setSelectedFilters, selectedFilters)}
                                 className="filtro-checkbox"
+                                checked={selectedFilters.includes(fil.value)}
+                                onChange={(e) => handleFilterChange(e, fil.value)}
                             />
                             {fil.name}
                         </label>
@@ -92,11 +134,7 @@ export default function Filtros() {
                 </div>
             </div>
 
-            {/* Botón Aplicar */}
-            <button
-                onClick={handleApplyFilters}
-                className="filtro-boton-aplicar"
-            >
+            <button className="filtro-boton-aplicar" onClick={handleApplyFilters}>
                 Aplicar
             </button>
         </div>
