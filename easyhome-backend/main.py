@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.endpoints import (
     example,
@@ -10,35 +10,51 @@ from app.api.v1.endpoints import (
     publicacion,
     resenas,
     status_servicio,
+    alerta_finalizacion,
     reportes,
 )
 
 app = FastAPI(
     title="EasyHome Backend API",
     description="API for managing EasyHome smart home devices and services.",
-    version="1.0.0"
+    version="1.0.0",
+    redirect_slashes=False
 )
 
-# Configurar CORS para permitir peticiones desde el frontend
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://d84l1y8p4kdic.cloudfront.net"],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
+# Routers CON /api prefix (para API Gateway stage "api")
+app.include_router(example.router, prefix="/api/api/v1")
+app.include_router(auth.router, prefix="/api/api/v1/auth", tags=["Authentication"])
+app.include_router(categories.router, prefix="/api/api/v1/categories", tags=["Categories"])
+app.include_router(publicacion.router, prefix="/api/api/v1", tags=["Publicaciones"])
+app.include_router(solicitud.router, prefix="/api/api/v1")
+app.include_router(perfil_proveedor.router, prefix="/api/api/v1")
+app.include_router(perfil_usuario.router, prefix="/api/api/v1")
+
+# Routers SIN prefix (para localhost/testing)
 app.include_router(example.router, prefix="/api/v1")
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(categories.router, prefix="/api/v1/categories", tags=["Categories"])
 app.include_router(publicacion.router, prefix="/api/v1", tags=["Publicaciones"])
-app.include_router(solicitud.router, prefix="/api/v1") 
+app.include_router(solicitud.router, prefix="/api/v1")
 app.include_router(perfil_proveedor.router, prefix="/api/v1")
 app.include_router(perfil_usuario.router, prefix="/api/v1")
 app.include_router(resenas.router, prefix="/api/v1")
 app.include_router(status_servicio.router, prefix="/api/v1")
-app.include_router(reportes.router, prefix="/api/v1")
+app.include_router(alerta_finalizacion.router, prefix="/api/v1")
 
+
+@app.get("/api/")
+@app.get("/api")
 @app.get("/")
 def root():
     return {"message": "Welcome to the EasyHome Backend API!"}

@@ -11,10 +11,18 @@ export const useSolicitudes = () => {
     setError(null);
     try {
       const data = await solicitudService.obtenerSolicitudes();
-      setSolicitudes(data);
+      // Asegurarse de que siempre sea un array
+      if (Array.isArray(data)) {
+        setSolicitudes(data);
+      } else {
+        console.error('La respuesta no es un array:', data);
+        setSolicitudes([]);
+        setError('Formato de respuesta inválido del servidor');
+      }
     } catch (err) {
-      setError(err.response?.data?.detail || 'Error al cargar solicitudes');
       console.error('Error cargando solicitudes:', err);
+      setSolicitudes([]); // Asegurar que siempre sea un array
+      setError(err.response?.data?.detail || 'Error al cargar solicitudes');
     } finally {
       setLoading(false);
     }

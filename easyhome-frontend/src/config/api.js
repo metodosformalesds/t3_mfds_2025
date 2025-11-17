@@ -1,69 +1,90 @@
+// src/config/api.js
 import axios from 'axios';
-
-// Configuración base de la API
+import { userManager } from './authService';
+ 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
+ 
 // Crear instancia de axios con configuración base
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 10000, // 10 segundos
+  timeout: 60000, // 60 segundos - AUMENTADO para uploads
 });
-
-// Interceptor para requests - agregar token de autenticación si existe
+ 
 apiClient.interceptors.request.use(
-  (config) => {
-    // Aquí puedes agregar el token de autenticación
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+  async (config) => {
+    const user = await userManager.getUser();
+ 
+    if (user && !user.expired && user.access_token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${user.access_token}`;
     }
+
+    // 🔍 DEBUG temporal - quitar después
+    console.log('=== AXIOS REQUEST DEBUG ===');
+    console.log('URL:', config.baseURL + config.url);
+    console.log('Method:', config.method?.toUpperCase());
+    console.log('Headers:', config.headers);
+    console.log('Data type:', config.data?.constructor.name);
+    
+    if (config.data instanceof FormData) {
+      console.log('✓ Es FormData - Contenido:');
+      for (let pair of config.data.entries()) {
+        if (pair[1] instanceof File) {
+          console.log(`  ${pair[0]}: [File] ${pair[1].name} (${pair[1].size} bytes)`);
+        } else {
+          console.log(`  ${pair[0]}: ${pair[1]}`);
+        }
+      }
+    }
+    console.log('===========================');
+ 
     return config;
   },
   (error) => {
     return Promise.reject(error);
   }
 );
-
-// Interceptor para responses - manejo centralizado de errores
+ 
+// Interceptor para responses
 apiClient.interceptors.response.use(
   (response) => {
+    console.log('=== AXIOS RESPONSE DEBUG ===');
+    console.log('Status:', response.status);
+    console.log('Data:', response.data);
+    console.log('============================');
     return response;
   },
   (error) => {
-    // Manejo de errores comunes
+    console.log('=== AXIOS ERROR DEBUG ===');
+    console.log('Error completo:', error);
+    console.log('Response:', error.response);
+    console.log('Request:', error.request);
+    console.log('Config:', error.config);
+    console.log('=========================');
+    
     if (error.response) {
-      // El servidor respondió con un código de estado fuera del rango 2xx
       switch (error.response.status) {
         case 401:
-          // No autorizado - redirigir a login
           console.error('No autorizado. Por favor inicia sesión.');
-          // Aquí puedes agregar lógica para redirigir al login
           break;
         case 403:
           console.error('Acceso prohibido.');
           break;
-        case 404:
-          console.error('Recurso no encontrado.');
-          break;
-        case 500:
-          console.error('Error interno del servidor.');
+        case 422:
+          console.error('Error de validación:', error.response.data);
           break;
         default:
           console.error('Error en la petición:', error.response.data);
       }
     } else if (error.request) {
-      // La petición se hizo pero no hubo respuesta
       console.error('No se recibió respuesta del servidor.');
+      console.error('Request que falló:', error.request);
     } else {
-      // Algo pasó al configurar la petición
       console.error('Error al configurar la petición:', error.message);
     }
     return Promise.reject(error);
   }
 );
-
+ 
 export default apiClient;
 export { API_BASE_URL };

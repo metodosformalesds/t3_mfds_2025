@@ -12,7 +12,7 @@ import "../assets/styles/sections/AcercaDe.css";
 import "../assets/styles/sections/MisServicios.css";
 import "../assets/styles/sections/Portafolio.css";
 
-// Componentes de las secciones
+// Componentes internos
 import CambiarDatos from './sections/CambiarDatos';
 import ServiciosContratados from './sections/ServiciosContratados';
 import ResenasRealizadas from './sections/ResenasRealizadas';
@@ -26,6 +26,15 @@ import EditarFotoModal from '../components/common/EditarFotoModal';
 function Perfil() {
   const auth = useAuth();
   const location = useLocation();
+
+  // Lógica de logout robusta: igual que AdminSidebar.jsx
+  const handleLogout = () => {
+    const clientId = "478qnp7vk39jamq13sl8k4sp7t";
+    const logoutUri = "http://localhost:5173";
+    const cognitoDomain = "https://us-east-1gbsgbtrls.auth.us-east-1.amazoncognito.com";
+    auth.removeUser();
+    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+  };
   const { 
     userData, 
     loading, 
@@ -35,9 +44,9 @@ function Perfil() {
     uploadProfilePhoto,
     getProfilePhotoUrl 
   } = useUserProfile();
+
   const { isWorker, isClient } = useUserCapabilities();
-  
-  // Por defecto, si es trabajador muestra "Acerca de", si no "Cambiar datos"
+
   const [activeTab, setActiveTab] = useState(isWorker ? 'acercaDe' : 'cambiarDatos');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [profilePhoto, setProfilePhoto] = useState(null);
@@ -50,7 +59,6 @@ function Perfil() {
   const { services: clientServices } = useClientServices(userData?.id_usuario);
   const { finishedServices } = useProviderServices(userData?.id_proveedor);
 
-  // Cargar foto de perfil cuando el usuario esté disponible
   useEffect(() => {
     const loadProfilePhoto = async () => {
       if (userData?.id_usuario) {
@@ -120,30 +128,28 @@ function Perfil() {
 
   const { nombres, apellidos } = splitName(userData.nombre);
   const edad = calculateAge(userData.fecha_nacimiento);
-  
-  // Determinar badge principal (prioridad a Trabajador si tiene ambos roles)
+
   const getBadge = () => {
     if (isWorker) return 'Proveedor verificado';
     if (isClient) return 'Cliente';
     return 'Usuario';
   };
 
-  // Tabs de navegación
+  // Tabs
   const clientTabs = [
-    { id: 'cambiarDatos', label: 'Cambiar datos' },
-    { id: 'serviciosContratados', label: 'Servicios contratados' },
-    { id: 'resenasRealizadas', label: 'Reseñas realizadas' }
+    { id: "cambiarDatos", label: "Cambiar datos" },
+    { id: "serviciosContratados", label: "Servicios contratados" },
+    { id: "resenasRealizadas", label: "Reseñas realizadas" }
   ];
 
   const workerTabs = [
-    { id: 'acercaDe', label: 'Acerca de' },
-    { id: 'misServicios', label: 'Mis servicios' },
-    { id: 'portafolio', label: 'Portafolio' },
-    { id: 'resenas', label: 'Reseñas' },
-    { id: 'servicios', label: 'Servicios' }
+    { id: "acercaDe", label: "Acerca de" },
+    { id: "misServicios", label: "Mis servicios" },
+    { id: "portafolio", label: "Portafolio" },
+    { id: "resenas", label: "Reseñas" },
+    { id: "servicios", label: "Servicios" }
   ];
 
-  // Combinar tabs según el rol
   const tabs = isWorker ? [...clientTabs, ...workerTabs] : clientTabs;
 
   const handleSavePhoto = async (file) => {
@@ -156,35 +162,32 @@ function Perfil() {
         setProfilePhoto(result.url);
         return result;
       } else {
-        console.error('Error al subir foto:', result.error);
         return result;
       }
     } catch (error) {
-      console.error('Error inesperado al subir foto:', error);
-      return { success: false, error: 'Error inesperado al subir la foto' };
+      return { success: false, error: "Error inesperado" };
     } finally {
       setUploadingPhoto(false);
     }
   };
 
-  // Renderizar el contenido según la tab activa
   const renderContent = () => {
     switch (activeTab) {
-      case 'cambiarDatos':
+      case "cambiarDatos":
         return <CambiarDatos userData={userData} splitName={splitName} calculateAge={calculateAge} />;
-      case 'serviciosContratados':
+      case "serviciosContratados":
         return <ServiciosContratados />;
-      case 'resenasRealizadas':
+      case "resenasRealizadas":
         return <ResenasRealizadas />;
-      case 'acercaDe':
+      case "acercaDe":
         return <AcercaDe idProveedor={userData.id_proveedor} />;
-      case 'misServicios':
+      case "misServicios":
         return <MisServicios idProveedor={userData.id_proveedor} />;
-      case 'portafolio':
+      case "portafolio":
         return <Portafolio idProveedor={userData.id_proveedor} />;
-      case 'resenas':
+      case "resenas":
         return <Resenas />;
-      case 'servicios':
+      case "servicios":
         return <Servicios idProveedor={userData.id_proveedor} />;
       default:
         return <CambiarDatos userData={userData} splitName={splitName} calculateAge={calculateAge} />;
@@ -193,26 +196,28 @@ function Perfil() {
 
   return (
     <div className="perfil-container">
-      {/* Sidebar con info del usuario */}
+      
+      {/* SIDEBAR */}
       <aside className="perfil-sidebar">
         <div className="perfil-avatar-container">
           <div className="perfil-avatar">
             <img 
-              src={profilePhoto || auth.user?.profile?.picture || 'https://via.placeholder.com/120'} 
+              src={profilePhoto || auth.user?.profile?.picture || "https://via.placeholder.com/120"} 
               alt={userData.nombre}
             />
           </div>
-          <button 
-            className="edit-photo-btn"
-            onClick={() => setIsModalOpen(true)}
-            title="Editar foto de perfil"
-          >
-            ✏️
-          </button>
+
+          {auth.user?.profile?.email === userData.correo_electronico && (
+            <button 
+              className="edit-photo-btn"
+              onClick={() => setIsModalOpen(true)}
+            >
+              ✏️
+            </button>
+          )}
         </div>
         
         <h2 className="perfil-nombre">{userData.nombre}</h2>
-        
         <span className="perfil-badge">{getBadge()}</span>
         
         {/* Estadísticas dinámicas */}
@@ -223,6 +228,8 @@ function Perfil() {
               <span className="stat-label">Servicios<br/>Contratados</span>
             </div>
           )}
+        
+
           {isWorker && (
             <>
               <div className="stat-item">
@@ -237,50 +244,61 @@ function Perfil() {
           )}
         </div>
 
-        {/* Información de contacto (si es trabajador) */}
-        {isWorker && (
-          <>
-            <div className="perfil-section">
-              <h3>Información del contacto</h3>
-              <div className="contact-info">
-                <div className="contact-item">
-                  <i className="icon">📧</i>
-                  <span>{userData.correo_electronico}</span>
-                </div>
-                {userData.numero_telefono && (
-                  <div className="contact-item">
-                    <i className="icon">📱</i>
-                    <span>{userData.numero_telefono}</span>
-                  </div>
-                )}
-              </div>
-            </div>
+        {/* CONTACTO (TEXTO NORMAL) */}
+        <div className="perfil-section">
+          <h3>Información del contacto</h3>
 
-            <div className="perfil-section">
-              <h3>Información del plan</h3>
-              <div className="plan-info">
-                <div className="plan-item">
-                  <i className="icon">💼</i>
-                  <span>Plan Pro</span>
-                </div>
-                <div className="plan-item">
-                  <i className="icon">📅</i>
-                  <span>Renovación: 18 Dic 2025</span>
-                </div>
-              </div>
+          <div className="contact-item">
+            <i className="icon">📧</i>
+            <span>{userData.correo_electronico}</span>
+          </div>
+
+          {userData.numero_telefono && (
+            <div className="contact-item">
+              <i className="icon">📱</i>
+              <span>{userData.numero_telefono}</span>
             </div>
+          )}
+        </div>
+
+        {/* PLAN */}
+        <div className="perfil-section">
+          <h3>Información del plan</h3>
+          <div className="plan-info">
+            <div className="plan-item">
+              <i className="icon">💼</i>
+              <span>Plan Básico</span>
+            </div>
+            <div className="plan-item">
+              <i className="icon">📅</i>
+              <span>Renovación no disponible</span>
+            </div>
+          </div>
+        </div>
+
           </>
         )}
+
+        {/* Botón de cerrar sesión para todos los usuarios */}
+        <div className="perfil-section">
+          <button className="logout-btn" onClick={handleLogout} style={{marginTop: '2rem', width: '100%', padding: '0.75rem', background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'}}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '0.5rem'}}>
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Cerrar Sesión
+          </button>
+        </div>
       </aside>
 
-      {/* Contenido principal */}
+      {/* MAIN CONTENT */}
       <main className="perfil-main">
-        {/* Navegación por tabs */}
         <nav className="perfil-tabs">
           {tabs.map(tab => (
             <button
               key={tab.id}
-              className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
+              className={`tab-btn ${activeTab === tab.id ? "active" : ""}`}
               onClick={() => setActiveTab(tab.id)}
             >
               {tab.label}
@@ -288,17 +306,16 @@ function Perfil() {
           ))}
         </nav>
 
-        {/* Contenido dinámico */}
         <div className="perfil-content">
           {renderContent()}
         </div>
       </main>
 
-      {/* Modal para editar foto */}
+      {/* MODAL */}
       <EditarFotoModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        currentPhoto={profilePhoto || auth.user?.profile?.picture || 'https://via.placeholder.com/120'}
+        currentPhoto={profilePhoto || auth.user?.profile?.picture || "https://via.placeholder.com/120"}
         onSave={handleSavePhoto}
       />
     </div>

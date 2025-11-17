@@ -14,11 +14,11 @@ from app.models.servicio_contratado import Servicio_Contratado
 from app.services.s3_service import s3_service
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/reseñas", tags=["Reseñas"])
+router = APIRouter(prefix="/resenas", tags=["Resenas"])
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-async def crear_reseña_servicio(
+async def crear_resena_servicio(
     id_servicio_contratado: int = Form(...),
     user_email: str = Form(..., description="Correo electrónico del cliente autenticado"),
     calificacion_general: int = Form(...),
@@ -71,7 +71,7 @@ async def crear_reseña_servicio(
             for imagen in imagenes[:5]:  # máximo 5
                 if imagen.filename:
                     extension = imagen.filename.split('.')[-1] if '.' in imagen.filename else 'jpg'
-                    s3_key = f"reseñas/{uuid.uuid4()}.{extension}"
+                    s3_key = f"resenas/{uuid.uuid4()}.{extension}"
 
                     s3_service.upload_file(
                         file_obj=imagen.file,
@@ -107,7 +107,7 @@ async def crear_reseña_servicio(
 
 
 @router.get("/cliente/{user_email}", status_code=status.HTTP_200_OK)
-async def obtener_reseñas_cliente(
+async def obtener_resenas_cliente(
     user_email: str,
     db: Session = Depends(get_db)
 ):
@@ -121,14 +121,14 @@ async def obtener_reseñas_cliente(
             logger.warning(f"Usuario {user_email} no encontrado")
             raise HTTPException(status_code=404, detail="Usuario no encontrado.")
 
-        reseñas = db.query(Reseña_Servicio).filter(
+        resenas = db.query(Reseña_Servicio).filter(
             Reseña_Servicio.id_cliente == usuario.id_usuario
         ).all()
 
         resultado = []
-        for reseña in reseñas:
+        for resena in resenas:
             proveedor = db.query(Proveedor_Servicio).filter(
-                Proveedor_Servicio.id_proveedor == reseña.id_proveedor
+                Proveedor_Servicio.id_proveedor == resena.id_proveedor
             ).first()
 
             usuario_proveedor = None
@@ -191,7 +191,7 @@ async def obtener_reseñas_cliente(
 
 
 @router.get("/proveedor/{id_proveedor}", status_code=status.HTTP_200_OK)
-async def obtener_reseñas_proveedor(
+async def obtener_resenas_proveedor(
     id_proveedor: int,
     db: Session = Depends(get_db)
 ):
@@ -209,14 +209,14 @@ async def obtener_reseñas_proveedor(
         usuario_proveedor = db.query(Usuario).filter(Usuario.id_usuario == proveedor.id_proveedor).first()
 
         # Obtener reseñas recibidas por el proveedor
-        reseñas = db.query(Reseña_Servicio).filter(
+        resenas = db.query(Reseña_Servicio).filter(
             Reseña_Servicio.id_proveedor == id_proveedor
         ).order_by(Reseña_Servicio.fecha_reseña.desc()).all()
 
         resultado = []
-        for reseña in reseñas:
+        for resena in resenas:
             # Info del cliente autor de la reseña
-            cliente_usuario = db.query(Usuario).filter(Usuario.id_usuario == reseña.id_cliente).first()
+            cliente_usuario = db.query(Usuario).filter(Usuario.id_usuario == resena.id_cliente).first()
 
             # Foto de perfil del cliente (pre-firmada si existe)
             foto_cliente_url = None
@@ -231,13 +231,13 @@ async def obtener_reseñas_proveedor(
             calificacion_promedio_cliente = db.query(
                 func.avg(Reseña_Servicio.calificacion_general)
             ).filter(
-                Reseña_Servicio.id_cliente == reseña.id_cliente
+                Reseña_Servicio.id_cliente == resena.id_cliente
             ).scalar() or 0.0
 
             # Nombre del servicio (desde Servicio_Contratado -> Publicacion_Servicio)
             nombre_servicio = "Servicio"
             servicio_contratado = db.query(Servicio_Contratado).filter(
-                Servicio_Contratado.id_servicio_contratado == reseña.id_servicio_contratado
+                Servicio_Contratado.id_servicio_contratado == resena.id_servicio_contratado
             ).first()
             if servicio_contratado and getattr(servicio_contratado, "id_publicacion", None):
                 from app.models.property import Publicacion_Servicio
@@ -257,13 +257,13 @@ async def obtener_reseñas_proveedor(
 
             resultado.append({
                 "reseña": {
-                    "id_reseña": reseña.id_reseña,
-                    "comentario": reseña.comentario,
-                    "calificacion_general": reseña.calificacion_general,
-                    "calificacion_puntualidad": reseña.calificacion_puntualidad,
-                    "calificacion_calidad_servicio": reseña.calificacion_calidad_servicio,
-                    "calificacion_calidad_precio": reseña.calificacion_calidad_precio,
-                    "fecha_reseña": reseña.fecha_reseña.isoformat() if reseña.fecha_reseña else None,
+                    "id_reseña": resena.id_reseña,
+                    "comentario": resena.comentario,
+                    "calificacion_general": resena.calificacion_general,
+                    "calificacion_puntualidad": resena.calificacion_puntualidad,
+                    "calificacion_calidad_servicio": resena.calificacion_calidad_servicio,
+                    "calificacion_calidad_precio": resena.calificacion_calidad_precio,
+                    "fecha_reseña": resena.fecha_reseña.isoformat() if resena.fecha_reseña else None,
                 },
                 "cliente": {
                     "nombre": cliente_usuario.nombre if cliente_usuario else "Cliente",

@@ -42,35 +42,32 @@ class ProveedorPerfilAboutSchema(BaseModel):
 # --- Esquemas para Endpoint 2 ("Mis Servicios") y 3 ("Portafolio") ---
 # -----------------------------------------------------------------
 
+from pydantic import BaseModel
+from typing import List, Optional
+
 class ImagenPublicacionSchema(BaseModel):
     id_imagen: int
     url_imagen: str
-    orden: Optional[int]
 
     class Config:
-        from_attributes = True
+        orm_mode = True
+
 
 class PublicacionServicioSchema(BaseModel):
     id_publicacion: int
-    id_proveedor: int
-    id_categoria: int
     titulo: str
     descripcion: str
-    rango_precio_min: Decimal
-    rango_precio_max: Decimal
-    fecha_publicacion: datetime
-    estado: str
-    vistas: int
-    
-    # --- Relación anidada ---
-    imagen_publicacion: List[ImagenPublicacionSchema] = []
+    rango_precio_min: float
+    rango_precio_max: float
 
-    # --- Campos Calculados (AÑADIDOS) ---
-    calificacion_promedio_publicacion: Optional[Decimal] = None
-    total_reseñas_publicacion: int = 0
+    imagen_publicacion: List[ImagenPublicacionSchema]
+
+    # 🔥 CAMPO QUE FALTABA
+    nombre_proveedor: Optional[str]
 
     class Config:
-        from_attributes = True
+        orm_mode = True
+
 
 # -----------------------------------------------
 # --- Esquemas para Endpoint 4: "Reseñas" ---

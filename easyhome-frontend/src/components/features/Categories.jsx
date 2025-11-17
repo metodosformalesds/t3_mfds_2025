@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from 'react-oidc-context';
 import '../../assets/styles/Categories.css';
 import categoryService from '../../services/categoryService';
 
@@ -7,12 +9,22 @@ function Categories() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const navigate = useNavigate();
+  const auth = useAuth();
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const data = await categoryService.getAll();
-        setCategories(data);
+        console.log('🔍 Datos recibidos de la API:', data);
+        console.log('🔍 Tipo de datos:', typeof data);
+        console.log('🔍 Es array?:', Array.isArray(data));
+        
+        // Asegurar que siempre sea un array
+        const categoriesArray = Array.isArray(data) ? data : [];
+        setCategories(categoriesArray);
       } catch (err) {
+        console.error('❌ Error al cargar categorías:', err);
         setError(err.detail || err.message || 'Error al cargar las categorías');
       } finally {
         setLoading(false);
@@ -28,6 +40,11 @@ function Categories() {
 
   if (error) {
     return <div className="categories-error">Error: {error}</div>;
+  }
+
+  // Verificar que categories sea un array válido
+  if (!Array.isArray(categories) || categories.length === 0) {
+    return <div className="categories-loading">No hay categorías disponibles.</div>;
   }
 
   return (
@@ -55,10 +72,42 @@ function Categories() {
               
               <div className="category-content">
                 <h3 className="category-name">{category.nombre_categoria}</h3>
+
                 {category.descripcion && (
                   <p className="category-description">{category.descripcion}</p>
                 )}
-                <a href="#" className="category-link">Ver catálogo ›</a>
+
+                {/* Botón que manda filtros y soporta login */}
+                <button
+                  className="category-btn"
+                  onClick={() => {
+                    const filtros = {
+                      categorias: [category.id_categoria],
+                      suscriptores: false,
+                      ordenar_por: null,
+                    };
+
+                    if (!auth.isAuthenticated) {
+                      // Guardar señal para ir al feed
+                      sessionStorage.setItem("goToFeedAfterLogin", "1");
+
+                      // Guardar filtros
+                      sessionStorage.setItem(
+                        "feedFiltrosAfterLogin",
+                        JSON.stringify(filtros)
+                      );
+
+                      auth.signinRedirect();
+                    } else {
+                      navigate("/cliente/feed", {
+                        state: { filtrosIniciales: filtros }
+                      });
+                    }
+                  }}
+                >
+                  Ver publicaciones ›
+                </button>
+
               </div>
             </div>
           ))}

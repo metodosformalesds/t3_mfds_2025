@@ -7,7 +7,9 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.database import get_db
+from app.models.alerta_sistema import Alerta_Sistema
 from app.models.servicio_contratado import Servicio_Contratado
+from app.models.user import Proveedor_Servicio
 from app.services.s3_service import s3_service
 
 router = APIRouter(
@@ -117,6 +119,10 @@ def finalizar_servicio(
 
     servicio = (
         db.query(Servicio_Contratado)
+        .options(
+            joinedload(Servicio_Contratado.proveedor_servicio)
+            .joinedload(Proveedor_Servicio.usuario)
+        )
         .filter(Servicio_Contratado.id_servicio_contratado == id_servicio_contratado)
         .first()
     )
@@ -142,6 +148,21 @@ def finalizar_servicio(
     servicio.estado_servicio = "finalizado"
     servicio.fecha_finalizacion = datetime.now(timezone.utc)
 
+    proveedor = getattr(servicio, "proveedor_servicio", None)
+    proveedor_nombre = None
+    if proveedor:
+        proveedor_nombre = proveedor.nombre_completo or getattr(getattr(proveedor, "usuario", None), "nombre", None)
+    if not proveedor_nombre:
+        proveedor_nombre = "Tu proveedor"
+
+    alerta = Alerta_Sistema(
+        id_usuario=servicio.id_cliente,
+        id_servicio_contratado=servicio.id_servicio_contratado,
+        tipo_alerta="servicio_finalizado",
+        mensaje=f"{proveedor_nombre} ha finalizado el servicio."
+    )
+
+    db.add(alerta)
     db.commit()
     db.refresh(servicio)
 

@@ -2,6 +2,7 @@ import '../../assets/styles/Header.css'
 import { useAuth } from "react-oidc-context";
 import { Link } from 'react-router-dom';
 import { isAdmin } from '../../utils/authUtils';
+import { useEffect } from 'react';
 
 function Header() {
   const auth = useAuth();
@@ -11,16 +12,24 @@ function Header() {
   };
 
   const handleLogout = () => {
-    const clientId = "478qnp7vk39jamq13sl8k4sp7t";
-    const logoutUri = "http://localhost:5173";
-    const cognitoDomain = "https://us-east-1gbsgbtrls.auth.us-east-1.amazoncognito.com";
-    
-    // Primero remover el usuario localmente
-    auth.removeUser();
-    
-    // Luego redirigir al logout de Cognito para cerrar la sesión completamente
-    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
-  };
+  const clientId = "478qnp7vk39jamq13sl8k4sp7t";
+  const logoutUri = "http://localhost:5173";
+  const cognitoDomain = "https://us-east-1gbsgbtrls.auth.us-east-1.amazoncognito.com";
+  
+  auth.removeUser();
+  window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+};
+
+  // 🔁 Si el login viene desde "Publicaciones", regresar al feed
+  useEffect(() => {
+    if (auth.isAuthenticated) {
+      const shouldGoToFeed = sessionStorage.getItem("goToFeedAfterLogin");
+      if (shouldGoToFeed === "1") {
+        sessionStorage.removeItem("goToFeedAfterLogin");
+        window.location.href = "/cliente/feed";
+      }
+    }
+  }, [auth.isAuthenticated]);
 
   return (
     <header className="app-header">
@@ -38,9 +47,27 @@ function Header() {
             <span className="text-home">Home</span>
           </Link>
         </div>
+
         <ul className="nav-right">
-          <li><a href="/cliente/feed">Publicaciones</a></li>
-          
+          {/* Publicaciones */}
+          <li>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+
+                if (!auth.isAuthenticated) {
+                  sessionStorage.setItem("goToFeedAfterLogin", "1");
+                  auth.signinRedirect();
+                } else {
+                  window.location.href = "/cliente/feed";
+                }
+              }}
+            >
+              Publicaciones
+            </a>
+          </li>
+
           {auth.isAuthenticated ? (
             <>
               {isAdmin(auth.user) && (
@@ -50,29 +77,42 @@ function Header() {
               )}
               <li>
                 <Link to="/perfil">
-                  👤 Perfil
+                  Perfil
                 </Link>
               </li>
               <li>
-                <a href="#" onClick={(e) => { e.preventDefault(); handleLogout(); }}>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleLogout();
+                  }}
+                >
                   Cerrar Sesión
                 </a>
               </li>
+              {/* Botón de cerrar sesión movido al perfil, eliminado de aquí */}
             </>
           ) : (
             <li>
-              <a href="#" onClick={(e) => { e.preventDefault(); handleLogin(); }}>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLogin();
+                }}
+              >
                 Iniciar Sesión
               </a>
             </li>
           )}
-          
+
           <li><Link to="/subscriptions">Suscripciones</Link></li>
           <li><Link to="/advertise">Anúnciate</Link></li>    
         </ul>
       </nav>
     </header>
-  )
+  );
 }
 
-export default Header
+export default Header;
