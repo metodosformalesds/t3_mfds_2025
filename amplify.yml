@@ -1,0 +1,17 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - cd easyhome-frontend
+        - npm ci --legacy-peer-deps
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: easyhome-frontend/dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - easyhome-frontend/node_modules/**/*

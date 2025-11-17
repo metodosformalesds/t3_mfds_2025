@@ -30,10 +30,12 @@ function AdminCategories() {
     try {
       setLoading(true);
       const data = await categoryService.getAll();
-      setCategories(data);
+      // Asegurar que siempre sea un array
+      setCategories(Array.isArray(data) ? data : []);
       setError(null);
     } catch (err) {
       setError(err.detail || err.message || 'Error al cargar las categorías');
+      setCategories([]); // Array vacío en caso de error
     } finally {
       setLoading(false);
     }

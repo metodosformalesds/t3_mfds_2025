@@ -4,12 +4,12 @@ Database configuration and session management
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from typing import Generator, AsyncGenerator
+from typing import Generator, AsyncGenerator, Optional
 from app.core.config import settings
 
-# Synchronous database engine
+# Synchronous database engine (using psycopg2)
 engine = create_engine(
-    settings.database_url,
+    settings.database_url,  # Already returns sync URL (postgresql://)
     pool_pre_ping=True,  # Verify connections before using them
     echo=settings.DEBUG,  # Log SQL queries in debug mode
     pool_size=10,  # Maximum number of connections to keep in the pool
@@ -23,23 +23,37 @@ SessionLocal = sessionmaker(
     bind=engine
 )
 
-# Asynchronous database engine (for async operations)
-async_engine = create_async_engine(
-    settings.async_database_url,
-    pool_pre_ping=True,
-    echo=settings.DEBUG,
-    pool_size=10,
-    max_overflow=20,
-)
+# Asynchronous engine and session - lazy initialization
+_async_engine: Optional[object] = None
+_async_session_local: Optional[object] = None
 
-# Asynchronous session factory
-AsyncSessionLocal = async_sessionmaker(
-    async_engine,
-    class_=AsyncSession,
-    autocommit=False,
-    autoflush=False,
-    expire_on_commit=False,
-)
+
+def get_async_engine():
+    """Get or create async engine (lazy initialization)"""
+    global _async_engine
+    if _async_engine is None:
+        _async_engine = create_async_engine(
+            settings.async_database_url,
+            pool_pre_ping=True,
+            echo=settings.DEBUG,
+            pool_size=10,
+            max_overflow=20,
+        )
+    return _async_engine
+
+
+def get_async_session_local():
+    """Get or create async session factory (lazy initialization)"""
+    global _async_session_local
+    if _async_session_local is None:
+        _async_session_local = async_sessionmaker(
+            get_async_engine(),
+            class_=AsyncSession,
+            autocommit=False,
+            autoflush=False,
+            expire_on_commit=False,
+        )
+    return _async_session_local
 
 
 def get_db() -> Generator[Session, None, None]:
@@ -68,6 +82,7 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
             result = await db.execute(select(Item))
             return result.scalars().all()
     """
+    AsyncSessionLocal = get_async_session_local()
     async with AsyncSessionLocal() as session:
         try:
             yield session
@@ -138,6 +153,7 @@ async def init_async_db():
         Reporte_Mensual_Premium,
     )
     
+    async_engine = get_async_engine()
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     
