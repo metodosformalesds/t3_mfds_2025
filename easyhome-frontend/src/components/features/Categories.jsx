@@ -58,7 +58,7 @@ function Categories() {
                 {category.descripcion && (
                   <p className="category-description">{category.descripcion}</p>
                 )}
-                <a href="#" className="category-link">Ver catálogo ›</a>
+                <a href="#" className="category-link">Ver publicaciones ›</a>
               </div>
             </div>
           ))}
