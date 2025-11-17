@@ -1,3 +1,9 @@
+# Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+
+# Fecha: 02/11/2025
+
+# Descripción: define la capa de la API responsable de gestionar las categorías de servicios. Proporciona endpoints para crear, leer, actualizar y eliminar categorías, interactuando con la base de datos a través de SQLAlchemy.
+# app/api/v1/endpoints/categories.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
