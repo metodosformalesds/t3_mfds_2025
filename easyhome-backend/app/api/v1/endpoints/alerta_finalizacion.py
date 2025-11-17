@@ -39,20 +39,14 @@ def obtener_alertas(
     }
 
     alertas = (
-        db.query(Alerta_Sistema)
-        .join(
-            Servicio_Contratado,
-            Alerta_Sistema.id_servicio_contratado == Servicio_Contratado.id_servicio_contratado,
-            isouter=True
-        )
-        .join(
-            Reseña_Servicio,
-            Reseña_Servicio.id_servicio_contratado == Servicio_Contratado.id_servicio_contratado,
-            isouter=True
+    db.query(Alerta_Sistema)
+    .join(
+        Servicio_Contratado,
+        Alerta_Sistema.id_servicio_contratado == Servicio_Contratado.id_servicio_contratado,
+        isouter=True
         )
         .filter(Alerta_Sistema.id_usuario == id_usuario)
         .filter(Servicio_Contratado.id_servicio_contratado.isnot(None))
-        .filter(Reseña_Servicio.id_reseña.is_(None))   # solo mostrar alertas de servicios sin reseña
         .order_by(Alerta_Sistema.fecha_envio.desc())
         .all()
     )
