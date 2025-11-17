@@ -16,6 +16,7 @@ import ClienteFeed from '../../pages/cliente/feed';
 import ProviderProfile from '../../pages/cliente/alerta_contratacion';
 import ProveedorPublicProfile from '../../pages/trabajador/perfil_publico';
 import ReviewPage from '../../pages/cliente/Formulario_reseña';
+import ReportPage from '../../pages/trabajador/reporte';
 
 
 // Páginas de Trabajador
@@ -100,6 +101,15 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['Clientes']}>
             <ReviewPage />
+          </ProtectedRoute>
+        }
+      />
+      
+      <Route 
+        path="/cliente/reporte"
+        element={
+          <ProtectedRoute allowedRoles={['Clientes']}>
+            <ReportPage />
           </ProtectedRoute>
         }
       />

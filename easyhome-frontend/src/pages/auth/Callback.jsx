@@ -10,51 +10,30 @@ function Callback() {
   const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
-    const syncUser = async () => {
-      if (auth.isAuthenticated && auth.user && !syncing) {
-        setSyncing(true);
-        
-        try {
-          console.log('🔄 Sincronizando usuario con backend...');
-          console.log('User profile:', auth.user.profile);
-          
-          // Llamar a sync-cognito-user
-          const response = await apiClient.post('/api/v1/auth/sync-cognito-user', {
-            email: auth.user.profile.email,
-            cognito_sub: auth.user.profile.sub,
-            name: auth.user.profile.name || auth.user.profile.email.split('@')[0],
-            phone: auth.user.profile.phone_number || null,
-            cognito_groups: auth.user.profile['cognito:groups'] || ['Clientes']
+    if (auth.isAuthenticated) {
+      const redirectData = sessionStorage.getItem("afterLoginRedirect");
+
+      if (redirectData) {
+        sessionStorage.removeItem("afterLoginRedirect");
+
+        const parsed = JSON.parse(redirectData);
+
+        // Publicaciones o categorías
+        if (parsed.goToFeed) {
+          navigate("/cliente/feed", {
+            replace: true,
+            state: parsed.filtrosIniciales
+              ? { filtrosIniciales: parsed.filtrosIniciales }
+              : {}
           });
-
-          console.log('✅ Usuario sincronizado:', response.data);
-
-          // Guardar información adicional en localStorage
-          localStorage.setItem('user_id', response.data.user_id);
-          localStorage.setItem('user_groups', JSON.stringify(response.data.groups));
-          localStorage.setItem('user_email', auth.user.profile.email);
-
-          // Redirigir al home
-          navigate('/');
-        } catch (err) {
-          console.error('❌ Error al sincronizar usuario:', err);
-          setError('Error al sincronizar con el servidor. Por favor intenta de nuevo.');
+          return;
         }
       }
-    };
 
-    syncUser();
-  }, [auth.isAuthenticated, auth.user, navigate, syncing]);
-
-  if (error) {
-    return (
-      <div style={{ textAlign: 'center', marginTop: '2rem', color: 'red' }}>
-        <h2>Error</h2>
-        <p>{error}</p>
-        <button onClick={() => navigate('/')}>Volver al inicio</button>
-      </div>
-    );
-  }
+      // Default
+      navigate('/', { replace: true });
+    }
+  }, [auth.isAuthenticated, navigate]);
 
   return (
     <div style={{ textAlign: 'center', marginTop: '2rem' }}>

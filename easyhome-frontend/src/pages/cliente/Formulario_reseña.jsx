@@ -1,6 +1,7 @@
 // src/pages/cliente/Formulario_reseña.jsx
 import "../../assets/styles/reseñaservicio.css";
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from 'react-oidc-context';
 import reviewService from '../../services/reseñaservicio';
 
@@ -18,6 +19,7 @@ function ReviewPage() {
   const [idServicioContratado, setIdServicioContratado] = useState(null);
 
   const auth = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const cargarInfoServicio = async () => {
@@ -171,10 +173,29 @@ function ReviewPage() {
       setFotos([]);
       setRecomendacion(null);
 
-      // Redirigir después de 2 segundos
-      setTimeout(() => {
-        window.location.href = '/servicios';
-      }, 2000);
+      // Navegar a la sección de Reseñas, pasando la nueva reseña para vista previa
+      const newReview = {
+        reseña: {
+          id_reseña: response.id_reseña,
+          comentario: comentario || '',
+          calificacion_general: generalRating,
+          calificacion_puntualidad: puntualidadRating,
+          calificacion_calidad_servicio: calidadServicio,
+          calificacion_calidad_precio: relacionCalidadPrecio,
+          fecha_reseña: new Date().toISOString(),
+        },
+        cliente: {
+          email: userEmail,
+        },
+        proveedor: {
+          nombre: (servicioInfo && servicioInfo.nombre_proveedor) || 'Proveedor',
+          servicio: (servicioInfo && servicioInfo.nombre_servicio) || 'Servicio',
+          foto_perfil: (servicioInfo && servicioInfo.foto_perfil) || null,
+        },
+        baseImageUrl: '',
+      };
+
+      navigate('/perfil', { state: { goToTab: 'resenasRealizadas', newReview } });
       
     } catch (error) {
       console.error("Error al crear la reseña:", error);

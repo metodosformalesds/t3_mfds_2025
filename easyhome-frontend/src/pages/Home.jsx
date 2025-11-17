@@ -1,9 +1,14 @@
-import { useState } from 'react'
+import { useState,  useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from 'react-oidc-context'
 import HeroSection from '../components/features/HeroSection'
 import Categories from '../components/features/Categories'
 import { Button } from '../components/ui'
+import { useUserProfile } from "../hooks/useUserProfile";
+import { useAlerts } from "../hooks/useAlerts";
+import ServiceFinishedAlert from "./cliente/alerta_finalizacion";
+import api from "../config/api";
+
 import '../assets/styles/BeneficiosEH_HomePage.css'
 import "../assets/styles/postulate.css"
 import "../assets/styles/como_funciona.css"
@@ -24,8 +29,45 @@ function Home() {
     }
   }
 
+  const { userData } = useUserProfile();
+  const userId = userData?.id_usuario;
+  const { latestAlert, fetchAlerts } = useAlerts(userId);
+
+  const [showFinishedAlert, setShowFinishedAlert] = useState(false);
+
+  useEffect(() => {
+    if (
+      latestAlert?.tipo_alerta === "servicio_finalizado" &&
+      latestAlert?.leida === false
+    ) {
+      setShowFinishedAlert(true);
+    } else {
+      setShowFinishedAlert(false);
+    }
+  }, [latestAlert]);
+
+
   return (
     <>
+      <ServiceFinishedAlert
+        isOpen={showFinishedAlert}
+        alert={latestAlert}
+
+        onClose={async () => {
+          await api.put(`/api/v1/alertas/${latestAlert.id_alerta}/marcar-leida`);
+          fetchAlerts();
+          setShowFinishedAlert(false);
+        }}
+
+        onReview={async () => {
+          await api.put(`/api/v1/alertas/${latestAlert.id_alerta}/marcar-leida`);
+          fetchAlerts();
+          navigate(`/cliente/resena?id_servicio_contratado=${latestAlert.id_servicio_contratado}`, {
+            state: { proveedor: latestAlert.proveedor }
+          });
+        }}
+      />
+
       <HeroSection />
       <Categories />
       
