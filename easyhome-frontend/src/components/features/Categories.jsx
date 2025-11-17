@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../../assets/styles/Categories.css';
 import categoryService from '../../services/categoryService';
 
@@ -6,6 +7,8 @@ function Categories() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -58,7 +61,25 @@ function Categories() {
                 {category.descripcion && (
                   <p className="category-description">{category.descripcion}</p>
                 )}
-                <a href="#" className="category-link">Ver publicaciones ›</a>
+
+                {/* 🔥 REDIRECCIÓN CON FILTRO */}
+                <button
+                  className="category-link"
+                  onClick={() =>
+                    navigate("/publicaciones", {
+                      state: {
+                        filtrosIniciales: {
+                          categorias: [category.id_categoria],
+                          suscriptores: false,
+                          ordenar_por: null
+                        }
+                      }
+                    })
+                  }
+                >
+                  Ver publicaciones ›
+                </button>
+
               </div>
             </div>
           ))}
