@@ -1,11 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import api from '../../config/api';
+import reviewService from '../../services/reseñaservicio';
+import { useProviderServices } from '../../hooks/useProviderServices';
 
 function AcercaDe({idProveedor, isPublicProfile = false, providerName = ""}) {
   const [proveedorData, setProveedorData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Estados para estadísticas dinámicas
+  const [avgRating, setAvgRating] = useState(null);
+  const { finishedServices } = useProviderServices(idProveedor);
 
   useEffect(() => {
     const fetchProveedorData = async () => {
@@ -29,6 +35,42 @@ function AcercaDe({idProveedor, isPublicProfile = false, providerName = ""}) {
 
     fetchProveedorData();
   }, [idProveedor]);
+  
+  // Cargar reseñas del proveedor y calcular promedio de calificación general
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      if (!idProveedor) return;
+      try {
+        const data = await reviewService.getProveedorReseñas(idProveedor);
+        const ratings = (Array.isArray(data) ? data : [])
+          .map((r) => Number(r?.reseña?.calificacion_general))
+          .filter((n) => Number.isFinite(n));
+        if (!mounted) return;
+        if (ratings.length) {
+          const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+          setAvgRating(avg);
+        } else {
+          setAvgRating(null);
+        }
+      } catch (_) {
+        if (mounted) setAvgRating(null);
+      }
+    };
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [idProveedor]);
+  
+  const finishedServicesCount = useMemo(() => {
+    return Array.isArray(finishedServices) ? finishedServices.length : 0;
+  }, [finishedServices]);
+  
+  const satisfactionPercent = useMemo(() => {
+    if (!Number.isFinite(avgRating)) return null;
+    return Math.round((avgRating / 5) * 100);
+  }, [avgRating]);
 
   if (!idProveedor) {
     return (
@@ -85,28 +127,19 @@ function AcercaDe({idProveedor, isPublicProfile = false, providerName = ""}) {
         </div>
       </section>
 
-      {/* Estadísticas */}
+      {/* Estadísticas dinámicas */}
       <section className="estadisticas-section">
         <h3>Estadísticas</h3>
         <div className="stats-grid">
           <div className="stat-item">
-            <span className="stat-value">{proveedorData.cantidad_trabajos_realizados}</span>
-            <span className="stat-label">Trabajos realizados</span>
+            <span className="stat-value">{finishedServicesCount}</span>
+            <span className="stat-label">Servicios finalizados</span>
           </div>
           <div className="stat-item">
             <span className="stat-value">
-              {proveedorData.calificacion_promedio ? 
-                Number(proveedorData.calificacion_promedio).toFixed(1) : 'N/A'}
+              {satisfactionPercent != null ? `${satisfactionPercent}%` : "--"}
             </span>
-            <span className="stat-label">Calificación promedio</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-value">{proveedorData.total_reseñas}</span>
-            <span className="stat-label">Reseñas</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-value">{proveedorData.años_activo}</span>
-            <span className="stat-label">Años activo</span>
+            <span className="stat-label">Satisfacción</span>
           </div>
         </div>
       </section>

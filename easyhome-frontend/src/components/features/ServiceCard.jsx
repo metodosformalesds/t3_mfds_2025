@@ -40,7 +40,8 @@ const ServiceCard = ({ service, onReview }) => {
     isPremium, 
     date, 
     status, 
-    canReview 
+    canReview,
+    clientRating
   } = service;
 
   // Determina la clase CSS para el estado del servicio
@@ -68,6 +69,9 @@ const ServiceCard = ({ service, onReview }) => {
     if (!name) return 'PR';
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
+
+  // DEBUG: Ver si clientRating llega correctamente
+  console.log('🎯 ServiceCard - clientRating:', clientRating, 'para servicio:', service.id, 'status:', status);
 
   return (
     // Clase principal para el contenedor de la tarjeta
@@ -116,10 +120,19 @@ const ServiceCard = ({ service, onReview }) => {
           </p>
           
           <div className="rating-info">
-             {/* Integración del componente SVG de la Estrella */}
-             <StarIcon /> 
-             <span>{providerRating > 0 ? providerRating.toFixed(1) : 'Sin calificación'}</span>
-             {providerReviews > 0 && <span className="review-count">({providerReviews})</span>}
+             {/* Solo mostrar calificación si existe (cliente o proveedor) */}
+             {(clientRating != null && clientRating > 0) ? (
+               <>
+                 <StarIcon /> 
+                 <span>{clientRating.toFixed(1)} (Tu calificación)</span>
+               </>
+             ) : (providerRating > 0) ? (
+               <>
+                 <StarIcon /> 
+                 <span>{providerRating.toFixed(1)}</span>
+                 {providerReviews > 0 && <span className="review-count">({providerReviews})</span>}
+               </>
+             ) : null}
           </div>
         </div>
       </div>
