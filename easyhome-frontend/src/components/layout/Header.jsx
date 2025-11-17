@@ -50,11 +50,7 @@ function Header() {
                   Perfil
                 </Link>
               </li>
-              <li>
-                <a href="#" onClick={(e) => { e.preventDefault(); handleLogout(); }}>
-                  Cerrar Sesión
-                </a>
-              </li>
+              {/* Botón de cerrar sesión movido al perfil, eliminado de aquí */}
             </>
           ) : (
             <li>
