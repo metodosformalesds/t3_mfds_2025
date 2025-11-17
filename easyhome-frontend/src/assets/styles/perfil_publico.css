@@ -214,3 +214,39 @@
 }
 
 
+.contact-buttons-section {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.e-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  color: white;
+  transition: 0.2s ease;
+}
+
+.mail-button {
+  background-color: #183b4e;
+}
+
+.mail-button:hover {
+  background-color: #27548a;
+}
+
+.whatsapp-button {
+  background-color: #1ebe57;
+}
+
+.whatsapp-button:hover {
+  background-color: #28d165;
+}
