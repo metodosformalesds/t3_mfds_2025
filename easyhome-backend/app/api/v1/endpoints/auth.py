@@ -1,3 +1,8 @@
+# Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+
+# Fecha: 02/11/2025
+
+# Descripción: define la capa de la API responsable de gestionar la identidad de los usuarios y su sincronización con Amazon Cognito. Actúa como el punto de enlace entre el sistema de identidad externo (Cognito) y la base de datos de la aplicación.
 # app/api/v1/endpoints/auth.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
