@@ -169,8 +169,19 @@ def sync_cognito_user(user_data: CognitoUserSync, db: Session = Depends(get_db))
 @router.get("/user-info/{email}")
 def get_user_info(email: str, db: Session = Depends(get_db)):
     """
-    Obtiene información del usuario por email.
+    Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+    Descripción: Obtiene información del usuario por email.
     Incluye id_proveedor si el usuario es un trabajador aprobado.
+    
+    Parámetros:
+        email (str): Correo electrónico del usuario a buscar.
+        db (Session): Sesión de la base de datos inyectada por dependencia.
+    
+    Retorna:
+        dict: Información detallada del usuario, incluyendo el id_proveedor si aplica.
+        
+    Genera:
+        HTTPException 404: Si el usuario no es encontrado.
     """
     # ORIGINAL: búsqueda de usuario
     user = db.query(Usuario).filter(Usuario.correo_electronico == email).first()
