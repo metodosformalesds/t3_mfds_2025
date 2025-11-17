@@ -1,111 +1,115 @@
 import '../../assets/styles/Publicaciones.css';
 
+export default function Publicaciones({ publicacionData, onVerPerfil }) {
+  if (!publicacionData) return null;
 
-// 1. Aceptar 'publicacionData' como prop
-export default function Publicaciones({ publicacionData, onVerPerfil  }) {
-        
-    // Usamos la estructura de la respuesta del endpoint 'listar_publicaciones'
-    const {
-        id_publicacion,
-        id_proveedor,
-        descripcion_corta: descripcion, 
-        rango_precio_min,
-        rango_precio_max,
-        url_imagen_portada, 
-        
-        // Datos del Proveedor
-        nombre_proveedor,
-        calificacion_proveedor,
-        
-        total_reseñas_proveedor = publicacionData.total_reseñas_proveedor || 127, 
-        etiquetas = publicacionData.etiquetas || ["Confiabilidad", "Mantenimiento", "Alta experiencia"],
-        proveedor = {}
-    } = publicacionData || {}; 
+  // Extraemos datos de la publicación
+  const {
+    id_publicacion,
+    id_proveedor,
+    nombre_proveedor,
+    descripcion_corta: descripcion,
+    rango_precio_min,
+    rango_precio_max,
+    url_imagen_portada,
+    foto_perfil_proveedor,
+    calificacion_proveedor = 0,
+    total_reseñas_proveedor = 0,
+    id_plan_suscripcion,
+    imagen_publicacion = []
+  } = publicacionData;
 
-    // 2. Determinar si es Premium
-    const esPremium = publicacionData.id_plan_suscripcion !== null && publicacionData.id_plan_suscripcion !== undefined;
+  // ¿Es premium?
+  const esPremium =
+    id_plan_suscripcion !== null && id_plan_suscripcion !== undefined;
 
+  // Rango de precio
+  const rangoPrecioFormateado = `$${rango_precio_min?.toFixed(2) || '0.00'} - $${rango_precio_max?.toFixed(2) || '0.00'}`;
 
-    // 3. Helper para formatear el rango de precios
-    const rangoPrecioFormateado = `$${rango_precio_min?.toFixed(0) || '?'}-$${rango_precio_max?.toFixed(0) || '?'}`;
+  // Avatar del proveedor (foto de perfil, y si no, alguna imagen de la publicación como fallback)
+  const avatarUrl =
+    foto_perfil_proveedor ||
+    (Array.isArray(imagen_publicacion) &&
+      imagen_publicacion.length > 0 &&
+      imagen_publicacion[0].url_imagen) ||
+    'https://i.imgur.com/placeholder.png';
 
+  // Portada / imágenes a mostrar en el card
+  const tieneGaleria =
+    Array.isArray(imagen_publicacion) && imagen_publicacion.length > 0;
 
-    return (
-        <section className="service-listings-section">
-            <div className="publicacion-card">
-                
-                <div className="publicacion-header">
-                    <div className="publicacion-perfil">
-                        
-                        {/* Avatar: Usamos la URL pre-firmada */}
-                        <img 
-                            // Usamos el campo foto_perfil_proveedor del resultado, si está disponible, 
-                            // o url_imagen_portada como fallback.
-                            src={publicacionData.foto_perfil_proveedor || url_imagen_portada}
-                            alt={`Foto de perfil de ${nombre_proveedor}`} 
-                            className="perfil-avatar" 
-                        />
-                        
-                        <div>
-                            {/* Nombre del Proveedor */}
-                            <h3 className="perfil-nombre">
-                                {nombre_proveedor || "Proveedor sin nombre"}
-                            </h3>
-                            
-                            {/* Rating y opiniones */}
-                            <div className="perfil-rating">
-                                <span className="rating-estrella">★</span>
-                                <span>{calificacion_proveedor || 0}</span>
-                            </div>
-                        </div>
-                    </div>
+  const portadaUrl =
+    url_imagen_portada ||
+    (tieneGaleria ? imagen_publicacion[0].url_imagen : null);
 
-                    {/* Etiqueta Premium */}
-                    {esPremium && (
-                        <span className="badge-premium">Premium</span>
-                    )}
-                </div>
+  return (
+    <div className="publicacion-card">
+      {/* HEADER */}
+      <div className="publicacion-header">
+        <div className="publicacion-perfil">
+          <img
+            src={avatarUrl}
+            alt={`Foto de ${nombre_proveedor || 'Proveedor'}`}
+            className="perfil-avatar"
+          />
 
-                {/* Resumen */}
-                <p className="publicacion-descripcion">{descripcion}</p>
+          <div>
+            <h3 className="perfil-nombre">
+              {nombre_proveedor || 'Proveedor'}
+            </h3>
 
-                {/* Contenedor de Etiquetas */}
-                <div className="etiquetas-contenedor">
-                    {(etiquetas || []).map((tag) => (
-                        <span key={tag} className="etiqueta-item">
-                            {tag}
-                        </span>
-                    ))}
-                </div>
-
-                {/* Imágenes (Galería) - Mapeamos la URL de portada (solo la portada está disponible en el endpoint) */}
-                <div className="imagenes-contenedor">
-                    {url_imagen_portada ? (
-                        <img src={url_imagen_portada} alt={`Muestra de ${nombre_proveedor}`} className="imagen-muestra" />
-                    ) : (
-                        <p>No hay imágenes disponibles.</p>
-                    )}
-                </div>
-                
-                {/* Footer (Precio y Botón) */}
-                <div className="publicacion-footer">
-                    {/* Rango de precio */}
-                    <p className="rango-precio">
-                        Rango de precio: <strong>{rangoPrecioFormateado}</strong>
-                    </p>
-
-                  <button
-                        type="button"
-                        className="boton-perfil"
-                        onClick={onVerPerfil}
-                    >
-                        Ir al perfil
-                    </button>
-
-                    
-                </div>
-
+            <div className="perfil-rating">
+              <span className="rating-estrella">★</span>
+              <span>{calificacion_proveedor}</span>
+              <span className="rating-count">
+                ({total_reseñas_proveedor})
+              </span>
             </div>
-        </section>
-    );
+          </div>
+        </div>
+
+        {esPremium && <span className="badge-premium">Premium</span>}
+      </div>
+
+      {/* DESCRIPCIÓN */}
+      <p className="publicacion-descripcion">{descripcion}</p>
+
+      {/* IMÁGENES (como MisServicios) */}
+      <div className="imagenes-contenedor">
+        {tieneGaleria ? (
+          imagen_publicacion.map((img) => (
+            <img
+              key={img.id_imagen}
+              src={img.url_imagen}
+              alt="Imagen del servicio"
+              className="imagen-muestra"
+            />
+          ))
+        ) : portadaUrl ? (
+          <img
+            src={portadaUrl}
+            alt="Imagen del servicio"
+            className="imagen-muestra"
+          />
+        ) : (
+          <p>No hay imágenes disponibles.</p>
+        )}
+      </div>
+
+      {/* FOOTER */}
+      <div className="publicacion-footer">
+        <p className="rango-precio">
+          Rango de precio: <strong>{rangoPrecioFormateado}</strong>
+        </p>
+
+        <button
+          type="button"
+          className="boton-perfil"
+          onClick={onVerPerfil}
+        >
+          Ir al perfil
+        </button>
+      </div>
+    </div>
+  );
 }
