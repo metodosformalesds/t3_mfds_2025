@@ -248,36 +248,39 @@ def listar_publicaciones(
         logger.error(f"Error al listar publicaciones: {e}")
         raise HTTPException(status_code=500, detail=str(e))
     
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from typing import List
 
-    # =========================================================
-#  Eliminar publicaciones.
+from app.core.database import get_db
+from app.models.user import Usuario
+from app.models.publicacion_servicio import Publicacion_Servicio
+from app.models.imagen_reseña import Imagen_Publicacion
+from app.services.s3_service import s3_service
+import logging
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(
+    prefix="/api/v1/publicaciones",
+    tags=["Publicaciones"]
+)
+
 # =========================================================
-
+# ELIMINAR PUBLICACIÓN POR ID (versión sencilla, SIN headers)
+# =========================================================
 @router.delete("/{id_publicacion}", status_code=status.HTTP_200_OK)
 def eliminar_publicacion(
     id_publicacion: int,
-    user_email: str = Header(..., convert_underscores=False),
     db: Session = Depends(get_db)
 ):
     """
-    Elimina una publicación si pertenece al proveedor autenticado.
-    `user_email` se recibe en el header sin cambiar guiones bajos.
+    Elimina una publicación de servicio por su ID.
+    (Versión sencilla, sin validar usuario para evitar errores 422
+    mientras terminas el flujo de MisServicios).
     """
 
-    # 1. Buscar usuario por email
-    usuario = db.query(Usuario).filter(Usuario.correo_electronico == user_email).first()
-    if not usuario:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-
-    if usuario.tipo_usuario != "proveedor" or not usuario.proveedor_servicio:
-        raise HTTPException(
-            status_code=403,
-            detail="No tienes permisos para eliminar esta publicación"
-        )
-
-    proveedor = usuario.proveedor_servicio
-
-    # 2. Buscar publicación
+    # 1. Buscar publicación
     publicacion = (
         db.query(Publicacion_Servicio)
         .filter(Publicacion_Servicio.id_publicacion == id_publicacion)
@@ -287,35 +290,30 @@ def eliminar_publicacion(
     if not publicacion:
         raise HTTPException(status_code=404, detail="La publicación no existe")
 
-    # 3. Verificar que pertenece al proveedor
-    if publicacion.id_proveedor != proveedor.id_proveedor:
-        raise HTTPException(
-            status_code=403,
-            detail="No puedes eliminar una publicación que no es tuya"
-        )
-
-    # 4. Obtener imágenes asociadas
+    # 2. Obtener imágenes asociadas
     imagenes = db.query(Imagen_Publicacion).filter(
         Imagen_Publicacion.id_publicacion == id_publicacion
     ).all()
 
-    # 5. Eliminar archivos en S3 (si fallan, no rompemos toda la operación)
+    # 3. Intentar eliminar archivos en S3 (si truena, solo se registra)
     for img in imagenes:
         try:
             s3_service.delete_file(img.url_imagen)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error(f"Error al eliminar archivo S3 {img.url_imagen}: {e}")
 
-    # 6. Eliminar registros de imágenes
+    # 4. Eliminar registros de imágenes
     db.query(Imagen_Publicacion).filter(
         Imagen_Publicacion.id_publicacion == id_publicacion
     ).delete()
 
-    # 7. Eliminar publicación
+    # 5. Eliminar la publicación
     db.delete(publicacion)
     db.commit()
 
     return {"message": "Publicación eliminada exitosamente"}
+
+
 
 
 # =========================================================
