@@ -58,28 +58,28 @@ function Categories() {
               
               <div className="category-content">
                 <h3 className="category-name">{category.nombre_categoria}</h3>
+
                 {category.descripcion && (
                   <p className="category-description">{category.descripcion}</p>
                 )}
 
-                {/* 🔥 REDIRECCIÓN CON FILTRO */}
-                <button
-                  className="category-link"
-                  onClick={() =>
-                    navigate("/publicaciones", {
-                      state: {
-                        filtrosIniciales: {
-                          categorias: [category.id_categoria],
-                          suscriptores: false,
-                          ordenar_por: null
-                        }
-                      }
-                    })
-                  }
-                >
-                  Ver publicaciones ›
-                </button>
-
+                {/* 👉 BOTÓN QUE FILTRA Y REDIRIGE */}
+  <button
+  className="category-btn"
+  onClick={() =>
+    navigate("/cliente/feed", {
+      state: {
+        filtrosIniciales: {
+          categorias: [category.id_categoria],
+          suscriptores: false,
+          ordenar_por: null,
+        },
+      },
+    })
+  }
+>
+  Ver publicaciones ›
+</button>
               </div>
             </div>
           ))}
