@@ -60,9 +60,8 @@ export default function Publicaciones({ publicacionData, onVerPerfil }) {
 
       {/* DESCRIPCIÓN */}
       <p className="publicacion-descripcion">
-        {descripcion_corta}
-      </p>
-
+  {publicacionData.descripcion_completa || publicacionData.descripcion_corta}
+</p>
       {/* IMÁGENES */}
       <div className="imagenes-contenedor">
         {tieneGaleria ? (
