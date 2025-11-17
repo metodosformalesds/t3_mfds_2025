@@ -250,20 +250,21 @@ def listar_publicaciones(
     
 
     # =========================================================
-# 2️⃣ Eliminar publicaciones.
+#  Eliminar publicaciones.
 # =========================================================
 
-@router.delete("/{id_publicacion}", status_code=200)
+@router.delete("/{id_publicacion}", status_code=status.HTTP_200_OK)
 def eliminar_publicacion(
     id_publicacion: int,
-    user_email: str = Header(...),
+    user_email: str = Header(..., convert_underscores=False),
     db: Session = Depends(get_db)
 ):
     """
     Elimina una publicación si pertenece al proveedor autenticado.
+    `user_email` se recibe en el header sin cambiar guiones bajos.
     """
 
-    # Buscar usuario por email
+    # 1. Buscar usuario por email
     usuario = db.query(Usuario).filter(Usuario.correo_electronico == user_email).first()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
@@ -276,7 +277,7 @@ def eliminar_publicacion(
 
     proveedor = usuario.proveedor_servicio
 
-    # Buscar publicación
+    # 2. Buscar publicación
     publicacion = (
         db.query(Publicacion_Servicio)
         .filter(Publicacion_Servicio.id_publicacion == id_publicacion)
@@ -286,31 +287,31 @@ def eliminar_publicacion(
     if not publicacion:
         raise HTTPException(status_code=404, detail="La publicación no existe")
 
-    # Verificar que pertenece al proveedor
+    # 3. Verificar que pertenece al proveedor
     if publicacion.id_proveedor != proveedor.id_proveedor:
         raise HTTPException(
             status_code=403,
             detail="No puedes eliminar una publicación que no es tuya"
         )
 
-    # Obtener imágenes
+    # 4. Obtener imágenes asociadas
     imagenes = db.query(Imagen_Publicacion).filter(
         Imagen_Publicacion.id_publicacion == id_publicacion
     ).all()
 
-    # Eliminar imágenes de S3
+    # 5. Eliminar archivos en S3 (si fallan, no rompemos toda la operación)
     for img in imagenes:
         try:
             s3_service.delete_file(img.url_imagen)
         except Exception:
             pass
 
-    # Eliminar registros de imágenes
+    # 6. Eliminar registros de imágenes
     db.query(Imagen_Publicacion).filter(
         Imagen_Publicacion.id_publicacion == id_publicacion
     ).delete()
 
-    # Eliminar publicación
+    # 7. Eliminar publicación
     db.delete(publicacion)
     db.commit()
 
