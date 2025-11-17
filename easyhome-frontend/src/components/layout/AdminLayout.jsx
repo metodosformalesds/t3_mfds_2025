@@ -2,6 +2,7 @@ import { useState } from 'react';
 import AdminSidebar from './AdminSidebar';
 import AdminDashboard from '../../pages/admin/AdminDashboard';
 import AdminCategories from '../../pages/admin/AdminCategories';
+import AdminPublicaciones from '../../pages/admin/AdminPublicaciones';
 import AdminSolicitudes from '../../pages/admin/AdminSolicitudes';
 import '../../assets/styles/AdminLayout.css';
 
@@ -14,6 +15,8 @@ function AdminLayout() {
         return <AdminDashboard />;
       case 'categorias':
         return <AdminCategories />;
+      case 'publicaciones':
+        return <AdminPublicaciones />;
       case 'postulaciones':
         return <AdminSolicitudes />;
       default:
