@@ -8,7 +8,7 @@ import "../assets/styles/sections/AcercaDe.css";
 import "../assets/styles/sections/MisServicios.css";
 import "../assets/styles/sections/Portafolio.css";
 
-// Componentes de las secciones
+// Componentes internos
 import CambiarDatos from './sections/CambiarDatos';
 import ServiciosContratados from './sections/ServiciosContratados';
 import ResenasRealizadas from './sections/ResenasRealizadas';
@@ -21,6 +21,7 @@ import EditarFotoModal from '../components/common/EditarFotoModal';
 
 function Perfil() {
   const auth = useAuth();
+
   const { 
     userData, 
     loading, 
@@ -30,15 +31,14 @@ function Perfil() {
     uploadProfilePhoto,
     getProfilePhotoUrl 
   } = useUserProfile();
+
   const { isWorker, isClient } = useUserCapabilities();
-  
-  // Por defecto, si es trabajador muestra "Acerca de", si no "Cambiar datos"
+
   const [activeTab, setActiveTab] = useState(isWorker ? 'acercaDe' : 'cambiarDatos');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
-  // Cargar foto de perfil cuando el usuario esté disponible
   useEffect(() => {
     const loadProfilePhoto = async () => {
       if (userData?.id_usuario) {
@@ -74,30 +74,28 @@ function Perfil() {
 
   const { nombres, apellidos } = splitName(userData.nombre);
   const edad = calculateAge(userData.fecha_nacimiento);
-  
-  // Determinar badge principal (prioridad a Trabajador si tiene ambos roles)
+
   const getBadge = () => {
     if (isWorker) return 'Proveedor verificado';
     if (isClient) return 'Cliente';
     return 'Usuario';
   };
 
-  // Tabs de navegación
+  // Tabs
   const clientTabs = [
-    { id: 'cambiarDatos', label: 'Cambiar datos' },
-    { id: 'serviciosContratados', label: 'Servicios contratados' },
-    { id: 'resenasRealizadas', label: 'Reseñas realizadas' }
+    { id: "cambiarDatos", label: "Cambiar datos" },
+    { id: "serviciosContratados", label: "Servicios contratados" },
+    { id: "resenasRealizadas", label: "Reseñas realizadas" }
   ];
 
   const workerTabs = [
-    { id: 'acercaDe', label: 'Acerca de' },
-    { id: 'misServicios', label: 'Mis servicios' },
-    { id: 'portafolio', label: 'Portafolio' },
-    { id: 'resenas', label: 'Reseñas' },
-    { id: 'servicios', label: 'Servicios' }
+    { id: "acercaDe", label: "Acerca de" },
+    { id: "misServicios", label: "Mis servicios" },
+    { id: "portafolio", label: "Portafolio" },
+    { id: "resenas", label: "Reseñas" },
+    { id: "servicios", label: "Servicios" }
   ];
 
-  // Combinar tabs según el rol
   const tabs = isWorker ? [...clientTabs, ...workerTabs] : clientTabs;
 
   const handleSavePhoto = async (file) => {
@@ -110,35 +108,32 @@ function Perfil() {
         setProfilePhoto(result.url);
         return result;
       } else {
-        console.error('Error al subir foto:', result.error);
         return result;
       }
     } catch (error) {
-      console.error('Error inesperado al subir foto:', error);
-      return { success: false, error: 'Error inesperado al subir la foto' };
+      return { success: false, error: "Error inesperado" };
     } finally {
       setUploadingPhoto(false);
     }
   };
 
-  // Renderizar el contenido según la tab activa
   const renderContent = () => {
     switch (activeTab) {
-      case 'cambiarDatos':
+      case "cambiarDatos":
         return <CambiarDatos userData={userData} splitName={splitName} calculateAge={calculateAge} />;
-      case 'serviciosContratados':
+      case "serviciosContratados":
         return <ServiciosContratados />;
-      case 'resenasRealizadas':
+      case "resenasRealizadas":
         return <ResenasRealizadas />;
-      case 'acercaDe':
+      case "acercaDe":
         return <AcercaDe idProveedor={userData.id_proveedor} />;
-      case 'misServicios':
+      case "misServicios":
         return <MisServicios idProveedor={userData.id_proveedor} />;
-      case 'portafolio':
+      case "portafolio":
         return <Portafolio idProveedor={userData.id_proveedor} />;
-      case 'resenas':
+      case "resenas":
         return <Resenas />;
-      case 'servicios':
+      case "servicios":
         return <Servicios idProveedor={userData.id_proveedor} />;
       default:
         return <CambiarDatos userData={userData} splitName={splitName} calculateAge={calculateAge} />;
@@ -147,34 +142,37 @@ function Perfil() {
 
   return (
     <div className="perfil-container">
-      {/* Sidebar con info del usuario */}
+      
+      {/* SIDEBAR */}
       <aside className="perfil-sidebar">
         <div className="perfil-avatar-container">
           <div className="perfil-avatar">
             <img 
-              src={profilePhoto || auth.user?.profile?.picture || 'https://via.placeholder.com/120'} 
+              src={profilePhoto || auth.user?.profile?.picture || "https://via.placeholder.com/120"} 
               alt={userData.nombre}
             />
           </div>
-          <button 
-            className="edit-photo-btn"
-            onClick={() => setIsModalOpen(true)}
-            title="Editar foto de perfil"
-          >
-            ✏️
-          </button>
+
+          {auth.user?.profile?.email === userData.correo_electronico && (
+            <button 
+              className="edit-photo-btn"
+              onClick={() => setIsModalOpen(true)}
+            >
+              ✏️
+            </button>
+          )}
         </div>
         
         <h2 className="perfil-nombre">{userData.nombre}</h2>
-        
         <span className="perfil-badge">{getBadge()}</span>
         
-        {/* Estadísticas (estáticas por ahora) */}
+        {/* Stats */}
         <div className="perfil-stats">
           <div className="stat-item">
             <span className="stat-value">15</span>
             <span className="stat-label">Servicios<br/>Contratados</span>
           </div>
+
           {isWorker && (
             <>
               <div className="stat-item">
@@ -189,50 +187,53 @@ function Perfil() {
           )}
         </div>
 
-        {/* Información de contacto (si es trabajador) */}
-        {isWorker && (
-          <>
-            <div className="perfil-section">
-              <h3>Información del contacto</h3>
-              <div className="contact-info">
-                <div className="contact-item">
-                  <i className="icon">📧</i>
-                  <span>{userData.correo_electronico}</span>
-                </div>
-                {userData.numero_telefono && (
-                  <div className="contact-item">
-                    <i className="icon">📱</i>
-                    <span>{userData.numero_telefono}</span>
-                  </div>
-                )}
-              </div>
-            </div>
+        {/* CONTACTO - SIEMPRE */}
+        <div className="perfil-section">
+          <h3>Información del contacto</h3>
 
-            <div className="perfil-section">
-              <h3>Información del plan</h3>
-              <div className="plan-info">
-                <div className="plan-item">
-                  <i className="icon">💼</i>
-                  <span>Plan Pro</span>
-                </div>
-                <div className="plan-item">
-                  <i className="icon">📅</i>
-                  <span>Renovación: 18 Dic 2025</span>
-                </div>
-              </div>
+          <a
+            href={`mailto:${userData.correo_electronico}?subject=Contacto desde EasyHome&body=Hola, vi tu publicación en EasyHome por favor...`}
+            className="contact-button"
+          >
+            📧 Enviar correo
+          </a>
+
+          <a
+            href={`https://wa.me/${userData.numero_telefono || ""}?text=${encodeURIComponent(
+              "Hola, vi tu publicación en EasyHome por favor..."
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="contact-button whatsapp-button"
+          >
+            💬 WhatsApp
+          </a>
+        </div>
+
+        {/* PLAN */}
+        <div className="perfil-section">
+          <h3>Información del plan</h3>
+          <div className="plan-info">
+            <div className="plan-item">
+              <i className="icon">💼</i>
+              <span>Plan Básico</span>
             </div>
-          </>
-        )}
+            <div className="plan-item">
+              <i className="icon">📅</i>
+              <span>Renovación no disponible</span>
+            </div>
+          </div>
+        </div>
+
       </aside>
 
-      {/* Contenido principal */}
+      {/* MAIN CONTENT */}
       <main className="perfil-main">
-        {/* Navegación por tabs */}
         <nav className="perfil-tabs">
           {tabs.map(tab => (
             <button
               key={tab.id}
-              className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
+              className={`tab-btn ${activeTab === tab.id ? "active" : ""}`}
               onClick={() => setActiveTab(tab.id)}
             >
               {tab.label}
@@ -240,17 +241,16 @@ function Perfil() {
           ))}
         </nav>
 
-        {/* Contenido dinámico */}
         <div className="perfil-content">
           {renderContent()}
         </div>
       </main>
 
-      {/* Modal para editar foto */}
+      {/* MODAL */}
       <EditarFotoModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        currentPhoto={profilePhoto || auth.user?.profile?.picture || 'https://via.placeholder.com/120'}
+        currentPhoto={profilePhoto || auth.user?.profile?.picture || "https://via.placeholder.com/120"}
         onSave={handleSavePhoto}
       />
     </div>
