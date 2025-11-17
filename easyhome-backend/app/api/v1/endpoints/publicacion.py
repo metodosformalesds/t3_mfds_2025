@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status, Query
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import func
 from typing import List, Optional
 from datetime import datetime
 import uuid
@@ -207,6 +208,21 @@ def listar_publicaciones(
                     url_imagen_portada = None
 
             # ===========================
+            # CALCULAR CALIFICACIÓN PROMEDIO DEL PROVEEDOR
+            # ===========================
+            calificacion_promedio = 0.0
+            if prov:
+                # Calcular promedio de reseñas activas del proveedor
+                from app.models.reseña_servicio import Reseña_Servicio
+                avg_result = db.query(func.avg(Reseña_Servicio.calificacion_general))\
+                    .filter(Reseña_Servicio.id_proveedor == prov.id_proveedor)\
+                    .filter(Reseña_Servicio.estado == "activa")\
+                    .scalar()
+                
+                if avg_result is not None:
+                    calificacion_promedio = round(float(avg_result), 1)
+            
+            # ===========================
             # AGREGAR PUBLICACIÓN AL RESULTADO
             # ===========================
             resultado.append({
@@ -222,11 +238,12 @@ def listar_publicaciones(
                     else (prov.usuario.nombre if prov and prov.usuario and getattr(prov.usuario, "nombre", None) else "Sin nombre")
                 ),
                 "foto_perfil_proveedor": foto_perfil_url,
-                "calificacion_proveedor": round(prov.calificacion_promedio, 1) if prov and prov.calificacion_promedio else 0,
+                "calificacion_proveedor": calificacion_promedio,
 
                 "rango_precio_min": pub.rango_precio_min,
                 "rango_precio_max": pub.rango_precio_max,
                 "url_imagen_portada": url_imagen_portada,
+                "fecha_publicacion": pub.fecha_publicacion.isoformat() if pub.fecha_publicacion else None,
             })
 
         return resultado
