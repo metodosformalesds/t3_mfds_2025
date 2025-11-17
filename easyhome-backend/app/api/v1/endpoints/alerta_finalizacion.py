@@ -102,3 +102,18 @@ def obtener_alertas(
         })
 
     return respuesta
+
+@router.put("/{id_alerta}/marcar-leida")
+def marcar_alerta_leida(
+    id_alerta: int,
+    db: Session = Depends(get_db)
+):
+    alerta = db.query(Alerta_Sistema).filter(Alerta_Sistema.id_alerta == id_alerta).first()
+
+    if not alerta:
+        raise HTTPException(status_code=404, detail="Alerta no encontrada.")
+
+    alerta.leida = True
+    db.commit()
+
+    return {"message": "Alerta marcada como leída"}
