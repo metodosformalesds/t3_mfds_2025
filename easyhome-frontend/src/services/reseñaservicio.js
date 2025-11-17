@@ -40,7 +40,7 @@ const reviewService = {
                 });
             }
             
-            const response = await apiClient.post('/api/v1/reseñas/', formData, {
+            const response = await apiClient.post('/api/v1/resenas/', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -58,7 +58,7 @@ const reviewService = {
      */
     getClienteReseñas: async (userEmail) => {
         try {
-            const response = await apiClient.get(`/api/v1/reseñas/cliente/${encodeURIComponent(userEmail)}`);
+            const response = await apiClient.get(`/api/v1/resenas/cliente/${encodeURIComponent(userEmail)}`);
             return response.data;
         } catch (error) {
             console.error('Error al obtener reseñas del cliente:', error);
@@ -71,7 +71,7 @@ const reviewService = {
      */
     getProveedorReseñas: async (idProveedor) => {
         try {
-            const response = await apiClient.get(`/api/v1/reseñas/proveedor/${encodeURIComponent(idProveedor)}`);
+            const response = await apiClient.get(`/api/v1/resenas/proveedor/${encodeURIComponent(idProveedor)}`);
             return response.data;
         } catch (error) {
             console.error('Error al obtener reseñas del proveedor:', error);
