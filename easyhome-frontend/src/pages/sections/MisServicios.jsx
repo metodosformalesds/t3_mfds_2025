@@ -336,6 +336,27 @@ const handleEliminar = async (idPublicacion) => {
           border-radius: 6px;
           cursor: pointer;
         }
+
+        .acciones-botones {
+          display: flex;
+          gap: 10px;
+        }
+
+        .boton-eliminar {
+          background-color: #b30000;
+          color: white;
+          padding: 8px 16px;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: 0.2s ease;
+          font-size: 0.95em;
+        }
+
+        .boton-eliminar:hover {
+          background-color: #d11a1a;
+        }
+
       `}</style>
     </div>
   );
