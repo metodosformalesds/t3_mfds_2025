@@ -12,7 +12,7 @@ function AdminLayout() {
   const renderContent = () => {
     switch (activeSection) {
       case 'dashboard':
-        return <AdminDashboard />;
+        return <AdminDashboard onNavigate={setActiveSection} />;
       case 'categorias':
         return <AdminCategories />;
       case 'publicaciones':
@@ -20,7 +20,7 @@ function AdminLayout() {
       case 'postulaciones':
         return <AdminSolicitudes />;
       default:
-        return <AdminDashboard />;
+        return <AdminDashboard onNavigate={setActiveSection} />;
     }
   };
 
