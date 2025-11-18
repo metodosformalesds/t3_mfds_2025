@@ -1,3 +1,8 @@
+# Autor: JENNIFER VELO DELGADO
+
+# Fecha: 02/11/2025
+
+# Descripción: define la capa de la API responsable de gestionar el estado de los servicios contratados.
 from datetime import datetime, timezone
 
 from typing import List
