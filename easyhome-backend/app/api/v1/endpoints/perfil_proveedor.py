@@ -45,8 +45,20 @@ router = APIRouter(
 @router.get("/{id_proveedor}/perfil-about", response_model=ProveedorPerfilAboutSchema)
 def get_perfil_about(id_proveedor: int, db: Session = Depends(get_db)):
     """
-    Obtiene la información principal del perfil de un proveedor
-    para la pestaña "Acerca de".
+    Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
+    Descripción: Obtiene la información principal del perfil de un proveedor 
+    para la pestaña "Acerca de". Incluye el cálculo dinámico de la antigüedad 
+    del proveedor y el total de reseñas.
+    
+    Parámetros:
+        id_proveedor (int): ID del proveedor a consultar.
+        db (Session): Sesión de la base de datos.
+    
+    Retorna:
+        ProveedorPerfilAboutSchema: Datos detallados del proveedor.
+    
+    Genera:
+        HTTPException 404: Si el proveedor no es encontrado.
     """
     
     proveedor = db.query(Proveedor_Servicio)\
