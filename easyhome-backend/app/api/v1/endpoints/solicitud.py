@@ -1,3 +1,8 @@
+# Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
+
+# Fecha: 02/11/2025
+
+# Descripción: Endpoint para que un usuario pueda crear una solicitud de proveedor de servicios y para que el administrador pueda gestionar dichas solicitudes.
 # app/api/v1/endpoints/solicitud.py
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
