@@ -66,7 +66,20 @@ def get_categories(db: Session = Depends(get_db)):
 @router.post("/", response_model=CategoryResponse, status_code=201)
 def create_category(category: CategoryCreate, db: Session = Depends(get_db)):
     """
-    Crea una nueva categoría de servicio.
+    Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+    Descripción: Crea una nueva categoría de servicio en la base de datos.
+    Verifica que no exista otra categoría con el mismo nombre.
+
+    Parámetros:
+        category (CategoryCreate): Datos de la nueva categoría (nombre, descripción, etc.).
+        db (Session): Sesión de la base de datos inyectada por dependencia.
+
+    Retorna:
+        CategoryResponse: La categoría de servicio recién creada.
+
+    Genera:
+        HTTPException 400: Si ya existe una categoría con el mismo nombre.
+        HTTPException 500: Si ocurre un error interno al crear la categoría.
     """
     try:
         # Verificar si ya existe una categoría con ese nombre
