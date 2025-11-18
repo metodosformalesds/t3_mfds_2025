@@ -165,10 +165,20 @@ class AlertaResultadoBodySchema(BaseModel):
 )
 def get_perfil_servicios(id_proveedor: int, db: Session = Depends(get_db)):
     """
-    Devuelve todas las publicaciones del proveedor con:
-    - Nombre correcto del proveedor
-    - Foto de perfil firmada desde S3
-    - Todas las imágenes de la publicación con URL firmada
+    Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
+    Descripción: Devuelve todas las publicaciones (servicios) activas del proveedor.
+    Incluye la foto de perfil del proveedor y todas las imágenes de cada publicación 
+    con sus URLs pre-firmadas desde S3 para el acceso temporal.
+    
+    Parámetros:
+        id_proveedor (int): ID del proveedor.
+        db (Session): Sesión de la base de datos.
+        
+    Retorna:
+        List[dict]: Lista de publicaciones enriquecidas con URLs de S3.
+        
+    Genera:
+        HTTPException 404: Si el proveedor no es encontrado.
     """
     proveedor = db.query(Proveedor_Servicio).filter(
         Proveedor_Servicio.id_proveedor == id_proveedor
