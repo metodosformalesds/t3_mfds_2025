@@ -241,7 +241,22 @@ async def obtener_resenas_proveedor(
     db: Session = Depends(get_db)
 ):
     """
-    Obtiene todas las reseñas recibidas por un proveedor específico.
+    Autor: SEBASTIAN VALENCIA TERRAZAS
+    Descripción: Obtiene todas las reseñas activas recibidas por un proveedor específico.
+    Los resultados incluyen la información del cliente, el servicio contratado, 
+    y URLs pre-firmadas para las fotos de perfil. También calcula la calificación 
+    promedio de reseñas del cliente.
+
+    Parámetros:
+        id_proveedor (int): ID del proveedor.
+        db (Session): Sesión de la base de datos.
+        
+    Retorna:
+        List[dict]: Lista de reseñas recibidas por el proveedor.
+        
+    Genera:
+        HTTPException 404: Si el proveedor no es encontrado.
+        HTTPException 500: Si ocurre un error interno en la consulta.
     """
     try:
         logger.info(f"Solicitando reseñas para proveedor ID: {id_proveedor}")
