@@ -1,3 +1,8 @@
+/**
+ * Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+ * Componente: Dashboard
+ * Descripción: Dashboard del trabajador con resumen y acciones.
+ */
 function TrabajadorDashboard() {
   return (
     <div style={{ padding: '20px' }}>

@@ -1,3 +1,8 @@
+/**
+ * Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+ * Componente: AdminSidebar
+ * Descripción: Muestra un producto individual con imagen, precio y botón de agregar.
+ */
 import { useState, useEffect } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { useUserProfile } from '../../hooks/useUserProfile';

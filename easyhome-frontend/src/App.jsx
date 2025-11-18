@@ -1,3 +1,8 @@
+/**
+ * Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+ * Componente: App
+ * Descripción: Muestra un producto individual con imagen, precio y botón de agregar.
+ */
 import { BrowserRouter } from 'react-router-dom'
 import { useAuth } from 'react-oidc-context'
 import Layout from './components/layout/Layout'

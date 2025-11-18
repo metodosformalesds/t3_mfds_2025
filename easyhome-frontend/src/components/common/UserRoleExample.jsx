@@ -1,3 +1,8 @@
+/**
+ * Autor:
+ * Componente: UserRoleExample
+ * Descripción: Componente de ejemplo que muestra cómo usar los roles de Cognito.
+ */
 import { useAuth } from 'react-oidc-context';
 import { isAdmin, isWorker, isClient, getUserRole, getUserGroups } from '../utils/authUtils';
 

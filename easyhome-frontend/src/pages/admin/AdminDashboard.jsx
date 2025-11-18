@@ -1,3 +1,8 @@
+/**
+ * Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+ * Componente: AdminDashboard
+ * Descripción: Muestra un producto individual con imagen, precio y botón de agregar.
+ */
 import '../../assets/styles/AdminDashboard.css';
 
 function AdminDashboard({ onNavigate }) {

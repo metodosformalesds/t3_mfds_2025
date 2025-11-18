@@ -1,3 +1,8 @@
+/**
+ * Autor:
+ * Componente: Filtros
+ * Descripción: Componente para filtrar publicaciones por categoría y otros criterios.
+ */
 import React, { useState, useEffect } from 'react';
 import '../../assets/styles/Filters.css';
 import categoryService from '../../services/categoryService';

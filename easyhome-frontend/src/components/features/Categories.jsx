@@ -1,3 +1,8 @@
+/**
+ * Autor: Cristian Heriberto Martinez Gallardo
+ * Componente: Categories
+ * Descripción: Muestra un producto individual con imagen, precio y botón de agregar.
+ */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from 'react-oidc-context';

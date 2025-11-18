@@ -1,3 +1,8 @@
+/**
+ * Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+ * Componente: Perfil
+ * Descripción: Muestra un producto individual con imagen, precio y botón de agregar.
+ */
 import { useState, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
 import { useAuth } from "react-oidc-context";

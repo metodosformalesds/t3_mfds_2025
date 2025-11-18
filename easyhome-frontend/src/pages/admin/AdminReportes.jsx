@@ -1,3 +1,8 @@
+/**
+ * Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+ * Componente: AdminReportes
+ * Descripción: Muestra un producto individual con imagen, precio y botón de agregar.
+ */
 function AdminReportes() {
   return (
     <div style={{ padding: '20px' }}>

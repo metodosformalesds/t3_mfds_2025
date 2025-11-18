@@ -1,3 +1,8 @@
+/**
+ * Autor: SEBASTIAN VALENCIA TERRAZAS
+ * Componente: Servicios
+ * Descripción: Lista de servicios contratados del cliente y navegación.
+ */
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import useClientServices from '../../hooks/useClientServices';

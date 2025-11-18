@@ -1,3 +1,8 @@
+/**
+ * Autor: SEBASTIAN VALENCIA TERRAZAS y BRANDON GUSTAVO HERNANDEZ ORTIZ
+ * Componente: Publicaciones
+ * Descripción: Muestra una publicación de servicio individual.
+ */
 import '../../assets/styles/Publicaciones.css';
 
 

@@ -1,3 +1,8 @@
+/**
+ * Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+ * Componente: AdminSolicitudes
+ * Descripción: Muestra un producto individual con imagen, precio y botón de agregar.
+ */
 import { useState } from 'react';
 import { useSolicitudes } from '../../hooks/useSolicitudes';
 import solicitudService from '../../services/solicitudService';

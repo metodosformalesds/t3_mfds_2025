@@ -1,3 +1,8 @@
+/**
+ * Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+ * Componente: AdminLayout
+ * Descripción: Muestra un producto individual con imagen, precio y botón de agregar.
+ */
 import { useState } from 'react';
 import AdminSidebar from './AdminSidebar';
 import AdminDashboard from '../../pages/admin/AdminDashboard';

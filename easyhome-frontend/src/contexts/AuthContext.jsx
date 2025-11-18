@@ -1,3 +1,8 @@
+/**
+ * Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+ * Componente: AuthContext
+ * Descripción: Contexto de autenticación (AuthProvider) y utilidades.
+ */
 import { createContext, useContext, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 

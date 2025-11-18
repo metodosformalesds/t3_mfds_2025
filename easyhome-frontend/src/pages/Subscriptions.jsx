@@ -1,3 +1,8 @@
+/**
+ * Autor: JENNIFER VELO DELGADO
+ * Componente: Subscriptions
+ * Descripción: Página de suscripciones y comparación de planes.
+ */
 import React, { useState } from 'react';
 import "../assets/styles/Subscriptions.css"
  

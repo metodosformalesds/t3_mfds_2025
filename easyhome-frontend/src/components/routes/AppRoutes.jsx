@@ -1,3 +1,8 @@
+/**
+ * Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+ * Componente: AppRoutes
+ * Descripción: Muestra un producto individual con imagen, precio y botón de agregar.
+ */
 import { Routes, Route } from 'react-router-dom';
 import Home from '../../pages/Home';
 import ProtectedRoute from './ProtectedRoute';

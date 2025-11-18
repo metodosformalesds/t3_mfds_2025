@@ -1,3 +1,8 @@
+/**
+ * Autor: SEBASTIAN VALENCIA TERRAZAS
+ * Componente: Header
+ * Descripción: Muestra un producto individual con imagen, precio y botón de agregar.
+ */
 import '../../assets/styles/Header.css'
 import { useAuth } from "react-oidc-context";
 import { Link } from 'react-router-dom';

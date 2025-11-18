@@ -1,3 +1,8 @@
+/**
+ * Autor:
+ * Componente: Home
+ * Descripción: Página principal (Home) con secciones y alertas.
+ */
 import { useState,  useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from 'react-oidc-context'

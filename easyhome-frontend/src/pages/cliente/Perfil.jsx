@@ -1,3 +1,8 @@
+/**
+ * Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+ * Componente: Perfil
+ * Descripción: Perfil del cliente (vista y edición futura).
+ */
 function ClientePerfil() {
   return (
     <div style={{ padding: '20px' }}>

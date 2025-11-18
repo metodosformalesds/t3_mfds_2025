@@ -1,3 +1,8 @@
+/**
+ * Autor: ENRIQUE ALEJANDRO PEREDA MERAZ
+ * Componente: Formulario_reseña
+ * Descripción: Formulario para crear y enviar reseñas de servicios.
+ */
 // src/pages/cliente/Formulario_reseña.jsx
 import "../../assets/styles/reseñaservicio.css";
 import React, { useState, useEffect } from 'react';

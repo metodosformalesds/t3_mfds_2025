@@ -1,3 +1,8 @@
+/**
+ * Autor: SEBASTIAN VALENCIA TERRAZAS
+ * Componente: FAQSection
+ * Descripción: Muestra un producto individual con imagen, precio y botón de agregar.
+ */
 import React, { useState } from 'react';
 import '../../assets/styles/FAQSection.css';
  

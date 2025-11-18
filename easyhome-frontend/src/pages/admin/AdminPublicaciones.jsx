@@ -1,3 +1,8 @@
+/**
+ * Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+ * Componente: AdminPublicaciones
+ * Descripción: Muestra un producto individual con imagen, precio y botón de agregar.
+ */
 import { useState } from 'react';
 import { useAdminPublicaciones } from '../../hooks/useAdminPublicaciones';
 import '../../assets/styles/AdminPublicaciones.css';

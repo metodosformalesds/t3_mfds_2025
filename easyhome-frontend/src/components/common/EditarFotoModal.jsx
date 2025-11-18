@@ -1,3 +1,8 @@
+/**
+ * Autor:
+ * Componente: EditarFotoModal
+ * Descripción: Muestra un modal para editar la foto de perfil.
+ */
 import { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import '../../assets/styles/EditarFotoModal.css';
@@ -146,7 +151,7 @@ function EditarFotoModal({ isOpen, onClose, currentPhoto, onSave }) {
   );
 }
 
-EditarFotoModal.propTypes = {
+EditarFotoModal.propTypes =.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   currentPhoto: PropTypes.string,

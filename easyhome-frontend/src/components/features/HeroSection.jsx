@@ -1,3 +1,8 @@
+/**
+ * Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+ * Componente: HeroSection
+ * Descripción: Muestra la sección principal de la página de inicio.
+ */
 import '../../assets/styles/HeroSection.css';
 import heroImage from '../../assets/images/Recurso 1.png';
 

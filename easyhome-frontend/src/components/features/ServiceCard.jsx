@@ -1,3 +1,8 @@
+/**
+ * Autor: SEBASTIAN VALENCIA TERRAZAS
+ * Componente: ServiceCard
+ * Descripción: Muestra una tarjeta de servicio con información del proveedor y estado.
+ */
 import React from 'react';
 // Eliminamos: import { FaUserCircle } from 'react-icons/fa'; 
 import '../../assets/styles/ServiceCard.css';

@@ -1,3 +1,8 @@
+/**
+ * Autor: JENNIFER VELO DELGADO
+ * Componente: Footer
+ * Descripción: Muestra un producto individual con imagen, precio y botón de agregar.
+ */
 import '../../assets/styles/Footer.css'
 import { useAuth } from "react-oidc-context";
 import { Link } from 'react-router-dom';

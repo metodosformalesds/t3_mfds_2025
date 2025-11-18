@@ -1,3 +1,8 @@
+/**
+ * Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+ * Componente: ProtectedRoute
+ * Descripción: Muestra un producto individual con imagen, precio y botón de agregar.
+ */
 import { Navigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useAuth } from 'react-oidc-context';

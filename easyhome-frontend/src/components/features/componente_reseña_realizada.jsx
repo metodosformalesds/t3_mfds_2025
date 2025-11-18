@@ -1,3 +1,8 @@
+/**
+ * Autor: SEBASTIAN VALENCIA TERRAZAS
+ * Componente: ResenaView
+ * Descripción: Muestra un producto individual con imagen, precio y botón de agregar.
+ */
 import React from 'react';
 import '../../assets/styles/ComponenteResena.css';
 

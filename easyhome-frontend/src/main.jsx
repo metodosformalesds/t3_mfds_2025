@@ -1,8 +1,9 @@
+/**
+ * Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+ * Componente: main
+ * Descripción: Punto de entrada de React y proveedor de autenticación.
+ */
 import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
-import './assets/styles/index.css'
-import './assets/styles/App.css'
 import { AuthProvider } from "react-oidc-context";
 
 // 1. Importamos el userManager, indicando que está en la carpeta 'config'

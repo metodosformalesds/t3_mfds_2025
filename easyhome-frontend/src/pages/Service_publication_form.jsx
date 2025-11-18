@@ -1,3 +1,8 @@
+/**
+ * Autor: JENNIFER VELO DELGADO
+ * Componente: Service_publication_form
+ * Descripción: Formulario para publicar servicios con carga de fotos.
+ */
 import "../assets/styles/Service_publication_form.css"
 import React, { useState, useEffect } from 'react';
 import categoryService from '../services/categoryService';

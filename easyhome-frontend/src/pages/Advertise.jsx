@@ -1,3 +1,8 @@
+/**
+ * Autor:
+ * Componente: Advertise
+ * Descripción: Página de publicidad y comparación de planes.
+ */
 import React from 'react';
 import FAQSection from '../components/features/FAQSection'
 import "../assets/styles/FAQSection.css"
