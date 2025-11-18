@@ -387,7 +387,7 @@ def eliminar_publicacion(
 
 
 # =========================================================
-# 3️⃣ (NUEVO) OBTENER MIEMBROS PREMIUM
+# (NUEVO) OBTENER MIEMBROS PREMIUM
 # (Para la barra lateral)
 # =========================================================
 @router.get("/miembros-premium", response_model=None)
@@ -396,12 +396,22 @@ def listar_miembros_premium(
     db: Session = Depends(get_db)
 ):
     """
-    Obtiene una lista de los proveedores suscritos ("Premium"),
-    ordenados por la calificación más alta (RF-15)[cite: 402], 
-    para mostrar en la barra lateral[cite: 96].
+    Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
+
+    Descripción: Obtiene una lista de proveedores suscritos (Premium),
+    ordenados por calificación y limitada por `limit`. Devuelve información
+    mínima necesaria para la barra lateral (id, nombre, calificación, foto).
+
+    Parámetros:
+        limit (int): Cantidad máxima de proveedores a devolver.
+        db (Session): Sesión de base de datos (Depends).
+
+    Retorna:
+        List[dict]: Lista de proveedores premium con `id_proveedor`,
+        `nombre_completo`, `calificacion_promedio` y `foto_perfil_url`.
     """
     try:
-        # 🔹 1. Query para buscar Proveedores Premium
+        # 1. Query para buscar Proveedores Premium
         # Hacemos 'join' con Usuario para verificar que la cuenta esté activa
         query = db.query(Proveedor_Servicio)\
             .join(Proveedor_Servicio.usuario)\
@@ -421,7 +431,7 @@ def listar_miembros_premium(
 
         proveedores_premium = query.all()
 
-        # 🔹 2. Construir respuesta con URLs pre-firmadas
+        # 2. Construir respuesta con URLs pre-firmadas
         resultado = []
         for prov in proveedores_premium:
             url_foto = None
