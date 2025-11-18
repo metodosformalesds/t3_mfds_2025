@@ -143,7 +143,21 @@ async def obtener_resenas_cliente(
     db: Session = Depends(get_db)
 ):
     """
-    Obtiene todas las reseñas realizadas por un cliente específico.
+    Autor: Enrique Alejandro Pereda Meraz
+    Descripción: Obtiene todas las reseñas que un cliente específico ha realizado.
+    Los datos se enriquecen con la información del proveedor, el nombre del servicio 
+    contratado y la URL pre-firmada de la foto de perfil del proveedor.
+
+      Parámetros:
+        user_email (str): Correo electrónico del cliente.
+        db (Session): Sesión de la base de datos.
+        
+     Retorna:
+            List[dict]: Lista de reseñas realizadas por el cliente.
+        
+      Genera:
+          HTTPException 404: Si el usuario no es encontrado.
+          HTTPException 500: Si ocurre un error interno en la consulta.
     """
     try:
         logger.info(f"Solicitando reseñas para cliente: {user_email}")
@@ -181,7 +195,7 @@ async def obtener_resenas_cliente(
                         logger.warning(f"No se pudo generar URL para foto de perfil: {e}")
 
                 servicio_contratado = db.query(Servicio_Contratado).filter(
-                    Servicio_Contratado.id_servicio_contratado == reseña.id_servicio_contratado
+                    Servicio_Contratado.id_servicio_contratado == resena.id_servicio_contratado
                 ).first()
 
                 if servicio_contratado and getattr(servicio_contratado, "id_publicacion", None):
@@ -194,13 +208,13 @@ async def obtener_resenas_cliente(
 
             resultado.append({
                 "reseña": {
-                    "id_reseña": reseña.id_reseña,
-                    "comentario": reseña.comentario,
-                    "calificacion_general": reseña.calificacion_general,
-                    "calificacion_puntualidad": reseña.calificacion_puntualidad,
-                    "calificacion_calidad_servicio": reseña.calificacion_calidad_servicio,
-                    "calificacion_calidad_precio": reseña.calificacion_calidad_precio,
-                    "fecha_reseña": reseña.fecha_reseña.isoformat() if reseña.fecha_reseña else None,
+                    "id_reseña": resena.id_reseña,
+                    "comentario": resena.comentario,
+                    "calificacion_general": resena.calificacion_general,
+                    "calificacion_puntualidad": resena.calificacion_puntualidad,
+                    "calificacion_calidad_servicio": resena.calificacion_calidad_servicio,
+                    "calificacion_calidad_precio": resena.calificacion_calidad_precio,
+                    "fecha_reseña": resena.fecha_reseña.isoformat() if resena.fecha_reseña else None,
                 },
                 "cliente": {
                     "email": user_email,
