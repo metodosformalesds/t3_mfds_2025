@@ -42,7 +42,18 @@ class CategoryResponse(BaseModel):
 @router.get("/", response_model=List[CategoryResponse])
 def get_categories(db: Session = Depends(get_db)):
     """
-    Obtiene todas las categorías de servicios ordenadas por orden de visualización.
+    Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+    Descripción: Obtiene todas las categorías de servicios de la base de datos.
+    Los resultados se ordenan por el campo 'orden_visualizacion'.
+
+    Parámetros:
+        db (Session): Sesión de la base de datos inyectada por dependencia.
+
+    Retorna:
+        List[CategoryResponse]: Una lista de todas las categorías de servicio.
+
+    Genera:
+        HTTPException 500: Si ocurre un error interno al consultar la base de datos.
     """
     try:
         categories = db.query(Categoria_Servicio).order_by(Categoria_Servicio.orden_visualizacion).all()
