@@ -156,6 +156,20 @@ async def actualizar_foto_perfil(
 
 @router.get("/{id_usuario}/foto-perfil")
 def obtener_foto_perfil(id_usuario: int, db: Session = Depends(get_db)):
+    """
+    Autor: Enrique Alejandro Pereda Meraz
+    Descripción: Obtiene la URL temporal pre-firmada de la foto de perfil de un usuario.
+
+    Parámetros:
+        id_usuario (int): ID del usuario cuya foto se desea obtener.
+        db (Session): Sesión de la base de datos inyectada por dependencia.
+
+    Retorna:
+        dict: La URL pre-firmada para la foto de perfil.
+
+    Genera:
+        HTTPException 404: Si el usuario o su foto de perfil no son encontrados.
+    """
     usuario = db.query(Usuario).filter(Usuario.id_usuario == id_usuario).first()
     if not usuario or not usuario.foto_perfil:
         raise HTTPException(status_code=404, detail="Foto de perfil no encontrada")
