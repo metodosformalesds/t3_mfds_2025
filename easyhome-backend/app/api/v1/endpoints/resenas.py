@@ -1,3 +1,9 @@
+# Autor: ENRIQUE ALEJANDRO PEREDA MERAZ
+
+# Fecha: 15/11/2025
+
+# Descripción: Endpoint para que un usuario pueda crear y ver reseñas de servicios.
+# app/api/v1/endpoints/resenas.py
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
