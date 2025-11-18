@@ -36,6 +36,31 @@ async def crear_resena_servicio(
     imagenes: List[UploadFile] = File(default=[]),
     db: Session = Depends(get_db)
 ):
+    """
+    Autor: Enrique Alejandro Pereda Meraz
+    Descripción: Permite a un cliente crear una nueva reseña asociada a un servicio contratado.
+    Valida la existencia del servicio y del proveedor, registra las calificaciones, 
+    y sube las imágenes de evidencia a S3 (máximo 5).
+
+    Parámetros:
+        id_servicio_contratado (int): ID del servicio completado al que se refiere la reseña.
+        user_email (str): Correo electrónico del cliente que crea la reseña.
+        calificacion_general (int): Calificación principal (1-5).
+        calificacion_puntualidad (int): Calificación de puntualidad (1-5).
+        calificacion_calidad_servicio (int): Calificación de calidad del servicio (1-5).
+        calificacion_calidad_precio (int): Calificación de valor/precio (1-5).
+        comentario (str): Comentario textual de la reseña.
+        recomendacion (str): Indica si recomienda al proveedor ('Sí' o 'No').
+        imagenes (List[UploadFile]): Lista de imágenes a adjuntar a la reseña (máx. 5).
+        db (Session): Sesión de la base de datos.
+        
+    Retorna:
+        dict: Confirmación de la creación y metadatos de la reseña.
+
+    Genera:
+        HTTPException 404: Si el usuario, el servicio contratado o el proveedor no son encontrados.
+        HTTPException 500: Si ocurre un error durante la creación o subida a S3.
+    """
     try:
         usuario = db.query(Usuario).filter(Usuario.correo_electronico == user_email).first()
         if not usuario:
