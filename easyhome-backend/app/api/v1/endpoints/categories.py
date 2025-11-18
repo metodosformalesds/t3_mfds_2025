@@ -116,7 +116,19 @@ def create_category(category: CategoryCreate, db: Session = Depends(get_db)):
 @router.delete("/{category_id}", status_code=204)
 def delete_category(category_id: int, db: Session = Depends(get_db)):
     """
-    Elimina una categoría de servicio.
+    Autor: CRISTIAN HERIBERTO MARTINEZ GALLARDO
+    Descripción: Elimina una categoría de servicio por su ID.
+
+    Parámetros:
+        category_id (int): ID de la categoría a eliminar.
+        db (Session): Sesión de la base de datos inyectada por dependencia.
+
+    Retorna:
+        None (respuesta 204 No Content) si la eliminación fue exitosa.
+
+    Genera:
+        HTTPException 404: Si la categoría no es encontrada.
+        HTTPException 500: Si ocurre un error interno al eliminar la categoría.
     """
     try:
         category = db.query(Categoria_Servicio).filter(
