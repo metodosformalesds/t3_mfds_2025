@@ -74,7 +74,7 @@ async def crear_solicitud_proveedor(
     """
     
     try:
-        # 🔹 1. Buscar usuario por correo
+        # 1. Buscar usuario por correo
         usuario = db.query(Usuario).filter(Usuario.correo_electronico == user_email).first()
         if not usuario:
             logger.warning(f"Intento de solicitud para usuario no existente: {user_email}")
@@ -87,15 +87,15 @@ async def crear_solicitud_proveedor(
              # raise HTTPException(status_code=400, detail="Por favor, añade un número de teléfono a tu perfil antes de postularte.")
 
 
-        # 🔹 2. Verificar si ya tiene una solicitud o es proveedor activo
+        # 2. Verificar si ya tiene una solicitud o es proveedor activo
         if usuario.proveedor_servicio:
             logger.warning(f"Usuario {user_email} ya tiene una solicitud o es proveedor.")
             raise HTTPException(status_code=400, detail="Ya existe una solicitud o eres proveedor activo.")
 
-        # 🔹 3. Convertir la lista de servicios en un string (ej: "Electricidad, Pintura, Plomería")
+        # 3. Convertir la lista de servicios en un string (ej: "Electricidad, Pintura, Plomería")
         especializaciones_str = ", ".join(servicios_ofrece)
 
-        # 🔹 4. Crear la solicitud en la tabla Proveedor_Servicio
+        # 4. Crear la solicitud en la tabla Proveedor_Servicio
         solicitud = Proveedor_Servicio(
             id_proveedor=usuario.id_usuario, # Se usa el ID del usuario como FK
             nombre_completo=nombre_completo,
@@ -113,7 +113,7 @@ async def crear_solicitud_proveedor(
         db.commit()
         db.refresh(solicitud)
 
-        # 🔹 5. Guardar fotos en S3
+        # 5. Guardar fotos en S3
         urls_fotos_guardadas = []
         for file in fotos:
             try:
@@ -173,16 +173,26 @@ async def crear_solicitud_proveedor(
 
 
 # =========================================================
-# 2️⃣ MOSTRAR SOLICITUDES (ADMINISTRADOR)
+#  MOSTRAR SOLICITUDES (ADMINISTRADOR)
 # RF-07 / CU-08
 # =========================================================
 
 @router.get("/admin")
 def listar_solicitudes_admin(db: Session = Depends(get_db)):
     """
-    Muestra todas las solicitudes de proveedores (pendientes, aprobadas, rechazadas).
-    Solo debe ser consumido por un usuario Administrador.
-    AHORA INCLUYE URLs temporales (pre-firmadas) para ver las fotos de evidencia.
+    Autor: Brandon Gustavo Hernandez Ortiz
+    Descripción: Obtiene todas las solicitudes de proveedores, cargando los datos 
+    del usuario asociado y las fotos de evidencia. Genera URLs pre-firmadas 
+    temporales para que el administrador pueda ver las fotos. Solo para administradores.
+    
+    Parámetros:
+        db (Session): Sesión de la base de datos.
+        
+    Retorna:
+        List[dict]: Lista de solicitudes con datos de usuario y URLs temporales para fotos.
+        
+    Genera:
+        HTTPException 500: Si ocurre un error al listar las solicitudes.
     """
     try:
         # 1. Cargar solicitudes con sus relaciones (usuario y fotos)
