@@ -20,4 +20,5 @@ MFDS 2025 T3
 | **Diagrama de Gantt**   | [Diagrama de Gantt](https://docs.google.com/spreadsheets/d/12fisyERQJj8kBUmMNtqUin5aMf8twmb_J5kFz3GdVP4/edit?gid=78022552#gid=78022552)
 | **Presentación ejecutiva**   | [Presentación ejecutiva](https://docs.google.com/presentation/d/1wJq_kQ5sVepp3kPFAkslxHOlO7W4VNMQ-HKDa6jcqWg/edit?slide=id.g39e6d54c4fe_1_36#slide=id.g39e6d54c4fe_1_36)
 | **Despliegue AWS**   | [Link_Pagina](https://main.d30cfshgj52c8r.amplifyapp.com/)   
+| **Presentación Final**   | [Link_Pagina](https://docs.google.com/presentation/d/1sGBN2S1ZFAi_kUjdjf61Pp5IaMujat-vSlZud6mDPgo/edit?usp=sharing)   
 
