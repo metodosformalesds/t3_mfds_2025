@@ -1,3 +1,8 @@
+# Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
+
+# Fecha: 02/11/2025
+
+# Descripción: define la capa de la API responsable de gestionar el perfil de los proveedores de servicios. Proporciona endpoints para obtener información del perfil, servicios, portafolio y reseñas de un proveedor, interactuando con la base de datos a través de SQLAlchemy.
 # app/api/v1/endpoints/perfil_proveedor.py
 from app.services.s3_service import s3_service
 
