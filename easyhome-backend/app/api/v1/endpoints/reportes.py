@@ -60,13 +60,21 @@ def crear_reporte(
     current_user: Usuario = Depends(get_current_user)
 ):
     """
-    Crea un nuevo reporte de un usuario contra un proveedor.
+    Autor: Enrique Alejandro Pereda Meraz
+    Descripción: Crea un nuevo registro de reporte de un usuario (cliente) contra un proveedor.
     
-    El usuario autenticado (current_user) es quien realiza el reporte.
-    Se guarda automáticamente en la BD con:
-    - motivo: "Reporte del cliente" (por defecto)
-    - descripcion: contenido enviado en 'detalles'
-    - estado: "pendiente"
+    Parámetros:
+        payload (ReporteCreateSchema): Contiene el ID del proveedor reportado y los detalles.
+        db (Session): Sesión de la base de datos.
+        current_user (Usuario): Usuario autenticado que realiza el reporte (automáticamente extraído).
+
+    Retorna:
+        ReporteResponseSchema: El objeto del reporte recién creado en la base de datos.
+
+    Genera:
+        HTTPException 400: Si el usuario intenta reportarse a sí mismo.
+        HTTPException 404: Si el proveedor reportado no existe.
+        HTTPException 500: Si ocurre un error al guardar en la base de datos.
     """
     
     cliente_id = current_user.id_usuario
