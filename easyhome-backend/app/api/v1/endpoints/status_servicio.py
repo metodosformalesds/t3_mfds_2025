@@ -1,6 +1,6 @@
 # Autor: JENNIFER VELO DELGADO
 
-# Fecha: 02/11/2025
+# Fecha: 16/11/2025
 
 # Descripción: define la capa de la API responsable de gestionar el estado de los servicios contratados.
 from datetime import datetime, timezone
@@ -65,7 +65,17 @@ def listar_servicios_activos(
     db: Session = Depends(get_db)
 ):
     """
-    Devuelve el listado de servicios contratados en curso para un proveedor.
+    Autor: JENNIFER VELO DELGADO
+    Descripción: Devuelve el listado de servicios contratados que se encuentran 
+    en un estado activo ('confirmado' o 'en_proceso') para el panel del proveedor. 
+    Incluye los datos del cliente y su foto de perfil (URL pre-firmada).
+    
+    Parámetros:
+        id_proveedor (int): ID del proveedor.
+        db (Session): Sesión de la base de datos.
+        
+    Retorna:
+        List[ServicioActivoSchema]: Lista de servicios activos.
     """
     servicios = (
         db.query(Servicio_Contratado)
@@ -118,8 +128,21 @@ def finalizar_servicio(
     db: Session = Depends(get_db)
 ):
     """
-    Cambia el estado de un servicio contratado activo a ``finalizado``.
-    Solo permite finalizar servicios que actualmente estan confirmados o en proceso.
+    Autor: SEBASTIAN VALENCIA TERRAZAS
+    Descripción: Cambia el estado de un servicio contratado a 'finalizado'.
+    Solo permite finalizar servicios que están en estado 'confirmado' o 'en_proceso'.
+    Al finalizar, genera una alerta al cliente informando el cambio de estado.
+    
+    Parámetros:
+        id_servicio_contratado (int): ID del servicio a finalizar.
+        db (Session): Sesión de la base de datos.
+        
+    Retorna:
+        FinalizarServicioResponse: Confirmación y metadatos del servicio finalizado.
+
+    Genera:
+        HTTPException 404: Si el servicio no es encontrado.
+        HTTPException 400: Si el servicio ya está finalizado o en un estado no permitido.
     """
 
     servicio = (
@@ -153,6 +176,7 @@ def finalizar_servicio(
     servicio.estado_servicio = "finalizado"
     servicio.fecha_finalizacion = datetime.now(timezone.utc)
 
+    # 1. Preparar el nombre del proveedor para la alerta
     proveedor = getattr(servicio, "proveedor_servicio", None)
     proveedor_nombre = None
     if proveedor:
@@ -160,6 +184,7 @@ def finalizar_servicio(
     if not proveedor_nombre:
         proveedor_nombre = "Tu proveedor"
 
+    # 2. Crear la alerta
     alerta = Alerta_Sistema(
         id_usuario=servicio.id_cliente,
         id_servicio_contratado=servicio.id_servicio_contratado,
@@ -188,7 +213,16 @@ def listar_servicios_completos(
     db: Session = Depends(get_db)
 ):
     """
-    Devuelve la lista de los servicios activos y finalizados
+    Autor: JENNIFER VELO DELGADO
+    Descripción: Devuelve una lista separada de los servicios activos 
+    y servicios finalizados de un proveedor.
+    
+    Parámetros:
+        id_proveedor (int): ID del proveedor.
+        db (Session): Sesión de la base de datos.
+        
+    Retorna:
+        dict: Conteniendo dos listas ('activos' y 'finalizados').
     """
     # --- Servicios Activos ---
     servicios_activos = (
@@ -282,8 +316,18 @@ def listar_servicios_cliente(
     db: Session = Depends(get_db)
 ):
     """
-    Devuelve la lista de servicios contratados por un cliente,
-    incluyendo información del proveedor y si tiene reseña.
+    Autor: SEBASTIAN VALENCIA TERRAZAS
+    Descripción: Devuelve la lista de servicios contratados por un cliente. 
+    Enriquece la respuesta con información detallada del proveedor, la foto de 
+    perfil pre-firmada, y un indicador para saber si el cliente ya ha dejado 
+    una reseña para ese servicio.
+    
+    Parámetros:
+        id_cliente (int): ID del cliente.
+        db (Session): Sesión de la base de datos.
+        
+    Retorna:
+        List[ServicioClienteSchema]: Lista de servicios contratados por el cliente.
     """
     from app.models.user import Proveedor_Servicio
     from app.models.reseña_servicio import Reseña_Servicio
@@ -316,23 +360,26 @@ def listar_servicios_cliente(
             except Exception:
                 foto_url = foto_key
 
-        # Verificar si tiene reseña (soporta relación uno-a-uno o lista)
-        # bool(None) -> False, bool([]) -> False, bool(objeto o lista no vacía) -> True
+        # Verificar si tiene reseña 
         reseña_obj = getattr(servicio, "reseña_servicio", None)
         tiene_reseña = bool(reseña_obj)
         
         # Obtener calificación del cliente si existe reseña
         calificacion_cliente = None
-        if reseña_obj:
+        if isinstance(reseña_obj, list): # Si la relación es uno-a-muchos (lista)
+            if reseña_obj:
+                calificacion_cliente = getattr(reseña_obj[0], "calificacion_general", None)
+        else: # Si la relación es uno-a-uno (objeto)
             calificacion_cliente = getattr(reseña_obj, "calificacion_general", None)
         
         # DEBUG: Imprimir en consola del backend
         print(f"🔍 DEBUG Backend - Servicio {servicio.id_servicio_contratado}:")
-        print(f"   - Estado: {servicio.estado_servicio}")
-        print(f"   - reseña_servicio object: {reseña_obj}")
-        print(f"   - tiene_reseña calculado: {tiene_reseña}")
-        print(f"   - calificacion_cliente: {calificacion_cliente}")
+        print(f"   - Estado: {servicio.estado_servicio}")
+        print(f"   - reseña_servicio object: {reseña_obj}")
+        print(f"   - tiene_reseña calculado: {tiene_reseña}")
+        print(f"   - calificacion_cliente: {calificacion_cliente}")
 
+        # Construcción del payload
         servicio_payload = {
             "id_servicio_contratado": servicio.id_servicio_contratado,
             "fecha_contacto": servicio.fecha_contacto,
@@ -378,8 +425,19 @@ def obtener_info_servicio_resena(
     db: Session = Depends(get_db)
 ):
     """
-    Devuelve la información del proveedor y servicio necesaria
-    para mostrar en el formulario de reseña.
+    Autor: SEBASTIAN VALENCIA TERRAZAS
+    Descripción: Devuelve la información esencial (nombre del proveedor, nombre del 
+    servicio y fecha) necesaria para poblar el formulario de reseña del cliente.
+    
+    Parámetros:
+        id_servicio_contratado (int): ID del servicio.
+        db (Session): Sesión de la base de datos.
+        
+    Retorna:
+        ServicioInfoReseñaSchema: Datos resumidos para el formulario.
+
+    Genera:
+        HTTPException 404: Si el servicio contratado no es encontrado.
     """
     from app.models.user import Proveedor_Servicio
     from app.models.property import Publicacion_Servicio

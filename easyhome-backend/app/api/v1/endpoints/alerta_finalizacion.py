@@ -1,3 +1,8 @@
+# Autor: JENNIFER VELO DELGADO
+
+# Fecha: 02/11/2025
+
+# Descripción: define la capa de la API responsable de gestionar las alertas del sistema. Proporciona endpoints para obtener y actualizar alertas, interactuando con la base de datos a través de SQLAlchemy.
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
@@ -23,7 +28,17 @@ def obtener_alertas(
     db: Session = Depends(get_db)
 ):
     """
-    Retorna todas las alertas para el usuario
+    Autor: JENNIFER VELO DELGADO
+    Descripción: Retorna todas las alertas asociadas a un usuario específico. 
+    Enriquece la información de cada alerta con datos del proveedor asociado al 
+    servicio contratado (nombre, foto de perfil pre-firmada, calificación y total de reseñas).
+    
+    Parámetros:
+        id_usuario (int): ID del usuario (cliente o proveedor) cuyas alertas se solicitan.
+        db (Session): Sesión de la base de datos.
+        
+    Retorna:
+        List[dict]: Lista de alertas enriquecidas.
     """
 
     resenas_count = {
@@ -102,6 +117,20 @@ def marcar_alerta_leida(
     id_alerta: int,
     db: Session = Depends(get_db)
 ):
+    """
+    Autor: JENNIFER VELO DELGADO
+    Descripción: Actualiza el estado de una alerta específica, marcándola como leída.
+    
+    Parámetros:
+        id_alerta (int): ID de la alerta a marcar.
+        db (Session): Sesión de la base de datos.
+        
+    Retorna:
+        dict: Mensaje de confirmación.
+
+    Genera:
+        HTTPException 404: Si la alerta no es encontrada.
+    """
     alerta = db.query(Alerta_Sistema).filter(Alerta_Sistema.id_alerta == id_alerta).first()
 
     if not alerta:
