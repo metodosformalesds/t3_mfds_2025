@@ -1,3 +1,9 @@
+# Autor: JENNIFER VELO DELGADO
+
+# Fecha: 02/11/2025
+
+# Descripción: define el modelo de datos para las alertas del sistema, incluyendo sus atributos y relaciones con otras entidades en la base de datos.
+# app/models/alerta_sistema.py
 from sqlalchemy import Column, Integer, String, Text, TIMESTAMP, ForeignKey, Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
