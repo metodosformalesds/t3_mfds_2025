@@ -27,7 +27,7 @@ router = APIRouter(prefix="/solicitudes", tags=["Solicitudes de Proveedor"])
 
 
 # =========================================================
-# 1️⃣ CREAR SOLICITUD DE PROVEEDOR (CLIENTE)
+# CREAR SOLICITUD DE PROVEEDOR (CLIENTE)
 # RF-06 / CU-07
 # Endpoint AJUSTADO (sin 'telefono_contacto')
 # =========================================================
@@ -49,9 +49,28 @@ async def crear_solicitud_proveedor(
     db: Session = Depends(get_db) # Inyectar la sesión de DB
 ):
     """
-    Crea una solicitud de proveedor (postulación) asociada a un usuario (cliente) existente.
-    Guarda todos los datos del formulario de Figma y sube las fotos de evidencia.
-    El teléfono se hereda del perfil de usuario base.
+    Autor: Brandon Gustavo Hernandez Ortiz
+    Descripción: Crea una solicitud de proveedor (postulación) asociada a un usuario existente.
+    Sube las fotos de evidencia a S3 y guarda los metadatos en la base de datos.
+    
+    Parámetros:
+        curp (str): CURP del solicitante.
+        direccion (str): Dirección del solicitante.
+        años_experiencia (int): Años de experiencia en el rubro.
+        descripcion_servicios (Optional[str]): Descripción de los servicios.
+        servicios_ofrece (List[str]): Lista de especializaciones.
+        fotos (List[UploadFile]): Archivos de evidencia de trabajos anteriores.
+        nombre_completo (str): Nombre completo a registrar como proveedor.
+        user_email (str): Correo electrónico del usuario autenticado.
+        db (Session): Sesión de la base de datos.
+        
+    Retorna:
+        dict: Mensaje de éxito, estado de la solicitud y fotos subidas.
+
+    Genera:
+        HTTPException 404: Si el usuario no es encontrado.
+        HTTPException 400: Si el usuario ya tiene una solicitud o es proveedor.
+        HTTPException 500: Si ocurre un error de base de datos o S3.
     """
     
     try:
