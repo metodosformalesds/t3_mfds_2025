@@ -1,4 +1,8 @@
+# Autor: ENRIQUE ALEJANDRO PEREDA MERAZ
 
+# Fecha: 16/11/2025
+
+# Descripción: Endpoint para que un usuario pueda reportar a un proveedor de servicios.
 # app/api/v1/endpoints/reportes.py
 
 from fastapi import APIRouter, Depends, HTTPException, status
