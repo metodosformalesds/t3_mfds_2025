@@ -375,17 +375,26 @@ def registrar_resultado_alerta(
     current_user: Usuario = Depends(get_current_user)
 ):
     """
-    Registra en la base de datos el resultado de la alerta que se muestra
-    al cliente cuando visita un perfil de proveedor.
+    Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
+    Descripción: Registra en la base de datos el resultado (logro o no logro) de 
+    la alerta de contratación mostrada al cliente. Requiere autenticación.
+    
+    Si `logro` es True, crea un `Servicio_Contratado` y alertas para cliente y proveedor.
+    Si `logro` es False, solo registra una alerta de feedback.
+    
+    Parámetros:
+        id_proveedor (int): ID del proveedor.
+        payload (AlertaResultadoSchema): Contiene 'logro' y 'id_publicacion' opcional.
+        db (Session): Sesión de la base de datos.
+        current_user (Usuario): Usuario cliente autenticado que realiza la acción.
 
-    Espera un JSON con:
-    - `cliente_id` (int): id del usuario cliente que responde
-    - `logro` (bool): si logró el acuerdo (true) o no (false)
-    - `id_publicacion` (int, opcional): id de la publicación asociada
-
-    Si `logro` es true se crea un registro en `servicio_contratado` con
-    acuerdo_confirmado=True y se generan `Alerta_Sistema` para el proveedor
-    y para el cliente. Si es false sólo se registra una alerta de feedback.
+    Retorna:
+        dict: Mensaje de confirmación y el ID del servicio contratado si aplica.
+        
+    Genera:
+        HTTPException 400: Si el cliente intenta registrarse a sí mismo como proveedor.
+        HTTPException 404: Si el proveedor no existe.
+        HTTPException 500: Si falla la transacción.
     """
 
     # Obtener cliente desde el usuario autenticado
