@@ -308,7 +308,7 @@ def actualizar_estado_solicitud(
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario asociado a la solicitud no encontrado.")
 
-    # 🔹 Lógica de APROBACIÓN
+    # Lógica de APROBACIÓN
     if estado == "aprobado":
         solicitud.estado_solicitud = estado
         solicitud.fecha_aprobacion = datetime.utcnow()
@@ -318,10 +318,6 @@ def actualizar_estado_solicitud(
             # Actualizamos tipo_usuario local
             usuario.tipo_usuario = "proveedor"
             
-            # -----------------------------------------------------------------
-            # AQUI ESTÁ LA LÓGICA DE CAMBIO DE GRUPO QUE PEDISTE
-            # Se llama a tu servicio de cognito para mover al usuario
-            # -----------------------------------------------------------------
             cognito_service.add_user_to_group(
                 username=usuario.correo_electronico, 
                 group_name="Trabajadores" # El grupo de proveedores
@@ -342,7 +338,7 @@ def actualizar_estado_solicitud(
             "nuevo_estado": estado
         }
             
-    else: # 🔹 Lógica de RECHAZO - ELIMINAR SOLICITUD
+    else: # Lógica de RECHAZO - ELIMINAR SOLICITUD
         try:
             # 1. Obtener y eliminar fotos de S3 y BD
             fotos = db.query(Foto_Trabajo_Anterior).filter(
@@ -381,7 +377,7 @@ def actualizar_estado_solicitud(
 
 
 # =========================================================
-# 4️⃣ OBTENER FOTOS DE UN PROVEEDOR CON URLs PRE-FIRMADAS
+# OBTENER FOTOS DE UN PROVEEDOR CON URLs PRE-FIRMADAS
 # =========================================================
 
 @router.get("/{id_proveedor}/fotos")
@@ -391,14 +387,21 @@ def obtener_fotos_proveedor(
     db: Session = Depends(get_db)
 ):
     """
-    Obtiene las fotos de un proveedor con URLs pre-firmadas para acceso temporal.
+    Autor: Brandon Gustavo Hernandez Ortiz
+    Descripción: Obtiene todas las fotos de evidencia de trabajo de un proveedor 
+    (ya sea postulación o activo) y devuelve URLs pre-firmadas de S3 para 
+    permitir el acceso temporal y seguro a las imágenes.
     
-    Args:
-        id_proveedor: ID del proveedor
-        expiration: Tiempo de expiración de las URLs en segundos (default: 3600 = 1 hora)
+    Parámetros:
+        id_proveedor (int): ID del proveedor/solicitante.
+        expiration (int): Tiempo de validez de las URLs en segundos (default: 3600s).
+        db (Session): Sesión de la base de datos.
     
-    Returns:
-        Lista de fotos con URLs pre-firmadas temporales
+    Retorna:
+        List[dict]: Lista de fotos con URLs pre-firmadas temporales.
+
+    Genera:
+        HTTPException 500: Si ocurre un error al generar las URLs o consultar la DB.
     """
     try:
         # Buscar fotos del proveedor
