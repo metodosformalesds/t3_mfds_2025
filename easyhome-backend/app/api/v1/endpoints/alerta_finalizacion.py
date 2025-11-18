@@ -23,7 +23,18 @@ def obtener_alertas(
     db: Session = Depends(get_db)
 ):
     """
-    Retorna todas las alertas para el usuario
+    Autor: Equipo EasyHome
+
+    Descripción: Retorna todas las alertas del sistema dirigidas a un usuario
+    determinado. Incluye información adicional del proveedor cuando la alerta
+    está asociada a un servicio contratado.
+
+    Parámetros:
+        id_usuario (int): ID del usuario destinatario de las alertas.
+        db (Session): Sesión de la base de datos.
+
+    Retorna:
+        List[dict]: Lista de alertas con metadatos y datos opcionales del proveedor.
     """
 
     resenas_count = {
@@ -102,6 +113,19 @@ def marcar_alerta_leida(
     id_alerta: int,
     db: Session = Depends(get_db)
 ):
+    """
+    Autor: Equipo EasyHome
+
+    Descripción: Marca una alerta específica como leída.
+
+    Parámetros:
+        id_alerta (int): ID de la alerta a marcar como leída.
+        db (Session): Sesión de la base de datos.
+
+    Retorna:
+        dict: Mensaje indicando que la alerta fue marcada.
+    """
+
     alerta = db.query(Alerta_Sistema).filter(Alerta_Sistema.id_alerta == id_alerta).first()
 
     if not alerta:

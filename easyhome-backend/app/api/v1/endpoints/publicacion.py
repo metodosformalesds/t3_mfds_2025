@@ -173,13 +173,21 @@ def listar_publicaciones(
     ordenar_por: Optional[str] = Query(None)
 ):
     """
-    Devuelve publicaciones con:
-    - Filtro por categorías
-    - Nombre del proveedor
-    - Fotografía del proveedor (URL prefirmada)
-    - Portada de publicación (URL prefirmada)
-    - TODAS las imágenes de la publicación (galería completa)
-    - CORREO Y TELÉFONO DEL PROVEEDOR (¡NUEVO!)
+    Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
+
+    Descripción: Devuelve un listado de publicaciones activas, soportando
+    filtros por `categorias`, opción para limitar solo proveedores suscritos
+    y ordenamiento. La respuesta incluye datos del proveedor, URLs prefirmadas
+    para imágenes y contacto del usuario asociado.
+
+    Parámetros:
+        db (Session): Sesión de base de datos (Depends).
+        categorias (Optional[List[int]]): Lista de ids de categorías para filtrar.
+        suscriptores (Optional[bool]): Si True, filtra solo proveedores suscritos.
+        ordenar_por (Optional[str]): Criterio de orden ('mas_recientes'|'mejor_calificados').
+
+    Retorna:
+        List[dict]: Lista de publicaciones con metadatos preparados para el frontend.
     """
 
     try:

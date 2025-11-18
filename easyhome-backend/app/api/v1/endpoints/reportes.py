@@ -1,3 +1,4 @@
+
 # app/api/v1/endpoints/reportes.py
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -28,7 +29,7 @@ class ReporteCreateSchema(BaseModel):
     detalles: Optional[str] = None
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ReporteResponseSchema(BaseModel):
@@ -41,7 +42,7 @@ class ReporteResponseSchema(BaseModel):
     fecha_reporte: datetime
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # -----------------------------------------------------------------
@@ -55,19 +56,13 @@ def crear_reporte(
     current_user: Usuario = Depends(get_current_user)
 ):
     """
-    Autor: Equipo EasyHome
-
-    Descripción: Crea un nuevo reporte de un usuario contra un proveedor.
-    El usuario autenticado (current_user) es quien realiza el reporte. Se
-    guarda automáticamente en la BD con motivo por defecto y estado 'pendiente'.
-
-    Parámetros:
-        payload (ReporteCreateSchema): Datos del reporte (proveedor_id, detalles).
-        db (Session): Sesión de la base de datos.
-        current_user (Usuario): Usuario autenticado (dependencia).
-
-    Retorna:
-        Reporte_Usuario: Instancia del reporte recién creado.
+    Crea un nuevo reporte de un usuario contra un proveedor.
+    
+    El usuario autenticado (current_user) es quien realiza el reporte.
+    Se guarda automáticamente en la BD con:
+    - motivo: "Reporte del cliente" (por defecto)
+    - descripcion: contenido enviado en 'detalles'
+    - estado: "pendiente"
     """
     
     cliente_id = current_user.id_usuario

@@ -60,7 +60,18 @@ def listar_servicios_activos(
     db: Session = Depends(get_db)
 ):
     """
-    Devuelve el listado de servicios contratados en curso para un proveedor.
+    Autor: Equipo EasyHome
+
+    Descripción: Devuelve el listado de servicios contratados en curso
+    (estados activos) para un proveedor, incluyendo información del cliente
+    y URL de foto de perfil pre-firmada cuando esté disponible.
+
+    Parámetros:
+        id_proveedor (int): ID del proveedor.
+        db (Session): Sesión de la base de datos.
+
+    Retorna:
+        List[ServicioActivoSchema]: Lista de servicios con datos de cliente.
     """
     servicios = (
         db.query(Servicio_Contratado)
@@ -113,8 +124,18 @@ def finalizar_servicio(
     db: Session = Depends(get_db)
 ):
     """
-    Cambia el estado de un servicio contratado activo a ``finalizado``.
-    Solo permite finalizar servicios que actualmente estan confirmados o en proceso.
+    Autor: Equipo EasyHome
+
+    Descripción: Marca un servicio contratado como 'finalizado'. Valida que
+    el servicio exista y se encuentre en un estado que permita finalizarlo.
+    Crea una alerta para notificar al cliente.
+
+    Parámetros:
+        id_servicio_contratado (int): ID del servicio contratado.
+        db (Session): Sesión de la base de datos.
+
+    Retorna:
+        FinalizarServicioResponse: Información sobre el servicio finalizado.
     """
 
     servicio = (
@@ -183,7 +204,17 @@ def listar_servicios_completos(
     db: Session = Depends(get_db)
 ):
     """
-    Devuelve la lista de los servicios activos y finalizados
+    Autor: Equipo EasyHome
+
+    Descripción: Devuelve tanto los servicios activos como los finalizados
+    de un proveedor, agrupados en dos listas.
+
+    Parámetros:
+        id_proveedor (int): ID del proveedor.
+        db (Session): Sesión de la base de datos.
+
+    Retorna:
+        dict: Contiene listas `activos` y `finalizados` con la información de cada servicio.
     """
     # --- Servicios Activos ---
     servicios_activos = (
@@ -277,8 +308,17 @@ def listar_servicios_cliente(
     db: Session = Depends(get_db)
 ):
     """
-    Devuelve la lista de servicios contratados por un cliente,
-    incluyendo información del proveedor y si tiene reseña.
+    Autor: Equipo EasyHome
+
+    Descripción: Devuelve los servicios contratados por un cliente, incluyendo
+    información resumida del proveedor y si el servicio ya tiene una reseña.
+
+    Parámetros:
+        id_cliente (int): ID del cliente.
+        db (Session): Sesión de la base de datos.
+
+    Retorna:
+        List[ServicioClienteSchema]: Lista de servicios del cliente.
     """
     from app.models.user import Proveedor_Servicio
     from app.models.reseña_servicio import Reseña_Servicio
@@ -373,8 +413,18 @@ def obtener_info_servicio_resena(
     db: Session = Depends(get_db)
 ):
     """
-    Devuelve la información del proveedor y servicio necesaria
-    para mostrar en el formulario de reseña.
+    Autor: Equipo EasyHome
+
+    Descripción: Recupera la información mínima necesaria del servicio y
+    proveedor asociado para rellenar el formulario de reseña (nombre, foto,
+    título del servicio y fecha de contratación).
+
+    Parámetros:
+        id_servicio_contratado (int): ID del servicio contratado.
+        db (Session): Sesión de la base de datos.
+
+    Retorna:
+        ServicioInfoReseñaSchema: Datos para el formulario de reseña.
     """
     from app.models.user import Proveedor_Servicio
     from app.models.property import Publicacion_Servicio
