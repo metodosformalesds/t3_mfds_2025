@@ -237,13 +237,13 @@ def get_perfil_servicios(id_proveedor: int, db: Session = Depends(get_db)):
             "rango_precio_min": pub.rango_precio_min,
             "rango_precio_max": pub.rango_precio_max,
 
-            # 🟢  NOMBRE REAL
+            # NOMBRE REAL
             "nombre_proveedor": proveedor.nombre_completo or usuario.nombre or "Proveedor",
 
-            # 🟢  FOTO DE PERFIL REAL
+            # FOTO DE PERFIL REAL
             "foto_perfil_url": foto_perfil_url,
 
-            # 🟢  TODAS LAS IMÁGENES
+            # TODAS LAS IMÁGENES
             "imagen_publicacion": imagenes
         })
 
@@ -260,8 +260,16 @@ def get_perfil_servicios(id_proveedor: int, db: Session = Depends(get_db)):
 )
 def get_perfil_portafolio(id_proveedor: int, db: Session = Depends(get_db)):
     """
-    Obtiene una galería de todas las imágenes de todas las
-    publicaciones activas de un proveedor, devolviendo URL firmadas.
+    Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
+    Descripción: Obtiene una galería plana (lista) de todas las imágenes de todas las
+    publicaciones activas de un proveedor, devolviendo URL pre-firmadas de S3.
+
+    Parámetros:
+        id_proveedor (int): ID del proveedor.
+        db (Session): Sesión de la base de datos.
+        
+    Retorna:
+        List[ImagenPublicacionSchema]: Lista de imágenes con URLs temporales.
     """
     
     fotos = (
