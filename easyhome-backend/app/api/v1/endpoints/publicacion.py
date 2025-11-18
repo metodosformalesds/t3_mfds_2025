@@ -67,7 +67,7 @@ async def crear_publicacion(
         de las fotos subidas.
     """
     
-    # 🔹 1. Obtener el usuario desde la BD por email
+    #  1. Obtener el usuario desde la BD por email
     current_user = db.query(Usuario).filter(Usuario.correo_electronico == user_email).first()
     if not current_user:
         raise HTTPException(
@@ -75,21 +75,21 @@ async def crear_publicacion(
             detail="Usuario no encontrado."
         )
     
-    # 🔹 2. Verificar que el usuario sea un Proveedor
+    #  2. Verificar que el usuario sea un Proveedor
     if not current_user.tipo_usuario == "proveedor" or not current_user.proveedor_servicio:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Solo los proveedores de servicio pueden crear publicaciones."
         )
     
-    # 🔹 3. Verificar límite de fotos (Máximo 10)
+    # 3. Verificar límite de fotos (Máximo 10)
     if len(fotos) > 10:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Se permite un máximo de 10 fotos por publicación."
         )
 
-    # 🔹 3. Verificar que la categoría exista
+    # 4. Verificar que la categoría exista
     categoria = db.query(Categoria_Servicio).filter(Categoria_Servicio.id_categoria == id_categoria).first()
     if not categoria:
         raise HTTPException(status_code=404, detail="La categoría seleccionada no existe.")
@@ -102,7 +102,7 @@ async def crear_publicacion(
                 status_code=403,
                 detail="Tu cuenta debe estar registrada como proveedor para crear publicaciones."
             )
-        # 🔹 4. Crear la publicación en la BD
+        # 5. Crear la publicación en la BD
         nueva_publicacion = Publicacion_Servicio(
             id_proveedor=proveedor.id_proveedor,
             id_categoria=id_categoria,
@@ -118,7 +118,7 @@ async def crear_publicacion(
         db.commit()
         db.refresh(nueva_publicacion) # Para obtener el 'id_publicacion' generado
 
-        # 🔹 5. Subir fotos a S3 (MISMA LÓGICA DE SOLICITUD.PY)
+        # 6. Subir fotos a S3 (MISMA LÓGICA DE SOLICITUD.PY)
         urls_fotos_guardadas = []
         for index, file in enumerate(fotos):
             try:
@@ -173,21 +173,13 @@ def listar_publicaciones(
     ordenar_por: Optional[str] = Query(None)
 ):
     """
-    Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
-
-    Descripción: Devuelve un listado de publicaciones activas, soportando
-    filtros por `categorias`, opción para limitar solo proveedores suscritos
-    y ordenamiento. La respuesta incluye datos del proveedor, URLs prefirmadas
-    para imágenes y contacto del usuario asociado.
-
-    Parámetros:
-        db (Session): Sesión de base de datos (Depends).
-        categorias (Optional[List[int]]): Lista de ids de categorías para filtrar.
-        suscriptores (Optional[bool]): Si True, filtra solo proveedores suscritos.
-        ordenar_por (Optional[str]): Criterio de orden ('mas_recientes'|'mejor_calificados').
-
-    Retorna:
-        List[dict]: Lista de publicaciones con metadatos preparados para el frontend.
+    Devuelve publicaciones con:
+    - Filtro por categorías
+    - Nombre del proveedor
+    - Fotografía del proveedor (URL prefirmada)
+    - Portada de publicación (URL prefirmada)
+    - TODAS las imágenes de la publicación (galería completa)
+    - CORREO Y TELÉFONO DEL PROVEEDOR (¡NUEVO!)
     """
 
     try:
@@ -343,18 +335,9 @@ def eliminar_publicacion(
     db: Session = Depends(get_db)
 ):
     """
-    Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
-
-    Descripción: Elimina una publicación y todas sus imágenes asociadas. Se
-    intenta eliminar los objetos en S3; si falla la eliminación de algún
-    archivo, el proceso continúa y se registra el error.
-
-    Parámetros:
-        id_publicacion (int): ID de la publicación a eliminar.
-        db (Session): Sesión de base de datos (Depends).
-
-    Retorna:
-        dict: Mensaje indicando éxito de la operación.
+    Elimina una publicación de servicio por su ID.
+    (Versión sencilla, sin validar usuario para evitar errores 422
+    mientras terminas el flujo de MisServicios).
     """
 
     # 1. Buscar publicación
@@ -401,19 +384,9 @@ def listar_miembros_premium(
     db: Session = Depends(get_db)
 ):
     """
-    Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
-
-    Descripción: Obtiene una lista de proveedores suscritos (Premium),
-    ordenados por calificación y limitada por `limit`. Devuelve información
-    mínima necesaria para la barra lateral (id, nombre, calificación, foto).
-
-    Parámetros:
-        limit (int): Cantidad máxima de proveedores a devolver.
-        db (Session): Sesión de base de datos (Depends).
-
-    Retorna:
-        List[dict]: Lista de proveedores premium con `id_proveedor`,
-        `nombre_completo`, `calificacion_promedio` y `foto_perfil_url`.
+    Obtiene una lista de los proveedores suscritos ("Premium"),
+    ordenados por la calificación más alta (RF-15)[cite: 402], 
+    para mostrar en la barra lateral[cite: 96].
     """
     try:
         # 🔹 1. Query para buscar Proveedores Premium

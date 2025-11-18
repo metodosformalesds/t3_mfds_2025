@@ -28,7 +28,7 @@ class ReporteCreateSchema(BaseModel):
     detalles: Optional[str] = None
     
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class ReporteResponseSchema(BaseModel):
@@ -41,7 +41,7 @@ class ReporteResponseSchema(BaseModel):
     fecha_reporte: datetime
     
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 # -----------------------------------------------------------------
@@ -55,13 +55,19 @@ def crear_reporte(
     current_user: Usuario = Depends(get_current_user)
 ):
     """
-    Crea un nuevo reporte de un usuario contra un proveedor.
-    
-    El usuario autenticado (current_user) es quien realiza el reporte.
-    Se guarda automáticamente en la BD con:
-    - motivo: "Reporte del cliente" (por defecto)
-    - descripcion: contenido enviado en 'detalles'
-    - estado: "pendiente"
+    Autor: Equipo EasyHome
+
+    Descripción: Crea un nuevo reporte de un usuario contra un proveedor.
+    El usuario autenticado (current_user) es quien realiza el reporte. Se
+    guarda automáticamente en la BD con motivo por defecto y estado 'pendiente'.
+
+    Parámetros:
+        payload (ReporteCreateSchema): Datos del reporte (proveedor_id, detalles).
+        db (Session): Sesión de la base de datos.
+        current_user (Usuario): Usuario autenticado (dependencia).
+
+    Retorna:
+        Reporte_Usuario: Instancia del reporte recién creado.
     """
     
     cliente_id = current_user.id_usuario
