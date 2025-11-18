@@ -262,7 +262,7 @@ def listar_solicitudes_admin(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Error al obtener las solicitudes.")
 
 # =========================================================
-# 3️⃣ APROBAR O RECHAZAR SOLICITUD (ADMINISTRADOR)
+# APROBAR O RECHAZAR SOLICITUD (ADMINISTRADOR)
 # RF-07 / CU-08
 # =========================================================
 
@@ -273,15 +273,29 @@ def actualizar_estado_solicitud(
     db: Session = Depends(get_db)
 ):
     """
-    Permite al administrador aprobar o rechazar una solicitud.
-    Si se APRUEBA:
-    1. Cambia el estado en la BD.
-    2. Cambia el 'tipo_usuario' a 'proveedor' en la tabla 'usuario'.
-    3. Mueve al usuario al grupo 'Trabajadores' en Cognito.
-    Si se RECHAZA:
-    1. Elimina la solicitud de la BD.
-    2. Elimina las fotos asociadas de la BD y S3.
-    3. Permite que el usuario pueda crear una nueva solicitud.
+    Autor: Brandon Gustavo Hernandez Ortiz
+    Descripción: Permite al administrador cambiar el estado de una solicitud a 'aprobado' o 'rechazado'.
+    
+    Si se APRUEBA: 
+    - Actualiza el estado local y el 'tipo_usuario' a 'proveedor'.
+    - Mueve al usuario al grupo 'Trabajadores' en Cognito.
+    
+    Si se RECHAZA: 
+    - Elimina el registro de Proveedor_Servicio, las fotos de S3 y los metadatos de las fotos de la DB, 
+      permitiendo al usuario volver a postularse.
+    
+    Parámetros:
+        id_proveedor (int): ID del proveedor/solicitud a actualizar.
+        estado (str): Nuevo estado de la solicitud ('aprobado' o 'rechazado').
+        db (Session): Sesión de la base de datos.
+        
+    Retorna:
+        dict: Mensaje de confirmación del estado.
+
+    Genera:
+        HTTPException 404: Si la solicitud o el usuario asociado no son encontrados.
+        HTTPException 400: Si el estado es inválido.
+        HTTPException 500: Si falla la transacción o la interacción con Cognito/S3.
     """
     solicitud = db.query(Proveedor_Servicio).filter(Proveedor_Servicio.id_proveedor == id_proveedor).first()
     if not solicitud:
