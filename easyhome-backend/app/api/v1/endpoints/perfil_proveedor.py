@@ -475,11 +475,23 @@ def registrar_resultado_alerta_body(
     db: Session = Depends(get_db)
 ):
     """
-    Endpoint público para registrar el resultado de una alerta de contratación.
-    Acepta todos los datos en el body (incluyendo cliente_id) para evitar
-    problemas con headers personalizados bloqueados por API Gateway/CORS.
+    Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
+    Descripción: Endpoint público (sin autenticación requerida) para registrar el 
+    resultado de una alerta de contratación. Acepta todos los datos (cliente_id, 
+    proveedor_id, etc.) en el cuerpo de la solicitud (body).
 
-    Body esperado: { cliente_id, proveedor_id, logro, id_publicacion }
+    Parámetros:
+        payload (AlertaResultadoBodySchema): Contiene 'cliente_id', 'proveedor_id', 
+                                             'logro' y 'id_publicacion' opcional.
+        db (Session): Sesión de la base de datos.
+        
+    Retorna:
+        dict: Mensaje de confirmación y el ID del servicio contratado si aplica.
+        
+    Genera:
+        HTTPException 400: Si faltan IDs o si cliente = proveedor.
+        HTTPException 404: Si el proveedor no existe.
+        HTTPException 500: Si falla la transacción.
     """
     id_proveedor = payload.proveedor_id
     cliente_id = payload.cliente_id
