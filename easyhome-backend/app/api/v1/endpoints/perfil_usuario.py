@@ -74,6 +74,24 @@ async def actualizar_foto_perfil(
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
+    """
+    Autor: Enrique Alejandro Pereda Meraz
+    Descripción: Sube una nueva foto de perfil a S3, elimina la foto anterior (si existe) 
+    y actualiza la clave de S3 en la base de datos del usuario. Devuelve una URL pre-firmada.
+
+    Parámetros:
+        id_usuario (int): ID del usuario cuya foto de perfil se va a actualizar.
+        file (UploadFile): El archivo de la imagen de perfil a subir.
+        db (Session): Sesión de la base de datos inyectada por dependencia.
+
+    Retorna:
+        dict: Mensaje de éxito y la URL temporal de la nueva foto.
+
+    Genera:
+        HTTPException 404: Si el usuario no es encontrado.
+        HTTPException 400: Si el archivo es inválido (tamaño/tipo).
+        HTTPException 500: Si falla la conexión con S3 o la base de datos.
+    """
     usuario = db.query(Usuario).filter(Usuario.id_usuario == id_usuario).first()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
