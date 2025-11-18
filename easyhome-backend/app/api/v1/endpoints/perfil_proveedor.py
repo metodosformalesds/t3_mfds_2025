@@ -281,7 +281,7 @@ def get_perfil_portafolio(id_proveedor: int, db: Session = Depends(get_db)):
         .all()
     )
 
-    # 🚀 Convertir key → presigned URL
+    # Convertir key → presigned URL
     from app.services.s3_service import s3_service
     fotos_con_url = []
 
@@ -290,7 +290,7 @@ def get_perfil_portafolio(id_proveedor: int, db: Session = Depends(get_db)):
         
         fotos_con_url.append({
             "id_imagen": foto.id_imagen,
-            "url_imagen": presigned_url,   # ⬅️ YA ES URL REAL
+            "url_imagen": presigned_url,  
             "orden": foto.orden
         })
 
@@ -305,9 +305,17 @@ def get_perfil_portafolio(id_proveedor: int, db: Session = Depends(get_db)):
 )
 def get_perfil_resenas(id_proveedor: int, db: Session = Depends(get_db)):
     """
-    Obtiene la lista de todas las reseñas que ha recibido
-    un proveedor, incluyendo las imágenes adjuntas y el
-    nombre del cliente.
+    Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
+    Descripción: Obtiene la lista de todas las reseñas que ha recibido
+    un proveedor, incluyendo las imágenes adjuntas y la información del cliente
+    mediante JOINS optimizados.
+
+    Parámetros:
+        id_proveedor (int): ID del proveedor.
+        db (Session): Sesión de la base de datos.
+        
+    Retorna:
+        List[ReseñaPublicaSchema]: Lista de reseñas activas del proveedor.
     """
     resenas = (
         db.query(Reseña_Servicio)
