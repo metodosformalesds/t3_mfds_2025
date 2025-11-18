@@ -24,6 +24,18 @@ MAX_FILE_SIZE = 5 * 1024 * 1024
 
 
 def validate_image_file(file: UploadFile, file_size: int):
+    """
+    Autor: Enrique Alejandro Pereda Meraz
+    Descripción: Valida que el archivo subido sea una imagen válida y cumpla
+    con las restricciones de tamaño y formato definidas.
+
+    Parámetros:
+        file (UploadFile): El objeto de archivo subido (metadata).
+        file_size (int): El tamaño real del archivo en bytes.
+
+    Genera:
+        HTTPException 400: Si el archivo no cumple con alguna restricción.
+    """
     if not file.filename:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
