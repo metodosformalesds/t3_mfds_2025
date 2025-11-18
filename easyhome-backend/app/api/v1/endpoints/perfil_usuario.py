@@ -180,6 +180,22 @@ def obtener_foto_perfil(id_usuario: int, db: Session = Depends(get_db)):
 
 @router.delete("/{id_usuario}/foto-perfil")
 def eliminar_foto_perfil(id_usuario: int, db: Session = Depends(get_db)):
+    """
+    Autor: Enrique Alejandro Pereda Meraz
+    Descripción: Elimina permanentemente la foto de perfil de un usuario de S3 y
+    borra la referencia en la base de datos.
+
+    Parámetros:
+        id_usuario (int): ID del usuario cuya foto se va a eliminar.
+        db (Session): Sesión de la base de datos inyectada por dependencia.
+
+    Retorna:
+        dict: Mensaje de confirmación de la eliminación.
+
+    Genera:
+        HTTPException 404: Si la foto de perfil no es encontrada.
+        HTTPException 500: Si falla la operación de borrado en S3.
+    """
     usuario = db.query(Usuario).filter(Usuario.id_usuario == id_usuario).first()
     if not usuario or not usuario.foto_perfil:
         raise HTTPException(status_code=404, detail="Foto de perfil no encontrada")
