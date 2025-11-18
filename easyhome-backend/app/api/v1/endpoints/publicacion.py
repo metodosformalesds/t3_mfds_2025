@@ -192,7 +192,7 @@ def listar_publicaciones(
 
     try:
         # =====================================================
-        # 🟦 BASE QUERY + FILTROS
+        #  BASE QUERY + FILTROS
         # =====================================================
         query = (
             db.query(Publicacion_Servicio)
@@ -202,17 +202,17 @@ def listar_publicaciones(
             .filter(Publicacion_Servicio.estado == "activo")
         )
 
-        # 🟧 FILTRO POR CATEGORÍAS
+        # FILTRO POR CATEGORÍAS
         if categorias:
             query = query.filter(Publicacion_Servicio.id_categoria.in_(categorias))
 
-        # 🟩 FILTRO POR SUSCRIPTORES
+        # FILTRO POR SUSCRIPTORES
         if suscriptores:
             query = query.join(Proveedor_Servicio).filter(
                 Proveedor_Servicio.id_plan_suscripcion.isnot(None)
             )
 
-        # 🟨 ORDENAMIENTO
+        # ORDENAMIENTO
         if ordenar_por == "mas_recientes":
             query = query.order_by(Publicacion_Servicio.fecha_publicacion.desc())
 
@@ -225,7 +225,7 @@ def listar_publicaciones(
         publicaciones = query.limit(100).all()
 
         # =====================================================
-        # 🔄 ARMAR RESPUESTA
+        #  ARMAR RESPUESTA
         # =====================================================
         resultado = []
 
@@ -309,15 +309,10 @@ def listar_publicaciones(
 
                 "foto_perfil_proveedor": foto_perfil_url,
                 "calificacion_proveedor": calificacion_promedio,
-
-                # --- 👇 AQUÍ ESTÁ LA SOLUCIÓN 👇 ---
-                # Agregamos los datos del 'usuario' asociado al proveedor
                 
                 "correo_proveedor": usuario.correo_electronico if usuario else None,
                 "telefono_proveedor": usuario.numero_telefono if usuario else None,
                 
-                # --- 👆 FIN DE LA SOLUCIÓN 👆 ---
-
                 "rango_precio_min": pub.rango_precio_min,
                 "rango_precio_max": pub.rango_precio_max,
 
@@ -343,9 +338,18 @@ def eliminar_publicacion(
     db: Session = Depends(get_db)
 ):
     """
-    Elimina una publicación de servicio por su ID.
-    (Versión sencilla, sin validar usuario para evitar errores 422
-    mientras terminas el flujo de MisServicios).
+    Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
+
+    Descripción: Elimina una publicación y todas sus imágenes asociadas. Se
+    intenta eliminar los objetos en S3; si falla la eliminación de algún
+    archivo, el proceso continúa y se registra el error.
+
+    Parámetros:
+        id_publicacion (int): ID de la publicación a eliminar.
+        db (Session): Sesión de base de datos (Depends).
+
+    Retorna:
+        dict: Mensaje indicando éxito de la operación.
     """
 
     # 1. Buscar publicación
