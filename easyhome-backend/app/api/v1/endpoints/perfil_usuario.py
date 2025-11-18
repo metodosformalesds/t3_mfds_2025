@@ -1,3 +1,9 @@
+# Autor: ENRIQUE ALEJANDRO PEREDA MERAZ
+
+# Fecha: 07/11/2025
+
+# Descripción: define la capa de la API responsable de gestionar las fotos de perfil de los usuarios. Proporciona endpoints para subir, obtener y eliminar fotos de perfil, interactuando con el servicio de almacenamiento S3 y la base de datos a través de SQLAlchemy.
+# app/api/v1/endpoints/perfil_usuario.py
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
