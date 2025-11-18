@@ -1,3 +1,9 @@
+# Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
+
+# Fecha: 07/11/2025
+
+# Descripción: define la capa de la API responsable de gestionar las publicaciones de servicios realizadas por los proveedores. Proporciona endpoints para crear, listar y eliminar publicaciones, interactuando con el servicio de almacenamiento S3 y la base de datos a través de SQLAlchemy.
+# app/api/v1/endpoints/publicacion.py
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status, Query, Header
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
@@ -22,7 +28,7 @@ router = APIRouter(prefix="/publicaciones", tags=["Publicaciones de Servicios"])
 
 
 # =========================================================
-# 1️⃣ CREAR PUBLICACIÓN DE SERVICIO (Proveedor)
+#   CREAR PUBLICACIÓN DE SERVICIO (Proveedor)
 # (Coincide con el formulario "Publica tu servicio")
 # =========================================================
 @router.post("/", status_code=status.HTTP_201_CREATED)
@@ -40,8 +46,25 @@ async def crear_publicacion(
     db: Session = Depends(get_db)
 ):
     """
-    Permite a un PROVEEDOR autenticado crear una nueva publicación de servicio.
-    Sube las fotos de referencia a S3 y guarda la S3 Key.
+    Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
+
+    Descripción: Permite a un PROVEEDOR autenticado crear una nueva publicación
+    de servicio. Sube las fotos de referencia a S3, guarda las keys en la tabla
+    `Imagen_Publicacion` y registra la publicación en la base de datos.
+
+    Parámetros:
+        titulo (str): Título de la publicación.
+        id_categoria (int): ID de la categoría seleccionada.
+        descripcion (str): Descripción del servicio.
+        rango_precio_min (float): Precio mínimo del rango.
+        rango_precio_max (float): Precio máximo del rango.
+        fotos (List[UploadFile]): Archivos de imagen enviados en el formulario.
+        user_email (str): Email del usuario autenticado (proveedor).
+        db (Session): Sesión de la base de datos (Depends).
+
+    Retorna:
+        dict: Mensaje de resultado, `id_publicacion`, `titulo` y listas de keys
+        de las fotos subidas.
     """
     
     # 🔹 1. Obtener el usuario desde la BD por email
@@ -150,13 +173,21 @@ def listar_publicaciones(
     ordenar_por: Optional[str] = Query(None)
 ):
     """
-    Devuelve publicaciones con:
-    - Filtro por categorías
-    - Nombre del proveedor
-    - Fotografía del proveedor (URL prefirmada)
-    - Portada de publicación (URL prefirmada)
-    - TODAS las imágenes de la publicación (galería completa)
-    - CORREO Y TELÉFONO DEL PROVEEDOR (¡NUEVO!)
+    Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
+
+    Descripción: Devuelve un listado de publicaciones activas, soportando
+    filtros por `categorias`, opción para limitar solo proveedores suscritos
+    y ordenamiento. La respuesta incluye datos del proveedor, URLs prefirmadas
+    para imágenes y contacto del usuario asociado.
+
+    Parámetros:
+        db (Session): Sesión de base de datos (Depends).
+        categorias (Optional[List[int]]): Lista de ids de categorías para filtrar.
+        suscriptores (Optional[bool]): Si True, filtra solo proveedores suscritos.
+        ordenar_por (Optional[str]): Criterio de orden ('mas_recientes'|'mejor_calificados').
+
+    Retorna:
+        List[dict]: Lista de publicaciones con metadatos preparados para el frontend.
     """
 
     try:
@@ -312,9 +343,18 @@ def eliminar_publicacion(
     db: Session = Depends(get_db)
 ):
     """
-    Elimina una publicación de servicio por su ID.
-    (Versión sencilla, sin validar usuario para evitar errores 422
-    mientras terminas el flujo de MisServicios).
+    Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
+
+    Descripción: Elimina una publicación y todas sus imágenes asociadas. Se
+    intenta eliminar los objetos en S3; si falla la eliminación de algún
+    archivo, el proceso continúa y se registra el error.
+
+    Parámetros:
+        id_publicacion (int): ID de la publicación a eliminar.
+        db (Session): Sesión de base de datos (Depends).
+
+    Retorna:
+        dict: Mensaje indicando éxito de la operación.
     """
 
     # 1. Buscar publicación
@@ -361,9 +401,19 @@ def listar_miembros_premium(
     db: Session = Depends(get_db)
 ):
     """
-    Obtiene una lista de los proveedores suscritos ("Premium"),
-    ordenados por la calificación más alta (RF-15)[cite: 402], 
-    para mostrar en la barra lateral[cite: 96].
+    Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
+
+    Descripción: Obtiene una lista de proveedores suscritos (Premium),
+    ordenados por calificación y limitada por `limit`. Devuelve información
+    mínima necesaria para la barra lateral (id, nombre, calificación, foto).
+
+    Parámetros:
+        limit (int): Cantidad máxima de proveedores a devolver.
+        db (Session): Sesión de base de datos (Depends).
+
+    Retorna:
+        List[dict]: Lista de proveedores premium con `id_proveedor`,
+        `nombre_completo`, `calificacion_promedio` y `foto_perfil_url`.
     """
     try:
         # 🔹 1. Query para buscar Proveedores Premium
