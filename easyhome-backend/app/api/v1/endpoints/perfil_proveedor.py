@@ -93,10 +93,21 @@ def get_perfil_about(id_proveedor: int, db: Session = Depends(get_db)):
 @router.get("/{id_proveedor}/alerta", response_model=None)
 def get_proveedor_alerta(id_proveedor: int, db: Session = Depends(get_db)):
     """
-    Devuelve un resumen ligero del proveedor para la ventana de
+    Autor: BRANDON GUSTAVO HERNANDEZ ORTIZ
+    Descripción: Devuelve un resumen ligero del proveedor para la ventana de
     "alerta de contratación" usada en el frontend. Retorna la URL
     pre-firmada de la foto de perfil (si existe), nombre, calificación
     y total de reseñas.
+    
+    Parámetros:
+        id_proveedor (int): ID del proveedor.
+        db (Session): Sesión de la base de datos.
+        
+    Retorna:
+        dict: Resumen del proveedor para la alerta.
+        
+    Genera:
+        HTTPException 404: Si el proveedor no es encontrado.
     """
     proveedor = db.query(Proveedor_Servicio)\
                   .options(joinedload(Proveedor_Servicio.usuario))\
